@@ -255,12 +255,12 @@ const bookmarks = computed(() => bookmarkStore.bookmarks)
 // 当前收藏夹ID（从URL参数获取）
 const collectionId = computed(() => {
   const id = Number(route.query.id)
-  return !isNaN(id) && id > 0 ? id : null
+  return !isNaN(id) && id > 0 ? id : 1 // 如果没有指定ID，默认返回ID为1的默认收藏夹
 })
 
 // 当前收藏夹
 const currentCollection = computed(() => {
-  if (!collectionId.value || !collections.value.length) return null
+  if (!collections.value.length) return null
   return collections.value.find(c => c.id === collectionId.value) || null
 })
 
