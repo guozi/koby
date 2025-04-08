@@ -237,6 +237,59 @@
         </div>
       </div>
     </div>
+
+    <!-- 编辑书签模态框 -->
+    <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-xl font-bold mb-4">编辑链接</h3>
+        <form @submit.prevent="updateBookmarkData">
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">URL</label>
+            <input 
+              v-model="editingBookmark.url" 
+              type="url" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="https://example.com"
+            >
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">标题</label>
+            <input 
+              v-model="editingBookmark.title" 
+              type="text" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="网站标题"
+            >
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">描述（可选）</label>
+            <textarea 
+              v-model="editingBookmark.description" 
+              rows="3" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="添加描述..."
+            ></textarea>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button 
+              type="button" 
+              @click="showEditBookmarkModal = false" 
+              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+            >
+              取消
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+            >
+              更新
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -355,6 +408,15 @@ function editBookmark(bookmark) {
 // 更新书签数据
 function updateBookmarkData() {
   if (editingBookmark.value) {
+    // 尝试从URL获取新的favicon
+    try {
+      const url = new URL(editingBookmark.value.url)
+      editingBookmark.value.favicon = `${url.protocol}//${url.hostname}/favicon.ico`
+    } catch (e) {
+      // URL解析错误，不设置favicon
+      editingBookmark.value.favicon = ''
+    }
+    
     bookmarkStore.updateBookmark(editingBookmark.value.id, editingBookmark.value)
     showEditBookmarkModal.value = false
   }
