@@ -55,7 +55,7 @@
                 <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline block">{{ bookmark.url }}</a>
                 <p v-if="bookmark.description" class="text-sm text-gray-600 mt-1">{{ bookmark.description }}</p>
                 <div class="flex items-center mt-2">
-                  <span class="text-xs text-gray-500">{{ formatDate(bookmark.createdAt) }}</span>
+                  <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
                 </div>
               </div>
               <div class="flex space-x-1">
@@ -253,7 +253,7 @@ const collections = computed(() => bookmarkStore.getAllCollections)
 const bookmarks = computed(() => bookmarkStore.bookmarks)
 
 // 当前收藏夹ID（从URL参数获取）
-const collectionId = computed(() => {
+const collection_id = computed(() => {
   const id = Number(route.query.id)
   return !isNaN(id) && id > 0 ? id : 1 // 如果没有指定ID，默认返回ID为1的默认收藏夹
 })
@@ -261,7 +261,7 @@ const collectionId = computed(() => {
 // 当前收藏夹
 const currentCollection = computed(() => {
   if (!collections.value.length) return null
-  return collections.value.find(c => c.id === collectionId.value) || null
+  return collections.value.find(c => c.id === collection_id.value) || null
 })
 
 // 搜索功能
@@ -269,7 +269,7 @@ const searchQuery = ref('')
 const filteredBookmarks = computed(() => {
   if (!currentCollection.value) return []
   
-  const collectionBookmarks = bookmarks.value.filter(b => b.collectionId === currentCollection.value.id)
+  const collectionBookmarks = bookmarks.value.filter(b => b.collection_id === currentCollection.value.id)
   
   if (!searchQuery.value.trim()) return collectionBookmarks
   
@@ -287,7 +287,7 @@ const newBookmark = ref({
   url: '',
   title: '',
   description: '',
-  collectionId: collectionId.value,
+  collection_id: collection_id.value,
   favicon: ''
 })
 
@@ -320,7 +320,7 @@ async function addNewBookmark() {
   // 确保使用当前收藏夹ID
   const bookmark = {
     ...newBookmark.value,
-    collectionId: collectionId.value
+    collection_id: collection_id.value
   }
   
   // 尝试从URL获取favicon
@@ -339,7 +339,7 @@ async function addNewBookmark() {
     url: '',
     title: '',
     description: '',
-    collectionId: collectionId.value,
+    collection_id: collection_id.value,
     favicon: ''
   }
   

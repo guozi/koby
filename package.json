@@ -8,19 +8,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node server.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
     "vue": "^3.2.25",
     "vue-router": "^4.2.4",
     "pinia": "^2.1.6",
-    "@vueuse/core": "^10.3.0"
+    "@vueuse/core": "^10.3.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "mysql2": "^3.6.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.4.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
     "autoprefixer": "^10.4.15",
     "postcss": "^8.4.28",
     "tailwindcss": "^3.3.3",
-    "vite": "^4.4.9"
+    "vite": "^4.4.9",
+    "concurrently": "^8.2.1"
   }
 }

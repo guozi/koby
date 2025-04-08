@@ -48,9 +48,9 @@
               <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline truncate block">{{ bookmark.url }}</a>
               <div class="flex items-center mt-2">
                 <span class="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600 mr-2">
-                  {{ getCollectionName(bookmark.collectionId) }}
+                  {{ getCollectionName(bookmark.collection_id) }}
                 </span>
-                <span class="text-xs text-gray-500">{{ formatDate(bookmark.createdAt) }}</span>
+                <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium mb-1">收藏夹</label>
             <select 
-              v-model="newBookmark.collectionId" 
+              v-model="newBookmark.collection_id" 
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option v-for="collection in collections" :key="collection.id" :value="collection.id">
@@ -168,7 +168,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium mb-1">收藏夹</label>
             <select 
-              v-model="editingBookmark.collectionId" 
+              v-model="editingBookmark.collection_id" 
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option v-for="collection in collections" :key="collection.id" :value="collection.id">
@@ -232,7 +232,7 @@ const bookmarks = computed(() => bookmarkStore.bookmarks)
 // 最近添加的书签（最多8个）
 const recentBookmarks = computed(() => {
   return [...bookmarks.value]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 8)
 })
 
@@ -242,7 +242,7 @@ const newBookmark = ref({
   url: '',
   title: '',
   description: '',
-  collectionId: 1, // 默认收藏夹
+  collection_id: 1, // 默认收藏夹
   favicon: ''
 })
 
@@ -255,13 +255,13 @@ const showDeleteConfirmModal = ref(false)
 const bookmarkToDelete = ref(null)
 
 // 获取收藏夹中的书签数量
-function getBookmarkCount(collectionId) {
-  return bookmarks.value.filter(b => b.collectionId === collectionId).length
+function getBookmarkCount(collection_id) {
+  return bookmarks.value.filter(b => b.collection_id === collection_id).length
 }
 
 // 获取收藏夹名称
-function getCollectionName(collectionId) {
-  const collection = collections.value.find(c => c.id === collectionId)
+function getCollectionName(collection_id) {
+  const collection = collections.value.find(c => c.id === collection_id)
   return collection ? collection.name : '未分类'
 }
 
@@ -288,7 +288,7 @@ function addNewBookmark() {
     url: '',
     title: '',
     description: '',
-    collectionId: 1,
+    collection_id: 1,
     favicon: ''
   }
   

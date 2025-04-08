@@ -289,8 +289,8 @@ const emojiOptions = ['📁', '💼', '📚', '🔖', '🌐', '💻', '📱', '�
 const colorOptions = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#06B6D4']
 
 // 获取收藏夹中的书签数量
-function getBookmarkCount(collectionId) {
-  return bookmarks.value.filter(b => b.collectionId === collectionId).length
+function getBookmarkCount(collection_id) {
+  return bookmarks.value.filter(b => b.collection_id === collection_id).length
 }
 
 // 添加新收藏夹

@@ -27,7 +27,18 @@
 </template>
 
 <script setup>
-// 组件逻辑
+import { useBookmarkStore } from './stores/bookmarks';
+import { onMounted } from 'vue';
+
+const bookmarkStore = useBookmarkStore();
+
+onMounted(async () => {
+  try {
+    await bookmarkStore.initialize();
+  } catch (error) {
+    console.error('初始化应用数据失败:', error);
+  }
+});
 </script>
 
 <style>
