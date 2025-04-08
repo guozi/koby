@@ -273,14 +273,6 @@ function formatDate(dateString) {
 
 // 添加新书签
 function addNewBookmark() {
-  // 尝试从URL获取favicon
-  try {
-    const url = new URL(newBookmark.value.url)
-    newBookmark.value.favicon = `${url.protocol}//${url.hostname}/favicon.ico`
-  } catch (e) {
-    // URL解析错误，不设置favicon
-  }
-  
   bookmarkStore.addBookmark(newBookmark.value)
   
   // 重置表单
@@ -304,15 +296,6 @@ function editBookmark(bookmark) {
 // 更新书签数据
 function updateBookmarkData() {
   if (editingBookmark.value) {
-    // 尝试从URL获取新的favicon
-    try {
-      const url = new URL(editingBookmark.value.url)
-      editingBookmark.value.favicon = `${url.protocol}//${url.hostname}/favicon.ico`
-    } catch (e) {
-      // URL解析错误，不设置favicon
-      editingBookmark.value.favicon = ''
-    }
-    
     bookmarkStore.updateBookmark(editingBookmark.value.id, editingBookmark.value)
     showEditBookmarkModal.value = false
   }

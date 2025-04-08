@@ -376,15 +376,6 @@ async function addNewBookmark() {
     collection_id: collection_id.value
   }
   
-  // 尝试从URL获取favicon
-  try {
-    const url = new URL(bookmark.url)
-    bookmark.favicon = `${url.protocol}//${url.hostname}/favicon.ico`
-  } catch (e) {
-    // URL解析错误，不设置favicon
-    bookmark.favicon = ''
-  }
-  
   await bookmarkStore.addBookmark(bookmark)
   
   // 重置表单
@@ -407,16 +398,7 @@ function editBookmark(bookmark) {
 
 // 更新书签数据
 function updateBookmarkData() {
-  if (editingBookmark.value) {
-    // 尝试从URL获取新的favicon
-    try {
-      const url = new URL(editingBookmark.value.url)
-      editingBookmark.value.favicon = `${url.protocol}//${url.hostname}/favicon.ico`
-    } catch (e) {
-      // URL解析错误，不设置favicon
-      editingBookmark.value.favicon = ''
-    }
-    
+  if (editingBookmark.value) {    
     bookmarkStore.updateBookmark(editingBookmark.value.id, editingBookmark.value)
     showEditBookmarkModal.value = false
   }

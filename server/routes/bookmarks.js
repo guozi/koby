@@ -34,9 +34,21 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
       }
 
+      // 如果没有提供favicon，尝试自动获取
+      let faviconUrl = favicon;
+      if (!favicon) {
+        try {
+          const { getFaviconUrl } = require('../utils/favicon');
+          faviconUrl = await getFaviconUrl(url);
+        } catch (error) {
+          console.error('自动获取favicon失败:', error);
+          // 获取失败不影响书签添加
+        }
+      }
+
       const [result] = await pool.query(
         'INSERT INTO bookmarks (title, url, description, collection_id, favicon) VALUES (?, ?, ?, ?, ?)',
-        [title, url, description, collection_id, favicon]
+        [title, url, description, collection_id, faviconUrl]
       );
 
       const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [result.insertId]);
@@ -57,9 +69,21 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
       }
 
+      // 如果没有提供favicon，尝试自动获取
+      let faviconUrl = favicon;
+      if (!favicon) {
+        try {
+          const { getFaviconUrl } = require('../utils/favicon');
+          faviconUrl = await getFaviconUrl(url);
+        } catch (error) {
+          console.error('自动获取favicon失败:', error);
+          // 获取失败不影响书签更新
+        }
+      }
+
       await pool.query(
         'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ?, favicon = ? WHERE id = ?',
-        [title, url, description, collection_id, favicon, bookmarkId]
+        [title, url, description, collection_id, faviconUrl, bookmarkId]
       );
 
       const [updatedBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [bookmarkId]);
