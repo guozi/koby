@@ -28,15 +28,15 @@ module.exports = (pool) => {
   // 添加书签
   router.post('/', async (req, res) => {
     try {
-      const { title, url, description, collection_id } = req.body;
+      const { title, url, description, collection_id, favicon } = req.body;
       
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
       }
 
       const [result] = await pool.query(
-        'INSERT INTO bookmarks (title, url, description, collection_id) VALUES (?, ?, ?, ?)',
-        [title, url, description, collection_id]
+        'INSERT INTO bookmarks (title, url, description, collection_id, favicon) VALUES (?, ?, ?, ?, ?)',
+        [title, url, description, collection_id, favicon]
       );
 
       const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [result.insertId]);
@@ -51,15 +51,15 @@ module.exports = (pool) => {
   router.put('/:id', async (req, res) => {
     try {
       const bookmarkId = req.params.id;
-      const { title, url, description, collection_id } = req.body;
+      const { title, url, description, collection_id, favicon } = req.body;
 
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
       }
 
       await pool.query(
-        'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ? WHERE id = ?',
-        [title, url, description, collection_id, bookmarkId]
+        'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ?, favicon = ? WHERE id = ?',
+        [title, url, description, collection_id, favicon, bookmarkId]
       );
 
       const [updatedBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [bookmarkId]);

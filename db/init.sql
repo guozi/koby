@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   title VARCHAR(255) NOT NULL,
   url VARCHAR(2048) NOT NULL,
   description TEXT,
+  favicon VARCHAR(2048) DEFAULT NULL,
   collection_id INT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
