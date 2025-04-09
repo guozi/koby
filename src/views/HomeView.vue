@@ -57,7 +57,7 @@
                 <span 
                   v-for="tag in bookmark.tags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200">
                   {{ tag }}
                 </span>
               </div>
@@ -137,7 +137,7 @@
                 <span 
                   v-for="tag in parsedNewBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
                   {{ tag }}
                 </span>
               </div>
@@ -217,7 +217,7 @@
                 <span 
                   v-for="tag in parsedEditBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
                   {{ tag }}
                 </span>
               </div>
