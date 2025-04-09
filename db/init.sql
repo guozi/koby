@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   description TEXT,
   favicon VARCHAR(2048) DEFAULT NULL,
   collection_id INT NOT NULL,
+  tags JSON DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
 );

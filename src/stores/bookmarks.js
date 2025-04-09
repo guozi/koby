@@ -68,7 +68,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
           url: bookmark.url,
           description: bookmark.description || '',
           collection_id: bookmark.collection_id,
-          favicon: bookmark.favicon || null
+          favicon: bookmark.favicon || null,
+          tags: bookmark.tags || null
         });
         this.bookmarks.push(newBookmark);
         return newBookmark;
@@ -86,7 +87,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
           url: data.url,
           description: data.description || '',
           collection_id: data.collection_id,
-          favicon: data.favicon || null
+          favicon: data.favicon || null,
+          tags: data.tags || null
         });
         const index = this.bookmarks.findIndex(b => b.id === id);
         if (index !== -1) {
