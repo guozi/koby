@@ -52,6 +52,15 @@
                 </span>
                 <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
               </div>
+              <!-- 标签 -->
+              <div v-if="bookmark.tags && bookmark.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
+                <span 
+                  v-for="tag in bookmark.tags" 
+                  :key="tag" 
+                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                  {{ tag }}
+                </span>
+              </div>
             </div>
           </div>
           <div class="flex justify-end mt-2">
@@ -115,6 +124,25 @@
               </option>
             </select>
           </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <div class="relative">
+              <input 
+                v-model="newBookmarkTagsInput" 
+                type="text" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="工作, 学习, 娱乐..."
+              >
+              <div v-if="parsedNewBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
+                <span 
+                  v-for="tag in parsedNewBookmarkTags" 
+                  :key="tag" 
+                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
           <div class="flex justify-end space-x-2">
             <button 
               type="button" 
@@ -175,6 +203,25 @@
                 {{ collection.icon }} {{ collection.name }}
               </option>
             </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <div class="relative">
+              <input 
+                v-model="editBookmarkTagsInput" 
+                type="text" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="工作, 学习, 娱乐..."
+              >
+              <div v-if="parsedEditBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
+                <span 
+                  v-for="tag in parsedEditBookmarkTags" 
+                  :key="tag" 
+                  class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
           </div>
           <div class="flex justify-end space-x-2">
             <button 
@@ -243,12 +290,23 @@ const newBookmark = ref({
   title: '',
   description: '',
   collection_id: 1, // 默认收藏夹
-  favicon: ''
+  favicon: '',
+  tags: []
+})
+const newBookmarkTagsInput = ref('')
+const parsedNewBookmarkTags = computed(() => {
+  if (!newBookmarkTagsInput.value) return []
+  return newBookmarkTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
 })
 
 // 编辑书签相关状态
 const showEditBookmarkModal = ref(false)
 const editingBookmark = ref(null)
+const editBookmarkTagsInput = ref('')
+const parsedEditBookmarkTags = computed(() => {
+  if (!editBookmarkTagsInput.value) return []
+  return editBookmarkTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+})
 
 // 删除书签相关状态
 const showDeleteConfirmModal = ref(false)
@@ -273,7 +331,13 @@ function formatDate(dateString) {
 
 // 添加新书签
 function addNewBookmark() {
-  bookmarkStore.addBookmark(newBookmark.value)
+  // 添加标签到书签数据
+  const bookmark = {
+    ...newBookmark.value,
+    tags: parsedNewBookmarkTags.value
+  }
+  
+  bookmarkStore.addBookmark(bookmark)
   
   // 重置表单
   newBookmark.value = {
@@ -281,8 +345,10 @@ function addNewBookmark() {
     title: '',
     description: '',
     collection_id: 1,
-    favicon: ''
+    favicon: '',
+    tags: []
   }
+  newBookmarkTagsInput.value = ''
   
   showAddBookmarkModal.value = false
 }
@@ -290,14 +356,22 @@ function addNewBookmark() {
 // 编辑书签
 function editBookmark(bookmark) {
   editingBookmark.value = { ...bookmark }
+  // 如果有标签，将其转换为逗号分隔的字符串
+  editBookmarkTagsInput.value = bookmark.tags && Array.isArray(bookmark.tags) ? bookmark.tags.join(', ') : ''
   showEditBookmarkModal.value = true
 }
 
 // 更新书签数据
 function updateBookmarkData() {
   if (editingBookmark.value) {
-    bookmarkStore.updateBookmark(editingBookmark.value.id, editingBookmark.value)
+    // 更新标签
+    const updatedBookmark = {
+      ...editingBookmark.value,
+      tags: parsedEditBookmarkTags.value
+    }
+    bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
     showEditBookmarkModal.value = false
+    editBookmarkTagsInput.value = ''
   }
 }
 
