@@ -5,7 +5,7 @@ module.exports = (pool) => {
   // 获取所有书签
   router.get('/', async (req, res) => {
     try {
-      const [rows] = await pool.query('SELECT * FROM bookmarks ORDER BY created_at DESC');
+      const [rows] = await pool.query('SELECT * FROM bookmarks ORDER BY is_pinned DESC, created_at DESC');
       res.json(rows);
     } catch (error) {
       console.error('获取书签失败:', error);
@@ -17,7 +17,7 @@ module.exports = (pool) => {
   router.get('/collection/:id', async (req, res) => {
     try {
       const collection_id = req.params.id;
-      const [rows] = await pool.query('SELECT * FROM bookmarks WHERE collection_id = ? ORDER BY created_at DESC', [collection_id]);
+      const [rows] = await pool.query('SELECT * FROM bookmarks WHERE collection_id = ? ORDER BY is_pinned DESC, created_at DESC', [collection_id]);
       res.json(rows);
     } catch (error) {
       console.error('获取收藏夹书签失败:', error);
@@ -28,7 +28,7 @@ module.exports = (pool) => {
   // 添加书签
   router.post('/', async (req, res) => {
     try {
-      const { title, url, description, collection_id, favicon, tags } = req.body;
+      const { title, url, description, collection_id, favicon, tags, is_pinned } = req.body;
       
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
@@ -47,8 +47,8 @@ module.exports = (pool) => {
       }
 
       const [result] = await pool.query(
-        'INSERT INTO bookmarks (title, url, description, collection_id, favicon, tags) VALUES (?, ?, ?, ?, ?, ?)',
-        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null]
+        'INSERT INTO bookmarks (title, url, description, collection_id, favicon, tags, is_pinned) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned || false]
       );
 
       const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [result.insertId]);
@@ -63,7 +63,7 @@ module.exports = (pool) => {
   router.put('/:id', async (req, res) => {
     try {
       const bookmarkId = req.params.id;
-      const { title, url, description, collection_id, favicon, tags } = req.body;
+      const { title, url, description, collection_id, favicon, tags, is_pinned } = req.body;
 
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
@@ -82,8 +82,8 @@ module.exports = (pool) => {
       }
 
       await pool.query(
-        'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ?, favicon = ?, tags = ? WHERE id = ?',
-        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, bookmarkId]
+        'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ?, favicon = ?, tags = ?, is_pinned = ? WHERE id = ?',
+        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned, bookmarkId]
       );
 
       const [updatedBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [bookmarkId]);

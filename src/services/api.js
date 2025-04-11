@@ -45,6 +45,9 @@ export const bookmarksAPI = {
   // 更新书签
   update: (id, bookmark) => apiClient.put(`/api/bookmarks/${id}`, bookmark),
   
+  // 切换书签置顶状态
+  togglePin: (id, bookmark) => apiClient.put(`/api/bookmarks/${id}`, bookmark),
+  
   // 删除书签
   delete: (id) => apiClient.delete(`/api/bookmarks/${id}`)
 };

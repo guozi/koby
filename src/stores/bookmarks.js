@@ -69,7 +69,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
           description: bookmark.description || '',
           collection_id: bookmark.collection_id,
           favicon: bookmark.favicon || null,
-          tags: bookmark.tags || null
+          tags: bookmark.tags || null,
+          is_pinned: bookmark.is_pinned || false
         });
         this.bookmarks.push(newBookmark);
         return newBookmark;
@@ -88,7 +89,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
           description: data.description || '',
           collection_id: data.collection_id,
           favicon: data.favicon || null,
-          tags: data.tags || null
+          tags: data.tags || null,
+          is_pinned: data.is_pinned || false
         });
         const index = this.bookmarks.findIndex(b => b.id === id);
         if (index !== -1) {
@@ -96,6 +98,23 @@ export const useBookmarkStore = defineStore('bookmarks', {
         }
       } catch (error) {
         console.error('更新书签失败:', error);
+        throw error;
+      }
+    },
+
+    // 切换书签置顶状态
+    async toggleBookmarkPin(id) {
+      try {
+        const bookmark = this.bookmarks.find(b => b.id === id);
+        if (!bookmark) return;
+        
+        const newPinnedState = !bookmark.is_pinned;
+
+        bookmark.is_pinned = newPinnedState;
+        
+        await bookmarksAPI.togglePin(id, bookmark);
+      } catch (error) {
+        console.error('切换书签置顶状态失败:', error);
         throw error;
       }
     },
@@ -144,7 +163,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
         throw error;
       }
     },
-    
+
     // 删除收藏夹
     async removeCollection(id) {
       try {

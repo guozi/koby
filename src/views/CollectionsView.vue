@@ -126,6 +126,11 @@
             <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
             
             <div class="flex space-x-1">
+              <button @click="togglePin(bookmark)" class="p-1 text-gray-500" :class="{'text-yellow-500 hover:text-yellow-600': bookmark.is_pinned, 'hover:text-yellow-500': !bookmark.is_pinned}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 5a2 2 0 012-2h6a2 2 0 012 2v2.17a2 2 0 01-.586 1.414l-3.828 3.829a1 1 0 01-1.414 0L5.586 8.583A2 2 0 015 7.17V5zm6 8.83l3.828-3.829A4 4 0 0017 7.17V5a4 4 0 00-4-4H7a4 4 0 00-4 4v2.17a4 4 0 001.172 2.83l3.828 3.829a3 3 0 004.243 0z" />
+                </svg>
+              </button>
               <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -182,6 +187,11 @@
                 </div>
               </div>
               <div class="flex space-x-1">
+                <button @click="togglePin(bookmark)" class="p-1 text-gray-500" :class="{'text-yellow-500 hover:text-yellow-600': bookmark.is_pinned, 'hover:text-yellow-500': !bookmark.is_pinned}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 5a2 2 0 012-2h6a2 2 0 012 2v2.17a2 2 0 01-.586 1.414l-3.828 3.829a1 1 0 01-1.414 0L5.586 8.583A2 2 0 015 7.17V5zm6 8.83l3.828-3.829A4 4 0 0017 7.17V5a4 4 0 00-4-4H7a4 4 0 00-4 4v2.17a4 4 0 001.172 2.83l3.828 3.829a3 3 0 004.243 0z" />
+                  </svg>
+                </button>
                 <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -610,26 +620,30 @@ const processedBookmarks = computed(() => {
   
   // 4. 排序
   result = [...result] // 创建副本以避免修改原数组
-  switch (currentSort.value) {
-    case 'created_desc':
-      result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      break
-    case 'created_asc':
-      result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-      break
-    case 'title_asc':
-      result.sort((a, b) => a.title.localeCompare(b.title))
-      break
-    case 'title_desc':
-      result.sort((a, b) => b.title.localeCompare(a.title))
-      break
-    case 'url_asc':
-      result.sort((a, b) => a.url.localeCompare(b.url))
-      break
-    case 'url_desc':
-      result.sort((a, b) => b.url.localeCompare(a.url))
-      break
-  }
+  result.sort((a, b) => {
+    // 首先按照置顶状态排序
+    if (a.is_pinned !== b.is_pinned) {
+      return b.is_pinned ? 1 : -1
+    }
+    
+    // 然后按照选择的排序方式排序
+    switch (currentSort.value) {
+      case 'created_desc':
+        return new Date(b.created_at) - new Date(a.created_at)
+      case 'created_asc':
+        return new Date(a.created_at) - new Date(b.created_at)
+      case 'title_asc':
+        return a.title.localeCompare(b.title)
+      case 'title_desc':
+        return b.title.localeCompare(a.title)
+      case 'url_asc':
+        return a.url.localeCompare(b.url)
+      case 'url_desc':
+        return b.url.localeCompare(a.url)
+      default:
+        return 0
+    }
+  })
   
   return result
 })
@@ -851,11 +865,24 @@ function confirmDeleteBookmark(bookmark) {
 }
 
 // 删除书签
-function deleteBookmark() {
+async function deleteBookmark() {
   if (bookmarkToDelete.value) {
-    bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
-    showDeleteConfirmModal.value = false
-    bookmarkToDelete.value = null
+    try {
+      await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
+      showDeleteConfirmModal.value = false
+      bookmarkToDelete.value = null
+    } catch (error) {
+      console.error('删除书签失败:', error)
+    }
+  }
+}
+
+// 切换书签置顶状态
+async function togglePin(bookmark) {
+  try {
+    await bookmarkStore.toggleBookmarkPin(bookmark.id)
+  } catch (error) {
+    console.error('切换书签置顶状态失败:', error)
   }
 }
 
