@@ -14,7 +14,7 @@
         </button>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900">
         <div v-for="collection in collections" :key="collection.id" class="border-b border-gray-200 dark:border-gray-700 last:border-0">
           <div class="flex items-center justify-between p-4">
             <div class="flex items-center">
@@ -22,8 +22,8 @@
                 <span class="text-xl">{{ collection.icon }}</span>
               </div>
               <div>
-                <h4 class="font-medium">{{ collection.name }}</h4>
-                <p class="text-sm text-gray-500">{{ getBookmarkCount(collection.id) }} 个链接</p>
+                <h4 class="font-medium dark:text-white">{{ collection.name }}</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ getBookmarkCount(collection.id) }} 个链接</p>
               </div>
             </div>
             <div class="flex space-x-2">
@@ -105,20 +105,20 @@
     <!-- 添加收藏夹模态框 -->
     <div v-if="showAddCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">添加新收藏夹</h3>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">添加新收藏夹</h3>
         <form @submit.prevent="addNewCollection">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">名称</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
             <input 
               v-model="newCollection.name" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
               placeholder="收藏夹名称"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">图标</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="emoji in emojiOptions" 
@@ -126,23 +126,23 @@
                 type="button"
                 @click="newCollection.icon = emoji"
                 class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="newCollection.icon === emoji ? 'border-primary bg-blue-50' : 'border-gray-300'"
+                :class="newCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700'"
               >
                 {{ emoji }}
               </button>
             </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">颜色</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="color in colorOptions" 
                 :key="color"
                 type="button"
                 @click="newCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300"
+                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
                 :style="{ backgroundColor: color }"
-                :class="newCollection.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''"
+                :class="newCollection.color === color ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-800' : ''"
               ></button>
             </div>
           </div>
@@ -150,7 +150,7 @@
             <button 
               type="button" 
               @click="showAddCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -168,19 +168,19 @@
     <!-- 编辑收藏夹模态框 -->
     <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">编辑收藏夹</h3>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">编辑收藏夹</h3>
         <form @submit.prevent="updateCollectionData">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">名称</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
             <input 
               v-model="editingCollection.name" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">图标</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="emoji in emojiOptions" 
@@ -188,23 +188,23 @@
                 type="button"
                 @click="editingCollection.icon = emoji"
                 class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50' : 'border-gray-300'"
+                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700'"
               >
                 {{ emoji }}
               </button>
             </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">颜色</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="color in colorOptions" 
                 :key="color"
                 type="button"
                 @click="editingCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300"
+                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
                 :style="{ backgroundColor: color }"
-                :class="editingCollection.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''"
+                :class="editingCollection.color === color ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-800' : ''"
               ></button>
             </div>
           </div>
@@ -212,7 +212,7 @@
             <button 
               type="button" 
               @click="showEditCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -231,13 +231,13 @@
     <!-- 删除确认模态框 -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">确认删除</h3>
-        <p class="mb-4">确定要删除收藏夹 "{{ collectionToDelete?.name }}" 吗？此操作无法撤销。</p>
-        <p class="mb-4 text-sm text-gray-600">该收藏夹中的所有链接将被移动到默认收藏夹。</p>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
+        <p class="mb-4 dark:text-white">确定要删除收藏夹 "{{ collectionToDelete?.name }}" 吗？此操作无法撤销。</p>
+        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">该收藏夹中的所有链接将被移动到默认收藏夹。</p>
         <div class="flex justify-end space-x-2">
           <button 
             @click="showDeleteConfirmModal = false" 
-            class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
           >
             取消
           </button>

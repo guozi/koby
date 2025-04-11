@@ -10,6 +10,7 @@
           <router-link to="/" class="nav-link">首页</router-link>
           <router-link to="/collections" class="nav-link">收藏夹</router-link>
           <router-link to="/settings" class="nav-link">设置</router-link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -28,12 +29,18 @@
 
 <script setup>
 import { useBookmarkStore } from './stores/bookmarks';
+import { useThemeStore } from './stores/theme';
 import { onMounted } from 'vue';
+import ThemeToggle from './components/ThemeToggle.vue';
 
 const bookmarkStore = useBookmarkStore();
+const themeStore = useThemeStore();
 
 onMounted(async () => {
   try {
+    // 初始化主题
+    themeStore.initTheme();
+    // 初始化应用数据
     await bookmarkStore.initialize();
   } catch (error) {
     console.error('初始化应用数据失败:', error);

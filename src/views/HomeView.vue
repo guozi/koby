@@ -18,14 +18,14 @@
           v-for="collection in collections" 
           :key="collection.id"
           :to="`/collections?id=${collection.id}`"
-          class="card flex items-center p-4 hover:border-primary border-2 border-transparent"
+          class="card flex items-center p-4 hover:border-primary border-2 border-transparent dark:bg-gray-800 dark:hover:border-primary"
         >
           <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3" :style="{ backgroundColor: collection.color + '20' }">
             <span class="text-xl">{{ collection.icon }}</span>
           </div>
           <div>
-            <h4 class="font-medium">{{ collection.name }}</h4>
-            <p class="text-sm text-gray-500">{{ getBookmarkCount(collection.id) }} 个链接</p>
+            <h4 class="font-medium dark:text-white">{{ collection.name }}</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ getBookmarkCount(collection.id) }} 个链接</p>
           </div>
         </router-link>
       </div>
@@ -35,29 +35,29 @@
     <div>
       <h3 class="text-lg font-semibold mb-3">最近添加</h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div v-for="bookmark in recentBookmarks" :key="bookmark.id" class="card">
+        <div v-for="bookmark in recentBookmarks" :key="bookmark.id" class="card dark:bg-gray-800">
           <div class="flex items-start">
-            <div class="w-10 h-10 rounded bg-gray-100 flex items-center justify-center mr-3 overflow-hidden">
+            <div class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3 overflow-hidden">
               <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="favicon" class="w-6 h-6" />
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <h4 class="font-medium truncate">{{ bookmark.title }}</h4>
+              <h4 class="font-medium truncate dark:text-white">{{ bookmark.title }}</h4>
               <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline truncate block">{{ bookmark.url }}</a>
               <div class="flex items-center mt-2">
-                <span class="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600 mr-2">
+                <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 mr-2">
                   {{ getCollectionName(bookmark.collection_id) }}
                 </span>
-                <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(bookmark.created_at) }}</span>
               </div>
               <!-- 标签 -->
               <div v-if="bookmark.tags && bookmark.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
                 <span 
                   v-for="tag in bookmark.tags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200">
+                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800">
                   {{ tag }}
                 </span>
               </div>
@@ -85,39 +85,39 @@
         <h3 class="text-xl font-bold mb-4">添加新链接</h3>
         <form @submit.prevent="addNewBookmark">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">URL</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
             <input 
               v-model="newBookmark.url" 
               type="url" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="https://example.com"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标题</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
             <input 
               v-model="newBookmark.title" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="网站标题"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">描述 (可选)</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">描述 (可选)</label>
             <textarea 
               v-model="newBookmark.description" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="简短描述..."
               rows="2"
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">收藏夹</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">收藏夹</label>
             <select 
               v-model="newBookmark.collection_id" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
             >
               <option v-for="collection in collections" :key="collection.id" :value="collection.id">
                 {{ collection.icon }} {{ collection.name }}
@@ -125,19 +125,19 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
             <div class="relative">
               <input 
                 v-model="newBookmarkTagsInput" 
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
                 placeholder="工作, 学习, 娱乐..."
               >
               <div v-if="parsedNewBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
                 <span 
                   v-for="tag in parsedNewBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
                   {{ tag }}
                 </span>
               </div>
@@ -147,7 +147,7 @@
             <button 
               type="button" 
               @click="showAddBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -168,36 +168,36 @@
         <h3 class="text-xl font-bold mb-4">编辑链接</h3>
         <form @submit.prevent="updateBookmarkData">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">URL</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
             <input 
               v-model="editingBookmark.url" 
               type="url" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标题</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
             <input 
               v-model="editingBookmark.title" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">描述 (可选)</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">描述 (可选)</label>
             <textarea 
               v-model="editingBookmark.description" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               rows="2"
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">收藏夹</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">收藏夹</label>
             <select 
               v-model="editingBookmark.collection_id" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
             >
               <option v-for="collection in collections" :key="collection.id" :value="collection.id">
                 {{ collection.icon }} {{ collection.name }}
@@ -205,19 +205,19 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
             <div class="relative">
               <input 
                 v-model="editBookmarkTagsInput" 
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
                 placeholder="工作, 学习, 娱乐..."
               >
               <div v-if="parsedEditBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
                 <span 
                   v-for="tag in parsedEditBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
                   {{ tag }}
                 </span>
               </div>
@@ -227,7 +227,7 @@
             <button 
               type="button" 
               @click="showEditBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -245,12 +245,12 @@
     <!-- 删除确认模态框 -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">确认删除</h3>
-        <p class="mb-4">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
+        <p class="mb-4 dark:text-gray-300">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
         <div class="flex justify-end space-x-2">
           <button 
             @click="showDeleteConfirmModal = false" 
-            class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
           >
             取消
           </button>

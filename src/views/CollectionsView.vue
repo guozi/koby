@@ -33,7 +33,7 @@
               v-model="searchQuery" 
               type="text" 
               placeholder="搜索链接..." 
-              class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               @input="handleSearch"
             >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,11 +47,11 @@
               <select 
                 v-model="currentSort" 
                 @change="changeSort(currentSort)"
-                class="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                class="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary text-sm dark:text-white"
               >
                 <option v-for="option in sortOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
@@ -63,11 +63,11 @@
               <select 
                 v-model="pageSize" 
                 @change="changePageSize(pageSize)"
-                class="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                class="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary text-sm dark:text-white"
               >
                 <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }}项/页</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
@@ -75,7 +75,7 @@
             </div>
             
             <!-- 视图切换按钮 -->
-            <button @click="toggleViewMode" class="p-2 border border-gray-300 rounded-md hover:bg-gray-100">
+            <button @click="toggleViewMode" class="p-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 bg-white dark:bg-gray-800">
               <svg v-if="viewMode === 'grid'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
@@ -88,11 +88,11 @@
         
         <!-- 标签过滤 -->
         <div v-if="availableTags.length > 0" class="flex flex-wrap items-center gap-2">
-          <span class="text-sm text-gray-500">标签筛选:</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">标签筛选:</span>
           <div v-for="tag in availableTags" :key="tag" 
                @click="toggleTag(tag)"
                class="px-2 py-1 text-xs rounded-full cursor-pointer transition-colors"
-               :class="selectedTags.includes(tag) ? 'bg-primary text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'">
+               :class="selectedTags.includes(tag) ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'">
             {{ tag }}
           </div>
           <button 
@@ -108,7 +108,7 @@
       <div v-if="processedBookmarks.length > 0 && viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
         <div v-for="bookmark in paginatedBookmarks" :key="bookmark.id" class="card p-4 flex flex-col h-full">
           <div class="flex items-start mb-3">
-            <div class="w-10 h-10 rounded bg-gray-100 flex items-center justify-center mr-3 overflow-hidden flex-shrink-0">
+            <div class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3 overflow-hidden flex-shrink-0">
               <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="favicon" class="w-6 h-6" />
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -144,7 +144,7 @@
             <span 
               v-for="tag in bookmark.tags" 
               :key="tag" 
-              class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200">
+              class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800">
               {{ tag }}
             </span>
           </div>
@@ -272,51 +272,51 @@
     <!-- 添加书签模态框 -->
     <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">添加链接</h3>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">添加链接</h3>
         <form @submit.prevent="addNewBookmark">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">URL</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
             <input 
               v-model="newBookmark.url" 
               type="url" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="https://example.com"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标题</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
             <input 
               v-model="newBookmark.title" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="网站标题"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">描述（可选）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">描述（可选）</label>
             <textarea 
               v-model="newBookmark.description" 
               rows="3" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="添加描述..."
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
             <div class="relative">
               <input 
                 v-model="newBookmarkTagsInput" 
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
                 placeholder="工作, 学习, 娱乐..."
               >
               <div v-if="parsedNewBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
                 <span 
                   v-for="tag in parsedNewBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
                   {{ tag }}
                 </span>
               </div>
@@ -326,7 +326,7 @@
             <button 
               type="button" 
               @click="showAddBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -344,19 +344,19 @@
     <!-- 编辑收藏夹模态框 -->
     <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">编辑收藏夹</h3>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">编辑收藏夹</h3>
         <form @submit.prevent="updateCollectionData">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">名称</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
             <input 
               v-model="editingCollection.name" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">图标</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="emoji in emojiOptions" 
@@ -364,21 +364,21 @@
                 type="button"
                 @click="editingCollection.icon = emoji"
                 class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50' : 'border-gray-300'"
+                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600'"
               >
                 {{ emoji }}
               </button>
             </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">颜色</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
             <div class="grid grid-cols-8 gap-2">
               <button 
                 v-for="color in colorOptions" 
                 :key="color"
                 type="button"
                 @click="editingCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300"
+                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
                 :style="{ backgroundColor: color }"
                 :class="editingCollection.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''"
               ></button>
@@ -388,7 +388,7 @@
             <button 
               type="button" 
               @click="showEditCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
@@ -407,12 +407,12 @@
     <!-- 删除确认模态框 -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">确认删除</h3>
-        <p class="mb-4">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
+        <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
+        <p class="mb-4 dark:text-gray-300">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
         <div class="flex justify-end space-x-2">
           <button 
             @click="showDeleteConfirmModal = false" 
-            class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
           >
             取消
           </button>
@@ -432,48 +432,48 @@
         <h3 class="text-xl font-bold mb-4">编辑链接</h3>
         <form @submit.prevent="updateBookmarkData">
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">URL</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
             <input 
               v-model="editingBookmark.url" 
               type="url" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="https://example.com"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标题</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
             <input 
               v-model="editingBookmark.title" 
               type="text" 
               required 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="网站标题"
             >
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">描述（可选）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">描述（可选）</label>
             <textarea 
               v-model="editingBookmark.description" 
               rows="3" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
               placeholder="添加描述..."
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">标签（可选，用逗号分隔）</label>
+            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
             <div class="relative">
               <input 
                 v-model="editBookmarkTagsInput" 
                 type="text" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
                 placeholder="工作, 学习, 娱乐..."
               >
               <div v-if="parsedEditBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
                 <span 
                   v-for="tag in parsedEditBookmarkTags" 
                   :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200 flex items-center">
+                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
                   {{ tag }}
                 </span>
               </div>
@@ -483,7 +483,7 @@
             <button 
               type="button" 
               @click="showEditBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
             >
               取消
             </button>
