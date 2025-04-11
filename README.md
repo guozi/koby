@@ -99,7 +99,13 @@ npm run preview
 
 ## 📱 应用截图
 
-*（此处可添加应用截图）*
+<p align="center">
+  <img src="public/img/light_mode.png" alt="亮色模式" width="800" height="800">
+  <img src="public/img/dark_mode.png" alt="暗色模式" width="800" height="800">
+  <img src="public/img/collection_1.png" alt="收藏夹表格页面" width="800" height="800">
+  <img src="public/img/collection_2.png" alt="收藏夹列表页面" width="800" height="800">
+  <img src="public/img/setting.png" alt="设置页面" width="800" height="800">
+</p>
 
 ## 🔧 主要功能说明
 
