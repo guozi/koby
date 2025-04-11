@@ -4,11 +4,11 @@
     class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     aria-label="切换主题"
   >
-    <!-- 亮色模式图标 -->
+    <!-- 亮色模式图标 (显示在暗色模式下) -->
     <svg
       v-if="isDark"
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-yellow-500"
+      class="h-5 w-5 text-yellow-400"
       viewBox="0 0 20 20"
       fill="currentColor"
     >
@@ -18,11 +18,11 @@
         clip-rule="evenodd"
       />
     </svg>
-    <!-- 暗色模式图标 -->
+    <!-- 暗色模式图标 (显示在暗色模式下) -->
     <svg
       v-else
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-gray-600"
+      class="h-5 w-5 text-gray-700 dark:text-gray-300"
       viewBox="0 0 20 20"
       fill="currentColor"
     >
@@ -32,14 +32,15 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useThemeStore } from '../stores/theme';
 
 // 使用主题存储
 const themeStore = useThemeStore();
 
-// 获取当前主题状态
-const { isDark, toggleTheme } = themeStore;
+// 获取当前主题状态，使用计算属性保持响应性
+const isDark = computed(() => themeStore.isDark);
+const toggleTheme = () => themeStore.toggleTheme();
 
 // 初始化主题
 onMounted(() => {
