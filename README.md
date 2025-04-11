@@ -174,6 +174,16 @@ VITE_API_URL=http://localhost:3001 # 后端API地址
 
 欢迎提交问题和功能请求！如果您想为Koby做出贡献，请随时提交Pull Request。
 
+## 💰 赞赏支持
+
+如果您觉得Koby对您有所帮助，欢迎扫描下方二维码进行赞赏，您的支持是我们持续改进的动力！
+
+<p align="center">
+  <img src="public/img/sponsor-qrcode.png" alt="赞赏二维码" width="200" height="200">
+</p>
+
+<p align="center">感谢您的每一份支持与鼓励 ❤️</p>
+
 ---
 
-使用 ❤️ 构建
+使用 ❤️ [Trae](https://www.trae.ai/) 构建
