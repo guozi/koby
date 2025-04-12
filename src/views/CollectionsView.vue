@@ -126,10 +126,8 @@
             <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
             
             <div class="flex space-x-1">
-              <button @click="togglePin(bookmark)" class="p-1 text-gray-500" :class="{'text-yellow-500 hover:text-yellow-600': bookmark.is_pinned, 'hover:text-yellow-500': !bookmark.is_pinned}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 5a2 2 0 012-2h6a2 2 0 012 2v2.17a2 2 0 01-.586 1.414l-3.828 3.829a1 1 0 01-1.414 0L5.586 8.583A2 2 0 015 7.17V5zm6 8.83l3.828-3.829A4 4 0 0017 7.17V5a4 4 0 00-4-4H7a4 4 0 00-4 4v2.17a4 4 0 001.172 2.83l3.828 3.829a3 3 0 004.243 0z" />
-                </svg>
+              <button @click="togglePin(bookmark)" class="p-1">
+                <PinIcon :isPinned="bookmark.is_pinned" />
               </button>
               <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -187,10 +185,8 @@
                 </div>
               </div>
               <div class="flex space-x-1">
-                <button @click="togglePin(bookmark)" class="p-1 text-gray-500" :class="{'text-yellow-500 hover:text-yellow-600': bookmark.is_pinned, 'hover:text-yellow-500': !bookmark.is_pinned}">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M5 5a2 2 0 012-2h6a2 2 0 012 2v2.17a2 2 0 01-.586 1.414l-3.828 3.829a1 1 0 01-1.414 0L5.586 8.583A2 2 0 015 7.17V5zm6 8.83l3.828-3.829A4 4 0 0017 7.17V5a4 4 0 00-4-4H7a4 4 0 00-4 4v2.17a4 4 0 001.172 2.83l3.828 3.829a3 3 0 004.243 0z" />
-                  </svg>
+                <button @click="togglePin(bookmark)" class="p-1">
+                  <PinIcon :isPinned="bookmark.is_pinned" />
                 </button>
                 <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -531,6 +527,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { useRoute, useRouter } from 'vue-router'
+import PinIcon from '../components/PinIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
