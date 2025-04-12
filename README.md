@@ -159,7 +159,7 @@ npm run preview
 ### 数据导入导出
 
 - 导出数据：将所有链接和收藏夹导出为JSON文件
-- 导入数据：从备份文件中恢复数据
+- 导入数据：从备份文件中恢复数据，从Chrome/Edge等浏览器导入HTML文件
 
 ### API接口
 
@@ -198,7 +198,7 @@ VITE_API_URL=http://localhost:3001 # 后端API地址
 如果您觉得Koby对您有所帮助，欢迎扫描下方二维码进行赞赏，您的支持是我们持续改进的动力！
 
 <p align="center">
-  <img src="public/img/sponsor-qrcode.png" alt="赞赏二维码" width="200" height="200">
+  <img src="public/img/sponsor-qrcode.png" alt="赞赏二维码" width="350" height="350">
 </p>
 
 <p align="center">感谢您的每一份支持与鼓励 ❤️</p>

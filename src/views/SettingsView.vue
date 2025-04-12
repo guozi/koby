@@ -51,53 +51,7 @@
     <!-- 数据导入导出 -->
     <div class="mb-8">
       <h3 class="text-lg font-semibold mb-4">数据导入导出</h3>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        <div class="mb-4">
-          <h4 class="font-medium mb-2">导出数据</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">将您的所有链接和收藏夹导出为JSON文件</p>
-          <button @click="exportData" class="btn btn-primary">
-            导出数据
-          </button>
-        </div>
-        <div>
-          <h4 class="font-medium mb-2">导入数据</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">从JSON或HTML文件导入链接和收藏夹</p>
-          
-          <!-- 导入类型选择 -->
-          <div class="mb-3">
-            <div class="flex space-x-4">
-              <label class="inline-flex items-center">
-                <input type="radio" v-model="importType" value="json" class="form-radio text-primary">
-                <span class="ml-2 text-sm">JSON格式</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="radio" v-model="importType" value="html" class="form-radio text-primary">
-                <span class="ml-2 text-sm">Chrome/Edge书签HTML</span>
-              </label>
-            </div>
-          </div>
-          
-          <div class="flex items-center">
-            <input 
-              type="file" 
-              ref="fileInput" 
-              :accept="importType === 'json' ? '.json' : '.html,.htm'" 
-              class="hidden" 
-              @change="handleFileUpload"
-            >
-            <button @click="$refs.fileInput.click()" class="btn btn-secondary">
-              选择文件
-            </button>
-            <span v-if="importFileName" class="ml-3 text-sm text-gray-600">已选择: {{ importFileName }}</span>
-          </div>
-          <div v-if="importError" class="mt-2 text-sm text-red-500">
-            {{ importError }}
-          </div>
-          <div v-if="importSuccess" class="mt-2 text-sm text-green-500">
-            数据导入成功！
-          </div>
-        </div>
-      </div>
+      <ImportExportPanel />
     </div>
 
     <!-- 关于 -->
@@ -271,6 +225,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
+import ImportExportPanel from '../components/ImportExportPanel.vue'
 
 const bookmarkStore = useBookmarkStore()
 
@@ -293,12 +248,6 @@ const editingCollection = ref(null)
 // 删除收藏夹相关状态
 const showDeleteConfirmModal = ref(false)
 const collectionToDelete = ref(null)
-
-// 导入导出相关状态
-const importFileName = ref('')
-const importError = ref('')
-const importSuccess = ref(false)
-const importType = ref('json') // 默认为JSON格式导入
 
 // 图标和颜色选项
 const emojiOptions = ['📁', '💼', '📚', '🔖', '🌐', '💻', '📱', '🎮', '🎬', '🎵', '🎨', '📝', '📊', '📈', '🔍', '⭐']
@@ -353,59 +302,5 @@ function deleteCollection() {
     showDeleteConfirmModal.value = false
     collectionToDelete.value = null
   }
-}
-
-// 导出数据
-function exportData() {
-  const data = bookmarkStore.exportBookmarks()
-  const blob = new Blob([data], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `koby-export-${new Date().toISOString().slice(0, 10)}.json`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-// 处理文件上传
-function handleFileUpload(event) {
-  const file = event.target.files[0]
-  if (!file) return
-  
-  importFileName.value = file.name
-  importError.value = ''
-  importSuccess.value = false
-  
-  const reader = new FileReader()
-  reader.onload = async (e) => {
-    try {
-      const content = e.target.result
-      let success = false
-      
-      // 根据导入类型选择不同的导入方法
-      if (importType.value === 'json') {
-        success = await bookmarkStore.importBookmarks(content)
-      } else if (importType.value === 'html') {
-        success = await bookmarkStore.importHtmlBookmarks(content)
-      }
-      
-      if (success) {
-        importSuccess.value = true
-      } else {
-        importError.value = '导入失败：数据格式不正确'
-      }
-    } catch (error) {
-      importError.value = `导入失败：${error.message}`
-    }
-  }
-  
-  reader.onerror = () => {
-    importError.value = '读取文件时发生错误'
-  }
-  
-  reader.readAsText(file)
 }
 </script>
