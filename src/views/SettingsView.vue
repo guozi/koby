@@ -72,129 +72,23 @@
     </div>
 
     <!-- 添加收藏夹模态框 -->
-    <div v-if="showAddCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 dark:text-white">添加新收藏夹</h3>
-        <form @submit.prevent="addNewCollection">
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
-            <input 
-              v-model="newCollection.name" 
-              type="text" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
-              placeholder="收藏夹名称"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="emoji in emojiOptions" 
-                :key="emoji"
-                type="button"
-                @click="newCollection.icon = emoji"
-                class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="newCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700'"
-              >
-                {{ emoji }}
-              </button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="color in colorOptions" 
-                :key="color"
-                type="button"
-                @click="newCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
-                :style="{ backgroundColor: color }"
-                :class="newCollection.color === color ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-800' : ''"
-              ></button>
-            </div>
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              @click="showAddCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-            >
-              保存
-            </button>
-          </div>
-        </form>
-      </div>
+    <div v-if="showAddCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <CollectionForm 
+        :collection="newCollection" 
+        :isEditing="false" 
+        @submit="addNewCollection" 
+        @close="showAddCollectionModal = false"
+      />
     </div>
 
     <!-- 编辑收藏夹模态框 -->
-    <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 dark:text-white">编辑收藏夹</h3>
-        <form @submit.prevent="updateCollectionData">
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
-            <input 
-              v-model="editingCollection.name" 
-              type="text" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="emoji in emojiOptions" 
-                :key="emoji"
-                type="button"
-                @click="editingCollection.icon = emoji"
-                class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700'"
-              >
-                {{ emoji }}
-              </button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="color in colorOptions" 
-                :key="color"
-                type="button"
-                @click="editingCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
-                :style="{ backgroundColor: color }"
-                :class="editingCollection.color === color ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-800' : ''"
-              ></button>
-            </div>
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              @click="showEditCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-              :disabled="editingCollection.id === 1 && editingCollection.name !== '默认收藏夹'"
-            >
-              更新
-            </button>
-          </div>
-        </form>
-      </div>
+    <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <CollectionForm 
+        :collection="editingCollection" 
+        :isEditing="true" 
+        @submit="updateCollectionData" 
+        @close="showEditCollectionModal = false"
+      />
     </div>
 
     <!-- 删除确认模态框 -->
@@ -226,6 +120,7 @@
 import { ref, computed } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
 import ImportExportPanel from '../components/ImportExportPanel.vue'
+import CollectionForm from '../components/CollectionForm.vue'
 
 const bookmarkStore = useBookmarkStore()
 
@@ -249,18 +144,14 @@ const editingCollection = ref(null)
 const showDeleteConfirmModal = ref(false)
 const collectionToDelete = ref(null)
 
-// 图标和颜色选项
-const emojiOptions = ['📁', '💼', '📚', '🔖', '🌐', '💻', '📱', '🎮', '🎬', '🎵', '🎨', '📝', '📊', '📈', '🔍', '⭐']
-const colorOptions = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#06B6D4']
-
 // 获取收藏夹中的书签数量
 function getBookmarkCount(collection_id) {
   return bookmarks.value.filter(b => b.collection_id === collection_id).length
 }
 
 // 添加新收藏夹
-function addNewCollection() {
-  bookmarkStore.addCollection(newCollection.value)
+function addNewCollection(collection) {
+  bookmarkStore.addCollection(collection)
   
   // 重置表单
   newCollection.value = {
@@ -279,9 +170,9 @@ function editCollection(collection) {
 }
 
 // 更新收藏夹数据
-function updateCollectionData() {
-  if (editingCollection.value) {
-    bookmarkStore.updateCollection(editingCollection.value.id, editingCollection.value)
+function updateCollectionData(collection) {
+  if (collection) {
+    bookmarkStore.updateCollection(collection.id, collection)
     showEditCollectionModal.value = false
   }
 }

@@ -127,7 +127,7 @@
             
             <div class="flex space-x-1">
               <button @click="togglePin(bookmark)" class="p-1">
-                <PinIcon :isPinned="bookmark.is_pinned" />
+                <PinIcon :isPinned="!!bookmark.is_pinned" />
               </button>
               <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -186,7 +186,7 @@
               </div>
               <div class="flex space-x-1">
                 <button @click="togglePin(bookmark)" class="p-1">
-                  <PinIcon :isPinned="bookmark.is_pinned" />
+                  <PinIcon :isPinned="!!bookmark.is_pinned" />
                 </button>
                 <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -276,138 +276,24 @@
     </div>
 
     <!-- 添加书签模态框 -->
-    <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 dark:text-white">添加链接</h3>
-        <form @submit.prevent="addNewBookmark">
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
-            <input 
-              v-model="newBookmark.url" 
-              type="url" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="https://example.com"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
-            <input 
-              v-model="newBookmark.title" 
-              type="text" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="网站标题"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">描述（可选）</label>
-            <textarea 
-              v-model="newBookmark.description" 
-              rows="3" 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="添加描述..."
-            ></textarea>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
-            <div class="relative">
-              <input 
-                v-model="newBookmarkTagsInput" 
-                type="text" 
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-                placeholder="工作, 学习, 娱乐..."
-              >
-              <div v-if="parsedNewBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
-                <span 
-                  v-for="tag in parsedNewBookmarkTags" 
-                  :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
-                  {{ tag }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              @click="showAddBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-            >
-              添加
-            </button>
-          </div>
-        </form>
-      </div>
+    <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <BookmarkForm 
+        :bookmark="newBookmark" 
+        :collections="collections" 
+        :isEditing="false" 
+        @submit="addNewBookmark" 
+        @close="showAddBookmarkModal = false"
+      />
     </div>
 
     <!-- 编辑收藏夹模态框 -->
-    <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 dark:text-white">编辑收藏夹</h3>
-        <form @submit.prevent="updateCollectionData">
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">名称</label>
-            <input 
-              v-model="editingCollection.name" 
-              type="text" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="emoji in emojiOptions" 
-                :key="emoji"
-                type="button"
-                @click="editingCollection.icon = emoji"
-                class="w-10 h-10 flex items-center justify-center rounded-md border"
-                :class="editingCollection.icon === emoji ? 'border-primary bg-blue-50 dark:bg-blue-900/30' : 'border-gray-300 dark:border-gray-600'"
-              >
-                {{ emoji }}
-              </button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">颜色</label>
-            <div class="grid grid-cols-8 gap-2">
-              <button 
-                v-for="color in colorOptions" 
-                :key="color"
-                type="button"
-                @click="editingCollection.color = color"
-                class="w-10 h-10 rounded-md border border-gray-300 dark:border-gray-600"
-                :style="{ backgroundColor: color }"
-                :class="editingCollection.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''"
-              ></button>
-            </div>
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              @click="showEditCollectionModal = false" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-              :disabled="editingCollection.id === 1 && editingCollection.name !== '默认收藏夹'"
-            >
-              更新
-            </button>
-          </div>
-        </form>
-      </div>
+    <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <CollectionForm 
+        :collection="editingCollection" 
+        :isEditing="true" 
+        @submit="updateCollectionData" 
+        @close="showEditCollectionModal = false"
+      />
     </div>
 
     <!-- 删除确认模态框 -->
@@ -433,92 +319,14 @@
     </div>
 
     <!-- 编辑书签模态框 -->
-    <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">编辑链接</h3>
-        <form @submit.prevent="updateBookmarkData">
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">URL</label>
-            <input 
-              v-model="editingBookmark.url" 
-              type="url" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="https://example.com"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">标题</label>
-            <input 
-              v-model="editingBookmark.title" 
-              type="text" 
-              required 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="网站标题"
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">描述（可选）</label>
-            <textarea 
-              v-model="editingBookmark.description" 
-              rows="3" 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="添加描述..."
-            ></textarea>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">图标</label>
-            <div class="flex items-center space-x-3 mb-2">
-              <div class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                <img v-if="editingBookmark.favicon" :src="editingBookmark.favicon" alt="favicon" class="w-6 h-6" />
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-              </div>
-              <input 
-              v-model="editingBookmark.favicon" 
-              type="url" 
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-              placeholder="https://example.com/favicon.ico"
-            >
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-1 dark:text-white">标签（可选，用逗号分隔）</label>
-            <div class="relative">
-              <input 
-                v-model="editBookmarkTagsInput" 
-                type="text" 
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 dark:text-white"
-                placeholder="工作, 学习, 娱乐..."
-              >
-              <div v-if="parsedEditBookmarkTags.length > 0" class="mt-2 flex flex-wrap gap-1">
-                <span 
-                  v-for="tag in parsedEditBookmarkTags" 
-                  :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800 flex items-center">
-                  {{ tag }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              @click="showEditBookmarkModal = false" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-            >
-              更新
-            </button>
-          </div>
-        </form>
-      </div>
+    <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <BookmarkForm 
+        :bookmark="editingBookmark" 
+        :collections="collections" 
+        :isEditing="true" 
+        @submit="updateBookmarkData" 
+        @close="showEditBookmarkModal = false"
+      />
     </div>
   </div>
 </template>
@@ -528,6 +336,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { useRoute, useRouter } from 'vue-router'
 import PinIcon from '../components/PinIcon.vue'
+import BookmarkForm from '../components/BookmarkForm.vue'
+import CollectionForm from '../components/CollectionForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -770,22 +580,13 @@ const newBookmark = ref({
   description: '',
   collection_id: collection_id.value,
   favicon: '',
-  tags: []
-})
-const newBookmarkTagsInput = ref('')
-const parsedNewBookmarkTags = computed(() => {
-  if (!newBookmarkTagsInput.value) return []
-  return newBookmarkTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+  tags: [],
+  is_pinned: false
 })
 
 // 编辑书签相关状态
 const showEditBookmarkModal = ref(false)
 const editingBookmark = ref(null)
-const editBookmarkTagsInput = ref('')
-const parsedEditBookmarkTags = computed(() => {
-  if (!editBookmarkTagsInput.value) return []
-  return editBookmarkTagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
-})
 
 // 删除书签相关状态
 const showDeleteConfirmModal = ref(false)
@@ -804,17 +605,9 @@ function formatDate(dateString) {
 }
 
 // 添加新书签
-async function addNewBookmark() {
-  if (!newBookmark.value.url || !newBookmark.value.title) {
-    return
-  }
-
-  // 确保使用当前收藏夹ID和处理标签
-  const bookmark = {
-    ...newBookmark.value,
-    collection_id: collection_id.value,
-    tags: parsedNewBookmarkTags.value
-  }
+async function addNewBookmark(bookmark) {
+  // 确保添加到当前收藏夹
+  bookmark.collection_id = collection_id.value
   
   await bookmarkStore.addBookmark(bookmark)
   
@@ -825,9 +618,9 @@ async function addNewBookmark() {
     description: '',
     collection_id: collection_id.value,
     favicon: '',
-    tags: []
+    tags: [],
+    is_pinned: false
   }
-  newBookmarkTagsInput.value = ''
   
   showAddBookmarkModal.value = false
 }
@@ -835,23 +628,14 @@ async function addNewBookmark() {
 // 编辑书签
 function editBookmark(bookmark) {
   editingBookmark.value = { ...bookmark }
-  // 如果有标签，将其转换为逗号分隔的字符串
-  editBookmarkTagsInput.value = bookmark.tags && Array.isArray(bookmark.tags) ? bookmark.tags.join(', ') : ''
   showEditBookmarkModal.value = true
 }
 
 // 更新书签数据
-function updateBookmarkData() {
-  if (editingBookmark.value) {
-    // 更新标签
-    const updatedBookmark = {
-      ...editingBookmark.value,
-      tags: parsedEditBookmarkTags.value
-    }
-    
+function updateBookmarkData(updatedBookmark) {
+  if (updatedBookmark) {
     bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
     showEditBookmarkModal.value = false
-    editBookmarkTagsInput.value = ''
   }
 }
 
@@ -890,9 +674,9 @@ function editCollection(collection) {
 }
 
 // 更新收藏夹数据
-function updateCollectionData() {
-  if (editingCollection.value) {
-    bookmarkStore.updateCollection(editingCollection.value.id, editingCollection.value)
+function updateCollectionData(collection) {
+  if (collection) {
+    bookmarkStore.updateCollection(collection.id, collection)
     showEditCollectionModal.value = false
   }
 }
