@@ -61,12 +61,27 @@
         </div>
         <div>
           <h4 class="font-medium mb-2">导入数据</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">从JSON文件导入链接和收藏夹</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">从JSON或HTML文件导入链接和收藏夹</p>
+          
+          <!-- 导入类型选择 -->
+          <div class="mb-3">
+            <div class="flex space-x-4">
+              <label class="inline-flex items-center">
+                <input type="radio" v-model="importType" value="json" class="form-radio text-primary">
+                <span class="ml-2 text-sm">JSON格式</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" v-model="importType" value="html" class="form-radio text-primary">
+                <span class="ml-2 text-sm">Chrome/Edge书签HTML</span>
+              </label>
+            </div>
+          </div>
+          
           <div class="flex items-center">
             <input 
               type="file" 
               ref="fileInput" 
-              accept=".json" 
+              :accept="importType === 'json' ? '.json' : '.html,.htm'" 
               class="hidden" 
               @change="handleFileUpload"
             >
@@ -283,6 +298,7 @@ const collectionToDelete = ref(null)
 const importFileName = ref('')
 const importError = ref('')
 const importSuccess = ref(false)
+const importType = ref('json') // 默认为JSON格式导入
 
 // 图标和颜色选项
 const emojiOptions = ['📁', '💼', '📚', '🔖', '🌐', '💻', '📱', '🎮', '🎬', '🎵', '🎨', '📝', '📊', '📈', '🔍', '⭐']
@@ -364,10 +380,17 @@ function handleFileUpload(event) {
   importSuccess.value = false
   
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const content = e.target.result
-      const success = bookmarkStore.importBookmarks(content)
+      let success = false
+      
+      // 根据导入类型选择不同的导入方法
+      if (importType.value === 'json') {
+        success = await bookmarkStore.importBookmarks(content)
+      } else if (importType.value === 'html') {
+        success = await bookmarkStore.importHtmlBookmarks(content)
+      }
       
       if (success) {
         importSuccess.value = true

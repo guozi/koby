@@ -176,7 +176,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
         throw error;
       }
     },
-    // 导入书签和收藏夹
+    // 导入书签和收藏夹 (JSON格式)
     async importBookmarks(data) {
       try {
         const importedData = JSON.parse(data);
@@ -199,7 +199,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
               title: bookmark.title,
               url: bookmark.url,
               description: bookmark.description,
-              collection_id: bookmark.collection_id
+              collection_id: bookmark.collection_id,
+              favicon: bookmark.favicon || null
             });
           }
         }
@@ -207,6 +208,54 @@ export const useBookmarkStore = defineStore('bookmarks', {
         return true;
       } catch (error) {
         console.error('导入数据失败:', error);
+        return false;
+      }
+    },
+    
+    // 导入Chrome/Edge HTML格式书签
+    async importHtmlBookmarks(htmlContent) {
+      try {
+        // 调用API解析HTML书签
+        const parsedData = await bookmarksAPI.parseHtml(htmlContent);
+        
+        if (!parsedData || !parsedData.collections || !parsedData.bookmarks) {
+          throw new Error('解析书签失败');
+        }
+        
+        // 导入收藏夹并记录新ID
+        const folderIdMap = new Map();
+        for (const collection of parsedData.collections) {
+          const newCollection = await this.addCollection({
+            name: collection.name,
+            icon: collection.icon,
+            color: collection.color
+          });
+          // 记录临时ID到实际ID的映射
+          folderIdMap.set(collection.tempId, newCollection.id);
+        }
+        
+        // 导入书签
+        for (const bookmark of parsedData.bookmarks) {
+          // 如果书签使用临时ID，替换为实际ID
+          let collectionId = bookmark.collection_id;
+          if (folderIdMap.has(collectionId)) {
+            collectionId = folderIdMap.get(collectionId);
+          }
+          
+          await this.addBookmark({
+            title: bookmark.title,
+            url: bookmark.url,
+            description: bookmark.description || '',
+            collection_id: collectionId,
+            favicon: bookmark.favicon || null,
+            tags: bookmark.tags || null,
+            is_pinned: bookmark.is_pinned || false
+          });
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('导入HTML书签失败:', error);
         return false;
       }
     },

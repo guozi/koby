@@ -49,7 +49,10 @@ export const bookmarksAPI = {
   togglePin: (id, bookmark) => apiClient.put(`/api/bookmarks/${id}`, bookmark),
   
   // 删除书签
-  delete: (id) => apiClient.delete(`/api/bookmarks/${id}`)
+  delete: (id) => apiClient.delete(`/api/bookmarks/${id}`),
+  
+  // 解析HTML书签
+  parseHtml: (htmlContent) => apiClient.post('/api/bookmarks/parse-html', { htmlContent })
 };
 
 // 收藏夹相关API

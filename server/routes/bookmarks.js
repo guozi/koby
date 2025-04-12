@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { parseBookmarksHtml } = require('../utils/bookmarkParser');
 
 module.exports = (pool) => {
   // 获取所有书签
@@ -113,6 +114,25 @@ module.exports = (pool) => {
     } catch (error) {
       console.error('删除书签失败:', error);
       res.status(500).json({ error: true, message: '删除书签失败' });
+    }
+  });
+
+  // 解析HTML书签
+  router.post('/parse-html', async (req, res) => {
+    try {
+      const { htmlContent } = req.body;
+      
+      if (!htmlContent) {
+        return res.status(400).json({ error: true, message: 'HTML内容不能为空' });
+      }
+
+      // 解析HTML书签
+      const parsedData = parseBookmarksHtml(htmlContent);
+      
+      res.json(parsedData);
+    } catch (error) {
+      console.error('解析HTML书签失败:', error);
+      res.status(500).json({ error: true, message: '解析HTML书签失败: ' + error.message });
     }
   });
 
