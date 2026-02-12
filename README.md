@@ -4,100 +4,169 @@
   <img src="public/logo.svg" alt="Koby Logo" width="120" height="120">
 </p>
 
-Koby是一个简洁高效的链接管理工具，帮助您整理、分类和快速访问重要网页链接。无论是工作资料、学习资源还是个人收藏，Koby都能让您的网络书签井然有序。现在支持MySQL数据库存储，提供更可靠的数据管理能力，并增加了暗色主题、标签系统等多项实用功能。
+Koby 是一个简洁高效的多用户链接管理工具，帮助您整理、分类和快速访问重要网页链接。支持用户注册登录、邮箱验证、收藏夹管理、标签系统、暗色主题等功能，数据存储在 Cloudflare D1 上，部署在 Vercel。
 
-## ✨ 功能特点
+## 功能特点
 
-- **链接管理**：添加、编辑、删除和搜索您的网页链接
-- **收藏夹分类**：创建自定义收藏夹，使用emoji图标和颜色进行个性化设置
-- **标签系统**：为链接添加标签，支持按标签筛选和分类
-- **暗色/亮色主题**：支持自动跟随系统设置或手动切换的主题模式
-- **视图切换**：支持网格视图和列表视图，满足不同浏览习惯
-- **分页功能**：大量链接时自动分页，提升浏览体验
-- **快速访问**：首页展示最近添加的链接和收藏夹快捷入口
-- **数据库存储**：所有数据安全存储在MySQL数据库中，提供可靠的数据持久化
-- **数据导入导出**：支持数据备份和恢复功能
-- **响应式设计**：完美适配桌面、平板和移动设备的各种屏幕尺寸
-- **API接口**：提供RESTful API接口，支持前后端分离
+- **用户认证**：邮箱注册/登录，JWT 认证，邮箱验证，多用户数据隔离
+- **收藏夹管理**：侧边栏+书签列表布局，自定义 emoji 图标和颜色
+- **链接管理**：添加、编辑、删除、搜索、置顶，自动获取 Favicon
+- **标签系统**：为链接添加标签，支持按标签筛选
+- **视图切换**：网格视图 / 列表视图，可配置分页
+- **暗色/亮色主题**：支持自动跟随系统或手动切换
+- **数据导入导出**：支持 JSON 和浏览器 HTML 书签格式
+- **响应式设计**：桌面端侧边栏布局，移动端自动折叠为下拉选择器
+- **安全防护**：请求频率限制、输入校验、XSS 防护、邮箱标准化
 
-## 🚀 快速开始
+## 快速开始
 
-### 环境准备
+### 环境要求
 
-1. 确保已安装Node.js (v18+)和MySQL
-2. 克隆仓库到本地
-3. 复制环境变量配置文件
+- Node.js >= 18
+- Cloudflare D1 数据库
+- SMTP 邮件服务（用于注册验证）
+
+### 安装
+
+```bash
+git clone <repo-url>
+cd koby
+npm install
+```
+
+### 配置
 
 ```bash
 cp .env.example .env
 ```
 
-4. 编辑.env文件，配置数据库连接信息
+编辑 `.env` 文件，填入实际配置：
 
-### 数据库设置
+| 变量 | 说明 |
+|------|------|
+| `CF_ACCOUNT_ID` | Cloudflare 账户 ID |
+| `CF_D1_DATABASE_ID` | D1 数据库 ID |
+| `CF_API_TOKEN` | Cloudflare API Token |
+| `JWT_SECRET` | JWT 签名密钥（随机字符串） |
+| `CLIENT_URL` | 前端地址（CORS + 验证邮件链接） |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` | SMTP 邮件服务 |
+| `SMTP_FROM` | 发件人（需与 SMTP_USER 一致） |
+| `VITE_API_URL` | 后端 API 地址（Vercel 部署时留空） |
 
-1. 创建MySQL数据库
+### 初始化数据库
 
-```bash
-mysql -u root -p < db/init.sql
-```
+在 Cloudflare D1 控制台执行 `db/init-d1.sql` 中的建表语句。
 
-或手动执行init.sql中的SQL语句创建数据库和表
-
-### 安装依赖
-
-```bash
-npm install
-```
-
-### 开发环境运行
-
-同时启动前端和后端服务：
+### 本地开发
 
 ```bash
+# 同时启动前端和后端
 npm run dev:all
+
+# 或分别启动
+npm run dev      # 前端 (http://localhost:5173)
+npm run server   # 后端 (http://localhost:3001)
 ```
 
-或分别启动：
-
-```bash
-# 前端服务
-npm run dev
-
-# 后端API服务
-npm run server
-```
-
-### 构建生产版本
+### 构建部署
 
 ```bash
 npm run build
 ```
 
-### 预览生产构建
+Vercel 部署时在项目设置中配置环境变量，`VITE_API_URL` 留空，`CLIENT_URL` 设为实际域名。
 
-```bash
-npm run preview
-```
-
-## 💻 技术栈
+## 技术栈
 
 ### 前端
 - **框架**：Vue 3 (Composition API)
 - **状态管理**：Pinia
-- **路由管理**：Vue Router
-- **UI 框架**：Tailwind CSS
-- **构建工具**：Vite
-- **HTTP客户端**：Axios
-- **工具库**：@vueuse/core (用于主题检测等功能)
+- **路由**：Vue Router（含 Auth Guard）
+- **样式**：Tailwind CSS
+- **构建**：Vite
+- **HTTP**：Axios（自动注入 Token、401 拦截）
 
 ### 后端
 - **服务器**：Node.js + Express
-- **数据库**：MySQL
-- **ORM**：mysql2
-- **环境变量**：dotenv
+- **数据库**：Cloudflare D1 (SQLite)
+- **认证**：JWT + bcryptjs
+- **邮件**：nodemailer
+- **安全**：express-rate-limit
 
-## 📱 应用截图
+### 部署
+- **前端 + API**：Vercel (Serverless Functions)
+- **数据库**：Cloudflare D1
+
+## 项目结构
+
+```
+koby/
+├── api/index.js              # Vercel Serverless 入口
+├── db/init-d1.sql            # D1 数据库 Schema
+├── server.js                 # 本地开发服务器
+├── server/
+│   ├── db/database.js        # D1 数据库适配层
+│   ├── middleware/auth.js     # JWT 认证中间件
+│   ├── routes/
+│   │   ├── auth.js           # 认证路由（注册/登录/验证）
+│   │   ├── bookmarks.js      # 书签路由
+│   │   └── collections.js    # 收藏夹路由
+│   └── utils/
+│       ├── bookmarkParser.js # HTML 书签解析
+│       ├── email.js          # 邮件发送
+│       └── favicon.js        # Favicon 获取
+├── src/
+│   ├── App.vue               # 根组件
+│   ├── router/index.js       # 前端路由 + Auth Guard
+│   ├── services/api.js       # API 服务层
+│   ├── stores/
+│   │   ├── auth.js           # 认证状态
+│   │   ├── bookmarks.js      # 书签/收藏夹状态
+│   │   └── theme.js          # 主题状态
+│   ├── views/
+│   │   ├── HomeView.vue      # 首页
+│   │   ├── CollectionsView.vue # 收藏夹（侧边栏+书签列表）
+│   │   ├── LoginView.vue     # 登录/注册
+│   │   ├── VerifyEmailView.vue # 邮箱验证
+│   │   └── SettingsView.vue  # 设置
+│   └── components/           # 通用组件
+└── vercel.json               # Vercel 部署配置
+```
+
+## API 接口
+
+### 认证（无需 Token，有频率限制）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/auth/register` | 注册 |
+| POST | `/api/auth/login` | 登录 |
+| POST | `/api/auth/verify-email` | 验证邮箱 |
+| POST | `/api/auth/resend-verification` | 重发验证邮件 |
+| GET | `/api/auth/me` | 获取当前用户（需 Token） |
+
+### 书签（需 Token）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/bookmarks` | 获取所有书签 |
+| GET | `/api/bookmarks/collection/:id` | 获取收藏夹下的书签 |
+| POST | `/api/bookmarks` | 添加书签 |
+| PUT | `/api/bookmarks/:id` | 更新书签 |
+| DELETE | `/api/bookmarks/:id` | 删除书签 |
+| POST | `/api/bookmarks/parse-html` | 解析 HTML 书签文件 |
+
+### 收藏夹（需 Token）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/collections` | 获取所有收藏夹 |
+| GET | `/api/collections/:id` | 获取单个收藏夹 |
+| POST | `/api/collections` | 添加收藏夹 |
+| PUT | `/api/collections/:id` | 更新收藏夹 |
+| DELETE | `/api/collections/:id` | 删除收藏夹 |
+
+## 应用截图
 
 <details>
   <summary><b>亮色模式</b></summary>
@@ -108,101 +177,22 @@ npm run preview
   <img src="public/img/dark_mode.png" alt="暗色模式" width="100%">
 </details>
 <details>
-  <summary><b>收藏夹表格页面</b></summary>
-  <img src="public/img/collection_1.png" alt="收藏夹表格页面" width="100%">
-</details>
-<details>
-  <summary><b>收藏夹列表页面</b></summary>
-  <img src="public/img/collection_2.png" alt="收藏夹列表页面" width="100%">
-</details>
-<details>
-  <summary><b>设置页面</b></summary>
-  <img src="public/img/setting.png" alt="设置页面" width="100%">
+  <summary><b>收藏夹页面</b></summary>
+  <img src="public/img/collection_1.png" alt="收藏夹页面" width="100%">
 </details>
 
-## 🔧 主要功能说明
-
-### 链接管理
-
-- 添加新链接：输入URL、标题、描述和标签
-- 编辑现有链接：修改链接信息、所属收藏夹或标签
-- 删除链接：移除不再需要的书签
-- 搜索功能：快速查找特定链接
-
-### 收藏夹管理
-
-- 创建自定义收藏夹：设置名称、图标和颜色
-- 编辑收藏夹：修改收藏夹属性
-- 删除收藏夹：移除不需要的分类（链接会自动移至默认收藏夹）
-
-### 标签系统
-
-- 添加标签：为链接添加多个标签
-- 标签筛选：通过标签快速筛选相关链接
-
-### 主题切换
-
-- 自动主题：根据系统设置自动切换亮色/暗色主题
-- 手动切换：通过界面按钮手动切换主题
-- 主题持久化：记住用户的主题偏好设置
-
-### 视图模式
-
-- 网格视图：以卡片形式展示链接，适合视觉浏览
-- 列表视图：以列表形式展示链接，适合快速查找
-
-### 分页功能
-
-- 自动分页：大量链接时自动分页显示
-- 页码导航：直观的页码导航和前后页切换
-
-### 数据导入导出
-
-- 导出数据：将所有链接和收藏夹导出为JSON文件
-- 导入数据：支持从JSON文件或浏览器导出的HTML文件导入书签
-
-### API接口
-
-- 书签API：提供书签的CRUD操作，支持标签和分页
-- 收藏夹API：提供收藏夹的CRUD操作
-
-## 🛠️ 环境变量配置
-
-项目使用.env文件进行环境配置，主要包含以下变量：
-
-```
-# 服务器配置
-PORT=3001                        # 后端服务器端口
-CLIENT_URL=http://localhost:3000 # 前端应用URL
-
-# 数据库配置
-DB_HOST=127.0.0.1               # 数据库主机
-DB_USER=root                     # 数据库用户名
-DB_PASSWORD=your_password        # 数据库密码
-DB_NAME=koby                     # 数据库名称
-
-# 前端API配置
-VITE_API_URL=http://localhost:3001 # 后端API地址
-```
-
-## 📄 许可证
+## 许可证
 
 [MIT](LICENSE)
 
-## 🤝 贡献指南
+## 赞赏支持
 
-欢迎提交问题和功能请求！如果您想为Koby做出贡献，请随时提交Pull Request。
-
-## 💰 赞赏支持
-
-如果您觉得Koby对您有所帮助，欢迎扫描下方二维码进行赞赏，您的支持是我们持续改进的动力！
+如果您觉得 Koby 对您有所帮助，欢迎扫描下方二维码进行赞赏：
 
 <p align="center">
   <img src="public/img/sponsor-qrcode.png" alt="赞赏二维码" width="350" height="350">
 </p>
 
-<p align="center">感谢您的每一份支持与鼓励 ❤️</p>
-
 ---
 
-使用 ❤️ [Trae](https://www.trae.ai/) 构建
+使用 [Trae](https://www.trae.ai/) 构建
