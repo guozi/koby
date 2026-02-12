@@ -24,7 +24,7 @@ Koby 是一个简洁高效的多用户链接管理工具，帮助您整理、分
 
 - Node.js >= 18
 - Cloudflare D1 数据库
-- SMTP 邮件服务（用于注册验证）
+- Resend 邮件服务（用于注册验证，https://resend.com）
 
 ### 安装
 
@@ -49,8 +49,8 @@ cp .env.example .env
 | `CF_API_TOKEN` | Cloudflare API Token |
 | `JWT_SECRET` | JWT 签名密钥（随机字符串） |
 | `CLIENT_URL` | 前端地址（CORS + 验证邮件链接） |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` | SMTP 邮件服务 |
-| `SMTP_FROM` | 发件人（需与 SMTP_USER 一致） |
+| `RESEND_API_KEY` | Resend API 密钥 |
+| `RESEND_FROM` | 发件人地址（需配置自定义域名） |
 | `VITE_API_URL` | 后端 API 地址（Vercel 部署时留空） |
 
 ### 初始化数据库
@@ -90,7 +90,7 @@ Vercel 部署时在项目设置中配置环境变量，`VITE_API_URL` 留空，`
 - **服务器**：Node.js + Express
 - **数据库**：Cloudflare D1 (SQLite)
 - **认证**：JWT + bcryptjs
-- **邮件**：nodemailer
+- **邮件**：Resend
 - **安全**：express-rate-limit
 
 ### 部署
