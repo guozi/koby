@@ -22,6 +22,7 @@ const collectionsRouter = require('./server/routes/collections')(pool);
 
 // 创建Express应用
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 
 // 中间件

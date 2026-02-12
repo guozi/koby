@@ -16,6 +16,7 @@ const bookmarksRouter = require('../server/routes/bookmarks')(pool);
 const collectionsRouter = require('../server/routes/collections')(pool);
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
