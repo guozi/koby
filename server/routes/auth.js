@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const { authMiddleware, signToken } = require('../middleware/auth');
 const { sendVerificationEmail } = require('../utils/email');
 
@@ -16,10 +17,29 @@ function escapeHtml(str) {
 const MAX_NAME_LEN = 50;
 const MAX_EMAIL_LEN = 254;
 const MAX_PASSWORD_LEN = 128;
+const RESEND_COOLDOWN_MS = 60 * 1000; // 60 秒冷却
+
+// 注册接口：每 IP 15 分钟最多 5 次
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: true, message: '注册请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 重发验证：每 IP 15 分钟最多 3 次
+const resendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  message: { error: true, message: '请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 module.exports = (pool) => {
   // 注册
-  router.post('/register', async (req, res) => {
+  router.post('/register', registerLimiter, async (req, res) => {
     try {
       const { password, name } = req.body;
       let { email } = req.body;
@@ -173,7 +193,7 @@ module.exports = (pool) => {
   });
 
   // 重新发送验证邮件
-  router.post('/resend-verification', async (req, res) => {
+  router.post('/resend-verification', resendLimiter, async (req, res) => {
     try {
       let { email } = req.body;
       if (!email) {
@@ -183,7 +203,7 @@ module.exports = (pool) => {
       email = email.trim().toLowerCase();
 
       const [users] = await pool.query(
-        'SELECT id, name, is_verified FROM users WHERE email = ?',
+        'SELECT id, name, is_verified, verification_expires_at FROM users WHERE email = ?',
         [email]
       );
       if (users.length === 0) {
@@ -193,6 +213,15 @@ module.exports = (pool) => {
       const user = users[0];
       if (user.is_verified) {
         return res.json({ message: '邮箱已验证，请直接登录' });
+      }
+
+      // 冷却时间检查：上次发送不足 60 秒则拒绝
+      if (user.verification_expires_at) {
+        const expiresAt = new Date(user.verification_expires_at).getTime();
+        const sentAt = expiresAt - 24 * 60 * 60 * 1000;
+        if (Date.now() - sentAt < RESEND_COOLDOWN_MS) {
+          return res.status(429).json({ error: true, message: '请等待 60 秒后再重新发送' });
+        }
       }
 
       const verification_token = crypto.randomBytes(32).toString('hex');

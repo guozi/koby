@@ -1,24 +1,18 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 465,
-    secure: (Number(process.env.SMTP_PORT) || 465) === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+let resend;
+function getClient() {
+  if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
+  return resend;
 }
 
 async function sendVerificationEmail(email, name, token) {
   const frontendUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const verifyUrl = `${frontendUrl}/verify-email?token=${token}`;
+  const from = process.env.RESEND_FROM || 'Koby <onboarding@resend.dev>';
 
-  const transporter = createTransporter();
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  await getClient().emails.send({
+    from,
     to: email,
     subject: 'Koby - 验证您的邮箱',
     html: `
