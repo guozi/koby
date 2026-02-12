@@ -15,6 +15,13 @@ export const useBookmarkStore = defineStore('bookmarks', {
     getAllCollections: (state) => state.collections
   },
   actions: {
+    resetState() {
+      this.bookmarks = [];
+      this.collections = [];
+      this.loading = false;
+      this.error = null;
+    },
+
     // 初始化加载数据
     async initialize() {
       try {

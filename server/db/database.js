@@ -28,6 +28,7 @@ function postProcessRows(rows) {
   return rows.map(row => {
     const out = { ...row };
     if ('is_pinned' in out) out.is_pinned = Boolean(out.is_pinned);
+    if ('is_verified' in out) out.is_verified = Boolean(out.is_verified);
     if ('tags' in out && typeof out.tags === 'string') {
       try { out.tags = JSON.parse(out.tags); } catch { /* keep as string */ }
     }
