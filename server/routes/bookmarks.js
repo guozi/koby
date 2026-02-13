@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { parseBookmarksHtml } = require('../utils/bookmarkParser');
+const { generateId } = require('../utils/id');
 
 module.exports = (pool) => {
   async function ensureCollectionOwnedByUser(collectionId, userId) {
@@ -65,12 +66,13 @@ module.exports = (pool) => {
         }
       }
 
+      const bookmarkId = generateId();
       const [result] = await pool.query(
-        'INSERT INTO bookmarks (title, url, description, collection_id, favicon, tags, is_pinned, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned || false, req.userId]
+        'INSERT INTO bookmarks (id, title, url, description, collection_id, favicon, tags, is_pinned, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [bookmarkId, title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned || false, req.userId]
       );
 
-      const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [result.insertId]);
+      const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [bookmarkId]);
       res.status(201).json(newBookmark[0]);
     } catch (error) {
       console.error('添加书签失败:', error);

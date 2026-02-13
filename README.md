@@ -90,6 +90,7 @@ Vercel 部署时在项目设置中配置环境变量，`VITE_API_URL` 留空，`
 - **服务器**：Node.js + Express
 - **数据库**：Cloudflare D1 (SQLite)
 - **认证**：JWT + bcryptjs
+- **ID 生成**：nanoid（URL 安全的唯一 ID，替代自增整数）
 - **邮件**：Resend
 - **安全**：express-rate-limit
 
@@ -114,7 +115,8 @@ koby/
 │   └── utils/
 │       ├── bookmarkParser.js # HTML 书签解析
 │       ├── email.js          # 邮件发送
-│       └── favicon.js        # Favicon 获取
+│       ├── favicon.js        # Favicon 获取
+│       └── id.js             # nanoid 生成唯一 ID
 ├── src/
 │   ├── App.vue               # 根组件
 │   ├── router/index.js       # 前端路由 + Auth Guard

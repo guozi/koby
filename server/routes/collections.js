@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { generateId } = require('../utils/id');
 
 module.exports = (pool) => {
   // 获取所有收藏夹（当前用户）
@@ -45,12 +46,13 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, message: '收藏夹名称是必填项' });
       }
 
-      const [result] = await pool.query(
-        'INSERT INTO collections (name, icon, color, user_id) VALUES (?, ?, ?, ?)',
-        [name, icon || '📁', color || '#3B82F6', req.userId]
+      const collectionId = generateId();
+      await pool.query(
+        'INSERT INTO collections (id, name, icon, color, user_id) VALUES (?, ?, ?, ?, ?)',
+        [collectionId, name, icon || '📁', color || '#3B82F6', req.userId]
       );
 
-      const [newCollection] = await pool.query('SELECT * FROM collections WHERE id = ?', [result.insertId]);
+      const [newCollection] = await pool.query('SELECT * FROM collections WHERE id = ?', [collectionId]);
       res.status(201).json(newCollection[0]);
     } catch (error) {
       console.error('添加收藏夹失败:', error);
@@ -101,7 +103,7 @@ module.exports = (pool) => {
       }
 
       // 找到用户的第一个收藏夹作为默认目标
-      const defaultCollection = allCollections.find(c => c.id !== Number(collection_id));
+      const defaultCollection = allCollections.find(c => c.id !== collection_id);
 
       const connection = await pool.getConnection();
       await connection.beginTransaction();

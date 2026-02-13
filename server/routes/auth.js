@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { authMiddleware, signToken } = require('../middleware/auth');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/email');
+const { generateId } = require('../utils/id');
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -78,10 +79,11 @@ module.exports = (pool) => {
       const password_hash = await bcrypt.hash(password, 10);
       const verification_token = crypto.randomBytes(32).toString('hex');
       const verification_expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const userId = generateId();
 
       await pool.query(
-        'INSERT INTO users (email, password_hash, name, verification_token, verification_expires_at) VALUES (?, ?, ?, ?, ?)',
-        [email, password_hash, trimmedName, verification_token, verification_expires_at]
+        'INSERT INTO users (id, email, password_hash, name, verification_token, verification_expires_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [userId, email, password_hash, trimmedName, verification_token, verification_expires_at]
       );
 
       sendVerificationEmail(email, escapeHtml(trimmedName), verification_token).catch(err => {
@@ -170,9 +172,10 @@ module.exports = (pool) => {
       }
 
       // 创建默认收藏夹
+      const collectionId = generateId();
       await pool.query(
-        "INSERT INTO collections (name, icon, color, user_id) VALUES ('默认收藏夹', '📁', '#3B82F6', ?)",
-        [user.id]
+        "INSERT INTO collections (id, name, icon, color, user_id) VALUES (?, '默认收藏夹', '📁', '#3B82F6', ?)",
+        [collectionId, user.id]
       );
 
       const jwtToken = signToken(user.id);
