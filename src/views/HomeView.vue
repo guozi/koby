@@ -88,22 +88,24 @@
 
     <!-- 添加书签模态框 -->
     <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm 
-        :bookmark="newBookmark" 
-        :collections="collections" 
-        :isEditing="false" 
-        @submit="addNewBookmark" 
+      <BookmarkForm
+        :bookmark="newBookmark"
+        :collections="collections"
+        :isEditing="false"
+        :submitting="submitting"
+        @submit="addNewBookmark"
         @close="showAddBookmarkModal = false"
       />
     </div>
 
     <!-- 编辑书签模态框 -->
     <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm 
-        :bookmark="editingBookmark" 
-        :collections="collections" 
-        :isEditing="true" 
-        @submit="updateBookmarkData" 
+      <BookmarkForm
+        :bookmark="editingBookmark"
+        :collections="collections"
+        :isEditing="true"
+        :submitting="submitting"
+        @submit="updateBookmarkData"
         @close="showEditBookmarkModal = false"
       />
     </div>
@@ -114,17 +116,19 @@
         <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
         <p class="mb-4 dark:text-gray-300">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
         <div class="flex justify-end space-x-2">
-          <button 
-            @click="showDeleteConfirmModal = false" 
-            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+          <button
+            @click="showDeleteConfirmModal = false"
+            :disabled="submitting"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-50"
           >
             取消
           </button>
-          <button 
-            @click="deleteBookmark()" 
-            class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+          <button
+            @click="deleteBookmark()"
+            :disabled="submitting"
+            class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            删除
+            {{ submitting ? '删除中...' : '删除' }}
           </button>
         </div>
       </div>
@@ -172,6 +176,7 @@ const editBookmarkTagsInput = ref('')
 // 删除书签相关状态
 const showDeleteConfirmModal = ref(false)
 const bookmarkToDelete = ref(null)
+const submitting = ref(false)
 
 // 获取收藏夹中的书签数量
 function getBookmarkCount(collection_id) {
@@ -200,6 +205,8 @@ function safeUrl(url) {
 
 // 添加新书签
 async function addNewBookmark(bookmark) {
+  if (submitting.value) return
+  submitting.value = true
   try {
     bookmark.collection_id = bookmark.collection_id || defaultCollectionId.value
     await bookmarkStore.addBookmark(bookmark)
@@ -208,6 +215,8 @@ async function addNewBookmark(bookmark) {
     toast.success('链接添加成功')
   } catch {
     toast.error('添加链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -221,14 +230,16 @@ function editBookmark(bookmark) {
 
 // 更新书签数据
 async function updateBookmarkData(updatedBookmark) {
-  if (updatedBookmark) {
-    try {
-      await bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
-      showEditBookmarkModal.value = false
-      toast.success('链接更新成功')
-    } catch {
-      toast.error('更新链接失败，请重试')
-    }
+  if (!updatedBookmark || submitting.value) return
+  submitting.value = true
+  try {
+    await bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
+    showEditBookmarkModal.value = false
+    toast.success('链接更新成功')
+  } catch {
+    toast.error('更新链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -240,15 +251,17 @@ function confirmDeleteBookmark(bookmark) {
 
 // 删除书签
 async function deleteBookmark() {
-  if (bookmarkToDelete.value) {
-    try {
-      await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
-      showDeleteConfirmModal.value = false
-      bookmarkToDelete.value = null
-      toast.success('链接已删除')
-    } catch {
-      toast.error('删除链接失败，请重试')
-    }
+  if (!bookmarkToDelete.value || submitting.value) return
+  submitting.value = true
+  try {
+    await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
+    showDeleteConfirmModal.value = false
+    bookmarkToDelete.value = null
+    toast.success('链接已删除')
+  } catch {
+    toast.error('删除链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 

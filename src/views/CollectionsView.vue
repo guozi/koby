@@ -272,22 +272,22 @@
 
     <!-- 添加书签模态框 -->
     <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm :bookmark="newBookmark" :collections="collections" :isEditing="false" @submit="addNewBookmark" @close="showAddBookmarkModal = false" />
+      <BookmarkForm :bookmark="newBookmark" :collections="collections" :isEditing="false" :submitting="submitting" @submit="addNewBookmark" @close="showAddBookmarkModal = false" />
     </div>
 
     <!-- 编辑书签模态框 -->
     <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm :bookmark="editingBookmark" :collections="collections" :isEditing="true" @submit="updateBookmarkData" @close="showEditBookmarkModal = false" />
+      <BookmarkForm :bookmark="editingBookmark" :collections="collections" :isEditing="true" :submitting="submitting" @submit="updateBookmarkData" @close="showEditBookmarkModal = false" />
     </div>
 
     <!-- 添加收藏夹模态框 -->
     <div v-if="showAddCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <CollectionForm :collection="newCollection" :isEditing="false" @submit="addNewCollection" @close="showAddCollectionModal = false" />
+      <CollectionForm :collection="newCollection" :isEditing="false" :submitting="submitting" @submit="addNewCollection" @close="showAddCollectionModal = false" />
     </div>
 
     <!-- 编辑收藏夹模态框 -->
     <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <CollectionForm :collection="editingCollection" :isEditing="true" @submit="updateCollectionData" @close="showEditCollectionModal = false" />
+      <CollectionForm :collection="editingCollection" :isEditing="true" :submitting="submitting" @submit="updateCollectionData" @close="showEditCollectionModal = false" />
     </div>
 
     <!-- 删除书签确认 -->
@@ -296,8 +296,8 @@
         <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
         <p class="mb-4 dark:text-gray-300">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
         <div class="flex justify-end space-x-2">
-          <button @click="showDeleteBookmarkModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">取消</button>
-          <button @click="deleteBookmark()" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">删除</button>
+          <button @click="showDeleteBookmarkModal = false" :disabled="submitting" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-50">取消</button>
+          <button @click="deleteBookmark()" :disabled="submitting" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">{{ submitting ? '删除中...' : '删除' }}</button>
         </div>
       </div>
     </div>
@@ -309,8 +309,8 @@
         <p class="mb-4 dark:text-white">确定要删除收藏夹 "{{ collectionToDelete?.name }}" 吗？</p>
         <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">该收藏夹中的所有链接将被移动到其他收藏夹。</p>
         <div class="flex justify-end space-x-2">
-          <button @click="showDeleteCollectionModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">取消</button>
-          <button @click="deleteCollection()" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">删除</button>
+          <button @click="showDeleteCollectionModal = false" :disabled="submitting" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-50">取消</button>
+          <button @click="deleteCollection()" :disabled="submitting" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">{{ submitting ? '删除中...' : '删除' }}</button>
         </div>
       </div>
     </div>
@@ -535,6 +535,8 @@ const showDeleteBookmarkModal = ref(false)
 const bookmarkToDelete = ref(null)
 
 async function addNewBookmark(bookmark) {
+  if (submitting.value) return
+  submitting.value = true
   try {
     bookmark.collection_id = collection_id.value
     await bookmarkStore.addBookmark(bookmark)
@@ -543,6 +545,8 @@ async function addNewBookmark(bookmark) {
     toast.success('链接添加成功')
   } catch {
     toast.error('添加链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -552,14 +556,16 @@ function editBookmark(bookmark) {
 }
 
 async function updateBookmarkData(updated) {
-  if (updated) {
-    try {
-      await bookmarkStore.updateBookmark(updated.id, updated)
-      showEditBookmarkModal.value = false
-      toast.success('链接更新成功')
-    } catch {
-      toast.error('更新链接失败，请重试')
-    }
+  if (!updated || submitting.value) return
+  submitting.value = true
+  try {
+    await bookmarkStore.updateBookmark(updated.id, updated)
+    showEditBookmarkModal.value = false
+    toast.success('链接更新成功')
+  } catch {
+    toast.error('更新链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -569,15 +575,17 @@ function confirmDeleteBookmark(bookmark) {
 }
 
 async function deleteBookmark() {
-  if (bookmarkToDelete.value) {
-    try {
-      await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
-      showDeleteBookmarkModal.value = false
-      bookmarkToDelete.value = null
-      toast.success('链接已删除')
-    } catch {
-      toast.error('删除链接失败，请重试')
-    }
+  if (!bookmarkToDelete.value || submitting.value) return
+  submitting.value = true
+  try {
+    await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
+    showDeleteBookmarkModal.value = false
+    bookmarkToDelete.value = null
+    toast.success('链接已删除')
+  } catch {
+    toast.error('删除链接失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -592,8 +600,11 @@ const showEditCollectionModal = ref(false)
 const editingCollection = ref(null)
 const showDeleteCollectionModal = ref(false)
 const collectionToDelete = ref(null)
+const submitting = ref(false)
 
 async function addNewCollection(collection) {
+  if (submitting.value) return
+  submitting.value = true
   try {
     await bookmarkStore.addCollection(collection)
     newCollection.value = { name: '', icon: '📁', color: '#3B82F6' }
@@ -601,6 +612,8 @@ async function addNewCollection(collection) {
     toast.success('收藏夹创建成功')
   } catch {
     toast.error('创建收藏夹失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -610,14 +623,16 @@ function editCollection(collection) {
 }
 
 async function updateCollectionData(collection) {
-  if (collection) {
-    try {
-      await bookmarkStore.updateCollection(collection.id, collection)
-      showEditCollectionModal.value = false
-      toast.success('收藏夹更新成功')
-    } catch {
-      toast.error('更新收藏夹失败，请重试')
-    }
+  if (!collection || submitting.value) return
+  submitting.value = true
+  try {
+    await bookmarkStore.updateCollection(collection.id, collection)
+    showEditCollectionModal.value = false
+    toast.success('收藏夹更新成功')
+  } catch {
+    toast.error('更新收藏夹失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -627,19 +642,21 @@ function confirmDeleteCollection(collection) {
 }
 
 async function deleteCollection() {
-  if (collectionToDelete.value) {
-    try {
-      const deletedId = collectionToDelete.value.id
-      await bookmarkStore.removeCollection(deletedId)
-      showDeleteCollectionModal.value = false
-      collectionToDelete.value = null
-      toast.success('收藏夹已删除')
-      if (deletedId === collection_id.value && collections.value.length > 0) {
-        selectCollection(collections.value[0].id)
-      }
-    } catch {
-      toast.error('删除收藏夹失败，请重试')
+  if (!collectionToDelete.value || submitting.value) return
+  submitting.value = true
+  try {
+    const deletedId = collectionToDelete.value.id
+    await bookmarkStore.removeCollection(deletedId)
+    showDeleteCollectionModal.value = false
+    collectionToDelete.value = null
+    toast.success('收藏夹已删除')
+    if (deletedId === collection_id.value && collections.value.length > 0) {
+      selectCollection(collections.value[0].id)
     }
+  } catch {
+    toast.error('删除收藏夹失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 

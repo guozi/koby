@@ -78,17 +78,22 @@
         >
           取消
         </button>
-        <button 
-          type="submit" 
-          class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium flex items-center"
+        <button
+          type="submit"
+          :disabled="submitting"
+          class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg v-if="isEditing" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-if="submitting" class="animate-spin h-5 w-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <svg v-else-if="isEditing" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          {{ isEditing ? '更新' : '添加' }}
+          {{ submitting ? '提交中...' : (isEditing ? '更新' : '添加') }}
         </button>
       </div>
     </form>
@@ -109,6 +114,10 @@ const props = defineProps({
     })
   },
   isEditing: {
+    type: Boolean,
+    default: false
+  },
+  submitting: {
     type: Boolean,
     default: false
   }
