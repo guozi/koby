@@ -19,6 +19,6 @@
     @apply bg-secondary text-white hover:bg-green-600;
   }
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 dark:border dark:border-gray-700;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 dark:border dark:border-gray-700 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
   }
 }
