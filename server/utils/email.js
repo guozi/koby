@@ -28,4 +28,26 @@ async function sendVerificationEmail(email, name, token) {
   });
 }
 
-module.exports = { sendVerificationEmail };
+async function sendPasswordResetEmail(email, name, token) {
+  const frontendUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+  const from = process.env.RESEND_FROM || 'Koby <onboarding@resend.dev>';
+
+  await getClient().emails.send({
+    from,
+    to: email,
+    subject: 'Koby - 重置您的密码',
+    html: `
+      <div style="max-width:480px;margin:0 auto;font-family:sans-serif;">
+        <h2>您好，${name}</h2>
+        <p>我们收到了您的密码重置请求。请点击下方按钮设置新密码：</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#3B82F6;color:#fff;border-radius:6px;text-decoration:none;margin:16px 0;">重置密码</a>
+        <p style="color:#666;font-size:14px;">如果按钮无法点击，请复制以下链接到浏览器：</p>
+        <p style="color:#666;font-size:12px;word-break:break-all;">${resetUrl}</p>
+        <p style="color:#999;font-size:12px;">此链接 1 小时内有效。如果您没有请求重置密码，请忽略此邮件。</p>
+      </div>
+    `,
+  });
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail };

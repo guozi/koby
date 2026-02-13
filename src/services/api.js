@@ -43,6 +43,8 @@ export const authAPI = {
   verifyEmail: (token) => apiClient.post('/api/auth/verify-email', { token }),
   me: () => apiClient.get('/api/auth/me'),
   resendVerification: (email) => apiClient.post('/api/auth/resend-verification', { email }),
+  forgotPassword: (email) => apiClient.post('/api/auth/forgot-password', { email }),
+  resetPassword: (token, newPassword) => apiClient.post('/api/auth/reset-password', { token, newPassword }),
 };
 
 // 书签相关API

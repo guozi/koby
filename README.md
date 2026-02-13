@@ -8,7 +8,7 @@ Koby 是一个简洁高效的多用户链接管理工具，帮助您整理、分
 
 ## 功能特点
 
-- **用户认证**：邮箱注册/登录，JWT 认证，邮箱验证，多用户数据隔离
+- **用户认证**：邮箱注册/登录，JWT 认证，邮箱验证，密码找回，多用户数据隔离
 - **收藏夹管理**：侧边栏+书签列表布局，自定义 emoji 图标和颜色
 - **链接管理**：添加、编辑、删除、搜索、置顶，自动获取 Favicon
 - **标签系统**：为链接添加标签，支持按标签筛选
@@ -128,6 +128,8 @@ koby/
 │   │   ├── CollectionsView.vue # 收藏夹（侧边栏+书签列表）
 │   │   ├── LoginView.vue     # 登录/注册
 │   │   ├── VerifyEmailView.vue # 邮箱验证
+│   │   ├── ForgotPasswordView.vue # 忘记密码
+│   │   ├── ResetPasswordView.vue # 重置密码
 │   │   └── SettingsView.vue  # 设置
 │   └── components/           # 通用组件
 └── vercel.json               # Vercel 部署配置
@@ -143,6 +145,8 @@ koby/
 | POST | `/api/auth/login` | 登录 |
 | POST | `/api/auth/verify-email` | 验证邮箱 |
 | POST | `/api/auth/resend-verification` | 重发验证邮件 |
+| POST | `/api/auth/forgot-password` | 发送密码重置邮件 |
+| POST | `/api/auth/reset-password` | 重置密码 |
 | GET | `/api/auth/me` | 获取当前用户（需 Token） |
 
 ### 书签（需 Token）

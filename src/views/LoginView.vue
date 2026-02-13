@@ -40,6 +40,9 @@
           <label class="block text-sm font-medium mb-1 dark:text-gray-300">密码</label>
           <input v-model="loginForm.password" type="password" required
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+          <div class="text-right mt-1">
+            <router-link to="/forgot-password" class="text-xs text-primary hover:underline">忘记密码？</router-link>
+          </div>
         </div>
         <button type="submit" :disabled="loading" class="w-full btn btn-primary py-2">
           {{ loading ? '登录中...' : '登录' }}

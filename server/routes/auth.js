@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { authMiddleware, signToken } = require('../middleware/auth');
-const { sendVerificationEmail } = require('../utils/email');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/email');
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -32,6 +32,15 @@ const registerLimiter = rateLimit({
 const resendLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 3,
+  message: { error: true, message: '请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 忘记密码：每 IP 15 分钟最多 5 次
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: { error: true, message: '请求过于频繁，请稍后再试' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -240,6 +249,81 @@ module.exports = (pool) => {
     } catch (error) {
       console.error('重发验证邮件失败:', error);
       res.status(500).json({ error: true, message: '发送失败' });
+    }
+  });
+
+  // 忘记密码
+  router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
+    try {
+      let { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: true, message: '邮箱为必填项' });
+      }
+
+      email = email.trim().toLowerCase();
+      const genericMsg = '如果该邮箱已注册，重置邮件已发送';
+
+      const [users] = await pool.query(
+        'SELECT id, name, is_verified FROM users WHERE email = ?',
+        [email]
+      );
+
+      if (users.length === 0 || !users[0].is_verified) {
+        return res.json({ message: genericMsg });
+      }
+
+      const user = users[0];
+      const reset_token = crypto.randomBytes(32).toString('hex');
+      const reset_expires_at = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+      await pool.query(
+        'UPDATE users SET reset_token = ?, reset_expires_at = ? WHERE id = ?',
+        [reset_token, reset_expires_at, user.id]
+      );
+
+      sendPasswordResetEmail(email, escapeHtml(user.name), reset_token).catch(err => {
+        console.error('发送重置邮件失败:', err);
+      });
+
+      res.json({ message: genericMsg });
+    } catch (error) {
+      console.error('忘记密码失败:', error);
+      res.status(500).json({ error: true, message: '请求失败' });
+    }
+  });
+
+  // 重置密码
+  router.post('/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: true, message: '缺少必要参数' });
+      }
+
+      if (newPassword.length < 6 || newPassword.length > MAX_PASSWORD_LEN) {
+        return res.status(400).json({ error: true, message: '密码长度 6-128 位' });
+      }
+
+      const [users] = await pool.query(
+        'SELECT id FROM users WHERE reset_token = ? AND reset_expires_at > ?',
+        [token, new Date().toISOString()]
+      );
+
+      if (users.length === 0) {
+        return res.status(400).json({ error: true, message: '重置链接无效或已过期' });
+      }
+
+      const password_hash = await bcrypt.hash(newPassword, 10);
+
+      await pool.query(
+        'UPDATE users SET password_hash = ?, reset_token = NULL, reset_expires_at = NULL WHERE id = ?',
+        [password_hash, users[0].id]
+      );
+
+      res.json({ message: '密码重置成功，请使用新密码登录' });
+    } catch (error) {
+      console.error('重置密码失败:', error);
+      res.status(500).json({ error: true, message: '重置密码失败' });
     }
   });
 

@@ -37,3 +37,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   created_at TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
 );
+
+-- 密码重置字段
+ALTER TABLE users ADD COLUMN reset_token TEXT;
+ALTER TABLE users ADD COLUMN reset_expires_at TEXT;
