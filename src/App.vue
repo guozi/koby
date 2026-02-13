@@ -33,6 +33,8 @@
         &copy; {{ new Date().getFullYear() }} Koby - 链接管理工具
       </div>
     </footer>
+
+    <Toast />
   </div>
 </template>
 
@@ -42,6 +44,7 @@ import { useThemeStore } from './stores/theme';
 import { useAuthStore } from './stores/auth';
 import { onMounted } from 'vue';
 import ThemeToggle from './components/ThemeToggle.vue';
+import Toast from './components/Toast.vue';
 
 const bookmarkStore = useBookmarkStore();
 const themeStore = useThemeStore();

@@ -34,7 +34,7 @@
     <!-- 最近添加的链接 -->
     <div>
       <h3 class="text-lg font-semibold mb-3">最近添加</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div v-if="recentBookmarks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div v-for="bookmark in recentBookmarks" :key="bookmark.id" class="card dark:bg-gray-800">
           <div class="flex items-start">
             <div class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3 overflow-hidden">
@@ -45,7 +45,7 @@
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="font-medium truncate dark:text-white">{{ bookmark.title }}</h4>
-              <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline truncate block">{{ bookmark.url }}</a>
+              <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-500 hover:underline truncate block">{{ bookmark.url }}</a>
               <div class="flex items-center mt-2">
                 <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 mr-2">
                   {{ getCollectionName(bookmark.collection_id) }}
@@ -64,18 +64,25 @@
             </div>
           </div>
           <div class="flex justify-end mt-2">
-            <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
+            <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary" aria-label="编辑链接">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
               </svg>
             </button>
-            <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500">
+            <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500" aria-label="删除链接">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
             </button>
           </div>
         </div>
+      </div>
+      <div v-else class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-500">还没有链接</h3>
+        <p class="mt-1 text-gray-400">点击上方"添加链接"按钮开始收藏吧</p>
       </div>
     </div>
 
@@ -126,11 +133,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
+import { useToastStore } from '../stores/toast'
 import BookmarkForm from '../components/BookmarkForm.vue'
 
 const bookmarkStore = useBookmarkStore()
+const toast = useToastStore()
 
 // 获取收藏夹和书签数据
 const collections = computed(() => bookmarkStore.getAllCollections)
@@ -145,11 +154,12 @@ const recentBookmarks = computed(() => {
 
 // 添加书签相关状态
 const showAddBookmarkModal = ref(false)
+const defaultCollectionId = computed(() => collections.value.length > 0 ? collections.value[0].id : null)
 const newBookmark = ref({
   url: '',
   title: '',
   description: '',
-  collection_id: 1, // 默认收藏夹
+  collection_id: null,
   favicon: '',
   tags: []
 })
@@ -180,22 +190,25 @@ function formatDate(dateString) {
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
+// URL 安全过滤
+function safeUrl(url) {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol) ? url : '#'
+  } catch { return '#' }
+}
+
 // 添加新书签
-function addNewBookmark(bookmark) {
-  bookmarkStore.addBookmark(bookmark)
-  
-  // 重置表单
-  newBookmark.value = {
-    url: '',
-    title: '',
-    description: '',
-    collection_id: 1,
-    favicon: '',
-    tags: [],
-    is_pinned: false
+async function addNewBookmark(bookmark) {
+  try {
+    bookmark.collection_id = bookmark.collection_id || defaultCollectionId.value
+    await bookmarkStore.addBookmark(bookmark)
+    newBookmark.value = { url: '', title: '', description: '', collection_id: defaultCollectionId.value, favicon: '', tags: [], is_pinned: false }
+    showAddBookmarkModal.value = false
+    toast.success('链接添加成功')
+  } catch {
+    toast.error('添加链接失败，请重试')
   }
-  
-  showAddBookmarkModal.value = false
 }
 
 // 编辑书签
@@ -207,10 +220,15 @@ function editBookmark(bookmark) {
 }
 
 // 更新书签数据
-function updateBookmarkData(updatedBookmark) {
+async function updateBookmarkData(updatedBookmark) {
   if (updatedBookmark) {
-    bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
-    showEditBookmarkModal.value = false
+    try {
+      await bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
+      showEditBookmarkModal.value = false
+      toast.success('链接更新成功')
+    } catch {
+      toast.error('更新链接失败，请重试')
+    }
   }
 }
 
@@ -221,11 +239,25 @@ function confirmDeleteBookmark(bookmark) {
 }
 
 // 删除书签
-function deleteBookmark() {
+async function deleteBookmark() {
   if (bookmarkToDelete.value) {
-    bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
-    showDeleteConfirmModal.value = false
-    bookmarkToDelete.value = null
+    try {
+      await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
+      showDeleteConfirmModal.value = false
+      bookmarkToDelete.value = null
+      toast.success('链接已删除')
+    } catch {
+      toast.error('删除链接失败，请重试')
+    }
   }
 }
+
+// Escape 关闭删除确认框
+function onEscape(e) {
+  if (e.key === 'Escape') {
+    if (showDeleteConfirmModal.value) showDeleteConfirmModal.value = false
+  }
+}
+onMounted(() => document.addEventListener('keydown', onEscape))
+onUnmounted(() => document.removeEventListener('keydown', onEscape))
 </script>

@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2 mb-4">
         <select
           :value="collection_id"
-          @change="selectCollection(Number($event.target.value))"
+          @change="selectCollection($event.target.value)"
           class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option v-for="c in collections" :key="c.id" :value="c.id">
@@ -46,7 +46,7 @@
               <span class="truncate">{{ c.name }}</span>
             </div>
             <div class="hidden group-hover:flex items-center space-x-1 flex-shrink-0">
-              <button @click.stop="editCollection(c)" class="p-0.5 text-gray-400 hover:text-primary">
+              <button @click.stop="editCollection(c)" class="p-0.5 text-gray-400 hover:text-primary" aria-label="编辑收藏夹">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
@@ -55,6 +55,7 @@
                 v-if="collections.length > 1"
                 @click.stop="confirmDeleteCollection(c)"
                 class="p-0.5 text-gray-400 hover:text-red-500"
+                aria-label="删除收藏夹"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -169,18 +170,18 @@
               </div>
               <div class="flex-1 min-w-0">
                 <h4 class="font-medium truncate">{{ bookmark.title }}</h4>
-                <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline block truncate">{{ bookmark.url }}</a>
+                <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-500 hover:underline block truncate">{{ bookmark.url }}</a>
               </div>
             </div>
             <p v-if="bookmark.description" class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{{ bookmark.description }}</p>
             <div class="mt-auto flex items-center justify-between">
               <span class="text-xs text-gray-500">{{ formatDate(bookmark.created_at) }}</span>
               <div class="flex space-x-1">
-                <button @click="togglePin(bookmark)" class="p-1"><PinIcon :isPinned="!!bookmark.is_pinned" /></button>
-                <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
+                <button @click="togglePin(bookmark)" class="p-1" aria-label="置顶"><PinIcon :isPinned="!!bookmark.is_pinned" /></button>
+                <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary" aria-label="编辑链接">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                 </button>
-                <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500">
+                <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500" aria-label="删除链接">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                 </button>
               </div>
@@ -204,7 +205,7 @@
               <div class="flex justify-between items-start">
                 <div>
                   <h4 class="font-medium">{{ bookmark.title }}</h4>
-                  <a :href="bookmark.url" target="_blank" class="text-sm text-blue-500 hover:underline block">{{ bookmark.url }}</a>
+                  <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-500 hover:underline block">{{ bookmark.url }}</a>
                   <p v-if="bookmark.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ bookmark.description }}</p>
                   <div v-if="bookmark.tags && bookmark.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
                     <span v-for="tag in bookmark.tags" :key="tag" class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800">{{ tag }}</span>
@@ -212,11 +213,11 @@
                   <span class="text-xs text-gray-500 mt-2 block">{{ formatDate(bookmark.created_at) }}</span>
                 </div>
                 <div class="flex space-x-1 flex-shrink-0">
-                  <button @click="togglePin(bookmark)" class="p-1"><PinIcon :isPinned="!!bookmark.is_pinned" /></button>
-                  <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary">
+                  <button @click="togglePin(bookmark)" class="p-1" aria-label="置顶"><PinIcon :isPinned="!!bookmark.is_pinned" /></button>
+                  <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary" aria-label="编辑链接">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                   </button>
-                  <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500">
+                  <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500" aria-label="删除链接">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                   </button>
                 </div>
@@ -317,8 +318,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
+import { useToastStore } from '../stores/toast'
 import { useRoute, useRouter } from 'vue-router'
 import PinIcon from '../components/PinIcon.vue'
 import BookmarkForm from '../components/BookmarkForm.vue'
@@ -327,16 +329,16 @@ import CollectionForm from '../components/CollectionForm.vue'
 const route = useRoute()
 const router = useRouter()
 const bookmarkStore = useBookmarkStore()
+const toast = useToastStore()
 
 const collections = computed(() => bookmarkStore.getAllCollections)
 const bookmarks = computed(() => bookmarkStore.bookmarks)
 
 // 当前收藏夹ID
 const collection_id = computed(() => {
-  const id = Number(route.query.id)
-  if (!isNaN(id) && id > 0) return id
-  // 默认选第一个收藏夹
-  return collections.value.length > 0 ? collections.value[0].id : 0
+  const id = route.query.id
+  if (id && collections.value.some(c => c.id === id)) return id
+  return collections.value.length > 0 ? collections.value[0].id : null
 })
 
 const currentCollection = computed(() => {
@@ -517,19 +519,31 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
+function safeUrl(url) {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol) ? url : '#'
+  } catch { return '#' }
+}
+
 // 书签 CRUD
 const showAddBookmarkModal = ref(false)
-const newBookmark = ref({ url: '', title: '', description: '', collection_id: collection_id.value, favicon: '', tags: [], is_pinned: false })
+const newBookmark = ref({ url: '', title: '', description: '', collection_id: null, favicon: '', tags: [], is_pinned: false })
 const showEditBookmarkModal = ref(false)
 const editingBookmark = ref(null)
 const showDeleteBookmarkModal = ref(false)
 const bookmarkToDelete = ref(null)
 
 async function addNewBookmark(bookmark) {
-  bookmark.collection_id = collection_id.value
-  await bookmarkStore.addBookmark(bookmark)
-  newBookmark.value = { url: '', title: '', description: '', collection_id: collection_id.value, favicon: '', tags: [], is_pinned: false }
-  showAddBookmarkModal.value = false
+  try {
+    bookmark.collection_id = collection_id.value
+    await bookmarkStore.addBookmark(bookmark)
+    newBookmark.value = { url: '', title: '', description: '', collection_id: collection_id.value, favicon: '', tags: [], is_pinned: false }
+    showAddBookmarkModal.value = false
+    toast.success('链接添加成功')
+  } catch {
+    toast.error('添加链接失败，请重试')
+  }
 }
 
 function editBookmark(bookmark) {
@@ -537,10 +551,15 @@ function editBookmark(bookmark) {
   showEditBookmarkModal.value = true
 }
 
-function updateBookmarkData(updated) {
+async function updateBookmarkData(updated) {
   if (updated) {
-    bookmarkStore.updateBookmark(updated.id, updated)
-    showEditBookmarkModal.value = false
+    try {
+      await bookmarkStore.updateBookmark(updated.id, updated)
+      showEditBookmarkModal.value = false
+      toast.success('链接更新成功')
+    } catch {
+      toast.error('更新链接失败，请重试')
+    }
   }
 }
 
@@ -551,9 +570,14 @@ function confirmDeleteBookmark(bookmark) {
 
 async function deleteBookmark() {
   if (bookmarkToDelete.value) {
-    await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
-    showDeleteBookmarkModal.value = false
-    bookmarkToDelete.value = null
+    try {
+      await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
+      showDeleteBookmarkModal.value = false
+      bookmarkToDelete.value = null
+      toast.success('链接已删除')
+    } catch {
+      toast.error('删除链接失败，请重试')
+    }
   }
 }
 
@@ -570,9 +594,14 @@ const showDeleteCollectionModal = ref(false)
 const collectionToDelete = ref(null)
 
 async function addNewCollection(collection) {
-  await bookmarkStore.addCollection(collection)
-  newCollection.value = { name: '', icon: '📁', color: '#3B82F6' }
-  showAddCollectionModal.value = false
+  try {
+    await bookmarkStore.addCollection(collection)
+    newCollection.value = { name: '', icon: '📁', color: '#3B82F6' }
+    showAddCollectionModal.value = false
+    toast.success('收藏夹创建成功')
+  } catch {
+    toast.error('创建收藏夹失败，请重试')
+  }
 }
 
 function editCollection(collection) {
@@ -580,10 +609,15 @@ function editCollection(collection) {
   showEditCollectionModal.value = true
 }
 
-function updateCollectionData(collection) {
+async function updateCollectionData(collection) {
   if (collection) {
-    bookmarkStore.updateCollection(collection.id, collection)
-    showEditCollectionModal.value = false
+    try {
+      await bookmarkStore.updateCollection(collection.id, collection)
+      showEditCollectionModal.value = false
+      toast.success('收藏夹更新成功')
+    } catch {
+      toast.error('更新收藏夹失败，请重试')
+    }
   }
 }
 
@@ -594,14 +628,28 @@ function confirmDeleteCollection(collection) {
 
 async function deleteCollection() {
   if (collectionToDelete.value) {
-    const deletedId = collectionToDelete.value.id
-    await bookmarkStore.removeCollection(deletedId)
-    showDeleteCollectionModal.value = false
-    collectionToDelete.value = null
-    // 如果删除的是当前选中的收藏夹，切换到第一个
-    if (deletedId === collection_id.value && collections.value.length > 0) {
-      selectCollection(collections.value[0].id)
+    try {
+      const deletedId = collectionToDelete.value.id
+      await bookmarkStore.removeCollection(deletedId)
+      showDeleteCollectionModal.value = false
+      collectionToDelete.value = null
+      toast.success('收藏夹已删除')
+      if (deletedId === collection_id.value && collections.value.length > 0) {
+        selectCollection(collections.value[0].id)
+      }
+    } catch {
+      toast.error('删除收藏夹失败，请重试')
     }
   }
 }
+
+// Escape 关闭确认框
+function onEscape(e) {
+  if (e.key === 'Escape') {
+    if (showDeleteBookmarkModal.value) showDeleteBookmarkModal.value = false
+    if (showDeleteCollectionModal.value) showDeleteCollectionModal.value = false
+  }
+}
+onMounted(() => document.addEventListener('keydown', onEscape))
+onUnmounted(() => document.removeEventListener('keydown', onEscape))
 </script>

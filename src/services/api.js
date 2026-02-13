@@ -1,4 +1,5 @@
 import axios from 'axios';
+import router from '../router';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
@@ -26,9 +27,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('koby_token');
       localStorage.removeItem('koby_user');
-      // 避免在登录页循环跳转
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      if (router.currentRoute.value.path !== '/login') {
+        router.push('/login');
       }
     }
     console.error('API请求错误:', error.response?.data || error.message);

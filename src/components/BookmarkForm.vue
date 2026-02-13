@@ -176,7 +176,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import PinIcon from './PinIcon.vue';
 
 const props = defineProps({
@@ -204,6 +204,10 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'close']);
 
+function onEscape(e) { if (e.key === 'Escape') emit('close') }
+onMounted(() => document.addEventListener('keydown', onEscape))
+onUnmounted(() => document.removeEventListener('keydown', onEscape))
+
 // 创建表单数据的副本，避免直接修改props
 const formData = ref({ ...props.bookmark });
 
@@ -228,13 +232,23 @@ watch(() => props.bookmark, (newVal) => {
   tagsInput.value = newVal.tags && Array.isArray(newVal.tags) ? newVal.tags.join(', ') : '';
 }, { deep: true });
 
-// 提交表单
+function isSafeUrl(url) {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol)
+  } catch { return false }
+}
+
 function submitForm() {
+  if (!isSafeUrl(formData.value.url)) {
+    alert('URL 必须以 http:// 或 https:// 开头')
+    return
+  }
   const updatedBookmark = {
     ...formData.value,
     tags: parsedTags.value
   };
-  
+
   emit('submit', updatedBookmark);
 }
 </script>

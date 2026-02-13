@@ -19,11 +19,7 @@
           required 
           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 dark:text-white transition-all duration-200"
           placeholder="收藏夹名称"
-          :disabled="isEditing && formData.id === 1"
         >
-        <p v-if="isEditing && formData.id === 1" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          默认收藏夹名称不能修改
-        </p>
       </div>
       
       <!-- 图标选择 -->
@@ -85,7 +81,6 @@
         <button 
           type="submit" 
           class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium flex items-center"
-          :disabled="isEditing && formData.id === 1 && formData.name !== '默认收藏夹'"
         >
           <svg v-if="isEditing" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -101,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   collection: {
@@ -120,6 +115,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['submit', 'close']);
+
+function onEscape(e) { if (e.key === 'Escape') emit('close') }
+onMounted(() => document.addEventListener('keydown', onEscape))
+onUnmounted(() => document.removeEventListener('keydown', onEscape))
 
 // 创建表单数据的副本，避免直接修改props
 const formData = ref({ ...props.collection });

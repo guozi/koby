@@ -3,6 +3,13 @@ const router = express.Router();
 const { parseBookmarksHtml } = require('../utils/bookmarkParser');
 const { generateId } = require('../utils/id');
 
+function isSafeUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch { return false; }
+}
+
 module.exports = (pool) => {
   async function ensureCollectionOwnedByUser(collectionId, userId) {
     const [rows] = await pool.query(
@@ -50,6 +57,10 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
       }
 
+      if (!isSafeUrl(url)) {
+        return res.status(400).json({ error: true, message: 'URL 必须以 http:// 或 https:// 开头' });
+      }
+
       const hasCollectionAccess = await ensureCollectionOwnedByUser(collection_id, req.userId);
       if (!hasCollectionAccess) {
         return res.status(403).json({ error: true, message: '无权访问该收藏夹' });
@@ -88,6 +99,10 @@ module.exports = (pool) => {
 
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, message: '标题、URL和收藏夹ID是必填项' });
+      }
+
+      if (!isSafeUrl(url)) {
+        return res.status(400).json({ error: true, message: 'URL 必须以 http:// 或 https:// 开头' });
       }
 
       const hasCollectionAccess = await ensureCollectionOwnedByUser(collection_id, req.userId);
