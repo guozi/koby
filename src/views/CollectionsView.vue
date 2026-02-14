@@ -8,8 +8,8 @@
           @change="selectCollection($event.target.value)"
           class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option v-for="c in collections" :key="c.id" :value="c.id">
-            {{ c.icon }} {{ c.name }}
+          <option v-for="c in flatCollections" :key="c.id" :value="c.id">
+            {{ '\u00A0\u00A0'.repeat(c.depth) }}{{ c.icon }} {{ c.name }}
           </option>
         </select>
         <button @click="showAddCollectionModal = true" class="btn btn-primary px-3 py-2 flex-shrink-0">
@@ -31,38 +31,18 @@
             </svg>
           </button>
         </div>
-        <ul class="space-y-1">
-          <li
-            v-for="c in collections"
-            :key="c.id"
-            @click="selectCollection(c.id)"
-            class="group flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors"
-            :class="c.id === collection_id
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'"
-          >
-            <div class="flex items-center min-w-0">
-              <span class="mr-2">{{ c.icon }}</span>
-              <span class="truncate">{{ c.name }}</span>
-            </div>
-            <div class="hidden group-hover:flex items-center space-x-1 flex-shrink-0">
-              <button @click.stop="editCollection(c)" class="p-0.5 text-gray-400 hover:text-primary" aria-label="编辑收藏夹">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
-              </button>
-              <button
-                v-if="collections.length > 1"
-                @click.stop="confirmDeleteCollection(c)"
-                class="p-0.5 text-gray-400 hover:text-red-500"
-                aria-label="删除收藏夹"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </li>
+        <ul class="space-y-0.5">
+          <CollectionTreeItem
+            v-for="node in collectionTree"
+            :key="node.id"
+            :node="node"
+            :selected-id="collection_id"
+            :can-delete="collections.length > 1"
+            @select="selectCollection"
+            @edit="editCollection"
+            @delete="confirmDeleteCollection"
+            @add-child="addChildCollection"
+          />
         </ul>
       </div>
     </aside>
@@ -272,22 +252,22 @@
 
     <!-- 添加书签模态框 -->
     <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm :bookmark="newBookmark" :collections="collections" :isEditing="false" :submitting="submitting" @submit="addNewBookmark" @close="showAddBookmarkModal = false" />
+      <BookmarkForm :bookmark="newBookmark" :collections="flatCollections" :isEditing="false" :submitting="submitting" @submit="addNewBookmark" @close="showAddBookmarkModal = false" />
     </div>
 
     <!-- 编辑书签模态框 -->
     <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <BookmarkForm :bookmark="editingBookmark" :collections="collections" :isEditing="true" :submitting="submitting" @submit="updateBookmarkData" @close="showEditBookmarkModal = false" />
+      <BookmarkForm :bookmark="editingBookmark" :collections="flatCollections" :isEditing="true" :submitting="submitting" @submit="updateBookmarkData" @close="showEditBookmarkModal = false" />
     </div>
 
     <!-- 添加收藏夹模态框 -->
     <div v-if="showAddCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <CollectionForm :collection="newCollection" :isEditing="false" :submitting="submitting" @submit="addNewCollection" @close="showAddCollectionModal = false" />
+      <CollectionForm :collection="newCollection" :collections="flatCollections" :isEditing="false" :submitting="submitting" @submit="addNewCollection" @close="showAddCollectionModal = false" />
     </div>
 
     <!-- 编辑收藏夹模态框 -->
     <div v-if="showEditCollectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <CollectionForm :collection="editingCollection" :isEditing="true" :submitting="submitting" @submit="updateCollectionData" @close="showEditCollectionModal = false" />
+      <CollectionForm :collection="editingCollection" :collections="editableCollections" :isEditing="true" :submitting="submitting" @submit="updateCollectionData" @close="showEditCollectionModal = false" />
     </div>
 
     <!-- 删除书签确认 -->
@@ -325,6 +305,7 @@ import { useRoute, useRouter } from 'vue-router'
 import PinIcon from '../components/PinIcon.vue'
 import BookmarkForm from '../components/BookmarkForm.vue'
 import CollectionForm from '../components/CollectionForm.vue'
+import CollectionTreeItem from '../components/CollectionTreeItem.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -333,6 +314,8 @@ const toast = useToastStore()
 
 const collections = computed(() => bookmarkStore.getAllCollections)
 const bookmarks = computed(() => bookmarkStore.bookmarks)
+const collectionTree = computed(() => bookmarkStore.collectionTree)
+const flatCollections = computed(() => bookmarkStore.flatCollectionsWithDepth)
 
 // 当前收藏夹ID
 const collection_id = computed(() => {
@@ -595,19 +578,31 @@ async function togglePin(bookmark) {
 
 // 收藏夹 CRUD
 const showAddCollectionModal = ref(false)
-const newCollection = ref({ name: '', icon: '📁', color: '#3B82F6' })
+const newCollection = ref({ name: '', icon: '📁', color: '#3B82F6', parent_id: null })
 const showEditCollectionModal = ref(false)
 const editingCollection = ref(null)
 const showDeleteCollectionModal = ref(false)
 const collectionToDelete = ref(null)
 const submitting = ref(false)
 
+// 编辑时排除自身及后代
+const editableCollections = computed(() => {
+  if (!editingCollection.value) return flatCollections.value
+  const excludeIds = new Set()
+  function collectDescendants(id) {
+    excludeIds.add(id)
+    collections.value.filter(c => c.parent_id === id).forEach(c => collectDescendants(c.id))
+  }
+  collectDescendants(editingCollection.value.id)
+  return flatCollections.value.filter(c => !excludeIds.has(c.id))
+})
+
 async function addNewCollection(collection) {
   if (submitting.value) return
   submitting.value = true
   try {
     await bookmarkStore.addCollection(collection)
-    newCollection.value = { name: '', icon: '📁', color: '#3B82F6' }
+    newCollection.value = { name: '', icon: '📁', color: '#3B82F6', parent_id: null }
     showAddCollectionModal.value = false
     toast.success('收藏夹创建成功')
   } catch {
@@ -615,6 +610,11 @@ async function addNewCollection(collection) {
   } finally {
     submitting.value = false
   }
+}
+
+function addChildCollection(parentNode) {
+  newCollection.value = { name: '', icon: '📁', color: '#3B82F6', parent_id: parentNode.id }
+  showAddCollectionModal.value = true
 }
 
 function editCollection(collection) {

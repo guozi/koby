@@ -12,7 +12,47 @@ export const useBookmarkStore = defineStore('bookmarks', {
     getBookmarksByCollection: (state) => {
       return (collection_id) => state.bookmarks.filter(bookmark => bookmark.collection_id === collection_id)
     },
-    getAllCollections: (state) => state.collections
+    getAllCollections: (state) => state.collections,
+
+    // 从平铺列表构建树
+    collectionTree: (state) => {
+      const map = new Map()
+      const roots = []
+      state.collections.forEach(c => map.set(c.id, { ...c, children: [] }))
+      state.collections.forEach(c => {
+        const node = map.get(c.id)
+        if (c.parent_id && map.has(c.parent_id)) {
+          map.get(c.parent_id).children.push(node)
+        } else {
+          roots.push(node)
+        }
+      })
+      return roots
+    },
+
+    // 带 depth 的扁平列表（用于 select 下拉）
+    flatCollectionsWithDepth: (state) => {
+      const result = []
+      const map = new Map()
+      state.collections.forEach(c => map.set(c.id, { ...c, children: [] }))
+      const roots = []
+      state.collections.forEach(c => {
+        const node = map.get(c.id)
+        if (c.parent_id && map.has(c.parent_id)) {
+          map.get(c.parent_id).children.push(node)
+        } else {
+          roots.push(node)
+        }
+      })
+      function walk(nodes, depth) {
+        for (const node of nodes) {
+          result.push({ ...node, depth, children: undefined })
+          walk(node.children, depth + 1)
+        }
+      }
+      walk(roots, 0)
+      return result
+    }
   },
   actions: {
     resetState() {
@@ -143,7 +183,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
         const newCollection = await collectionsAPI.add({
           name: collection.name,
           icon: collection.icon || '📁',
-          color: collection.color || '#3B82F6'
+          color: collection.color || '#3B82F6',
+          parent_id: collection.parent_id || null
         });
         this.collections.push(newCollection);
         return newCollection;
@@ -159,7 +200,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
         await collectionsAPI.update(id, {
           name: data.name,
           icon: data.icon,
-          color: data.color
+          color: data.color,
+          parent_id: data.parent_id || null
         });
         const index = this.collections.findIndex(c => c.id === id);
         if (index !== -1) {
@@ -175,8 +217,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
     async removeCollection(id) {
       try {
         await collectionsAPI.delete(id);
-        this.collections = this.collections.filter(c => c.id !== id);
-        // 刷新书签列表，后端会自动处理关联的书签
+        // 刷新收藏夹列表（子收藏夹会被提升）和书签列表
+        await this.fetchCollections();
         await this.fetchBookmarks();
       } catch (error) {
         console.error('删除收藏夹失败:', error);

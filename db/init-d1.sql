@@ -21,8 +21,11 @@ CREATE TABLE IF NOT EXISTS collections (
   name TEXT NOT NULL,
   icon TEXT DEFAULT '📁',
   color TEXT DEFAULT '#3B82F6',
+  parent_id TEXT DEFAULT NULL,
+  sort_order INTEGER DEFAULT 0,
   user_id TEXT REFERENCES users(id),
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (parent_id) REFERENCES collections(id) ON DELETE SET NULL
 );
 
 -- 书签表

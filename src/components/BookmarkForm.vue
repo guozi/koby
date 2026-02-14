@@ -80,7 +80,7 @@
             class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 dark:text-white appearance-none transition-all duration-200 pr-10"
           >
             <option v-for="collection in collections" :key="collection.id" :value="collection.id">
-              {{ collection.icon }} {{ collection.name }}
+              {{ '\u00A0\u00A0'.repeat(collection.depth || 0) }}{{ collection.icon }} {{ collection.name }}
             </option>
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

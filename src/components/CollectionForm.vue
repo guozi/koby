@@ -13,13 +13,34 @@
       <!-- 名称输入 -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">名称</label>
-        <input 
-          v-model="formData.name" 
-          type="text" 
-          required 
+        <input
+          v-model="formData.name"
+          type="text"
+          required
           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 dark:text-white transition-all duration-200"
           placeholder="收藏夹名称"
         >
+      </div>
+
+      <!-- 父收藏夹选择 -->
+      <div v-if="collections.length > 0" class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">父收藏夹 <span class="text-gray-500 dark:text-gray-400 text-xs">(可选)</span></label>
+        <div class="relative">
+          <select
+            v-model="formData.parent_id"
+            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-700 dark:text-white appearance-none transition-all duration-200 pr-10"
+          >
+            <option :value="null">无（根级收藏夹）</option>
+            <option v-for="c in collections" :key="c.id" :value="c.id">
+              {{ '\u00A0\u00A0'.repeat(c.depth || 0) }}{{ c.icon }} {{ c.name }}
+            </option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
       </div>
       
       <!-- 图标选择 -->
@@ -110,8 +131,13 @@ const props = defineProps({
       name: '',
       icon: '📁',
       color: '#3B82F6',
+      parent_id: null,
       id: null
     })
+  },
+  collections: {
+    type: Array,
+    default: () => []
   },
   isEditing: {
     type: Boolean,

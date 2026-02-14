@@ -10,7 +10,10 @@ CREATE TABLE IF NOT EXISTS collections (
   name VARCHAR(100) NOT NULL,
   icon VARCHAR(10) DEFAULT '📁',
   color VARCHAR(20) DEFAULT '#3B82F6',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  parent_id INT DEFAULT NULL,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_id) REFERENCES collections(id) ON DELETE SET NULL
 );
 
 -- 创建书签表
