@@ -70,6 +70,12 @@ const messages = {
     'search.noResults': '没有找到匹配的书签',
     'search.hint': '输入关键词搜索标题、网址或描述',
 
+    // Duplicate & Share
+    'bf.duplicateWarning': '该网址已存在于书签中',
+    'bf.duplicateIn': '所在收藏夹：{name}',
+    'toast.linkCopied': '链接已复制到剪贴板',
+    'toast.copyFailed': '复制失败',
+
     // Collection Form
     'cf.newCollection': '新建收藏夹',
     'cf.editCollection': '编辑收藏夹',
@@ -217,6 +223,11 @@ const messages = {
     'search.placeholder': 'Search bookmarks...',
     'search.noResults': 'No matching bookmarks found',
     'search.hint': 'Search by title, URL, or description',
+
+    'bf.duplicateWarning': 'This URL already exists in your bookmarks',
+    'bf.duplicateIn': 'Collection: {name}',
+    'toast.linkCopied': 'Link copied to clipboard',
+    'toast.copyFailed': 'Copy failed',
 
     'cf.newCollection': 'New Collection',
     'cf.editCollection': 'Edit Collection',

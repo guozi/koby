@@ -56,7 +56,8 @@ export const bookmarksAPI = {
   togglePin: (id, bookmark) => apiClient.put(`/api/bookmarks/${id}`, bookmark),
   delete: (id) => apiClient.delete(`/api/bookmarks/${id}`),
   parseHtml: (htmlContent) => apiClient.post('/api/bookmarks/parse-html', { htmlContent }),
-  fetchMeta: (url) => apiClient.get('/api/bookmarks/fetch-meta', { params: { url } })
+  fetchMeta: (url) => apiClient.get('/api/bookmarks/fetch-meta', { params: { url } }),
+  search: (q) => apiClient.get('/api/bookmarks/search', { params: { q } })
 };
 
 // 收藏夹相关API

@@ -16,7 +16,7 @@
       <!-- Collections grid -->
       <div v-if="collections.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div v-for="collection in collections" :key="collection.id"
-          class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+          class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
           <router-link :to="`/collections?id=${collection.id}`" class="block p-5">
             <div class="flex items-start gap-3">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
@@ -112,12 +112,12 @@
         <!-- Grid view -->
         <div v-if="processedBookmarks.length > 0 && viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
           <div v-for="bookmark in visibleBookmarks" :key="bookmark.id"
-            class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+            class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
             <div class="p-4">
               <div class="flex items-start gap-3">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
                   :style="{ backgroundColor: (currentCollection?.color || '#6B7280') + '15' }">
-                  <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" />
+                  <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" loading="lazy" />
                   <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -138,8 +138,11 @@
                 </div>
               </div>
               <div class="flex items-center gap-0.5 flex-shrink-0">
-                <button @click="togglePin(bookmark)" class="p-1 rounded transition-colors" :class="bookmark.is_pinned ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100'">
-                  <PinIcon :isPinned="!!bookmark.is_pinned" />
+                <button @click="copyBookmarkLink(bookmark, toast, t)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                </button>
+                <button @click="togglePin(bookmark)" class="p-1 rounded transition-colors" :class="bookmark.is_pinned ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500 opacity-0 group-hover:opacity-100'">
+                  <PinIcon :isPinned="!!bookmark.is_pinned" class="w-3.5 h-3.5" />
                 </button>
                 <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -155,10 +158,10 @@
         <!-- List view -->
         <div v-if="processedBookmarks.length > 0 && viewMode === 'list'" class="space-y-3 mb-6">
           <div v-for="bookmark in visibleBookmarks" :key="bookmark.id"
-            class="group flex items-center gap-4 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
+            class="bookmark-card group flex items-center gap-4 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
               :style="{ backgroundColor: (currentCollection?.color || '#6B7280') + '15' }">
-              <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" />
+              <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" loading="lazy" />
               <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
             </div>
             <div class="flex-1 min-w-0">
@@ -173,8 +176,11 @@
             </div>
             <span class="text-2xs text-gray-400 flex-shrink-0 hidden sm:block">{{ formatDate(bookmark.created_at) }}</span>
             <div class="flex items-center gap-1 flex-shrink-0">
-              <button @click="togglePin(bookmark)" class="p-1.5 rounded transition-colors" :class="bookmark.is_pinned ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100'">
-                <PinIcon :isPinned="!!bookmark.is_pinned" />
+              <button @click="copyBookmarkLink(bookmark, toast, t)" class="p-1.5 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              </button>
+              <button @click="togglePin(bookmark)" class="p-1.5 rounded transition-colors" :class="bookmark.is_pinned ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500 opacity-0 group-hover:opacity-100'">
+                <PinIcon :isPinned="!!bookmark.is_pinned" class="w-4 h-4" />
               </button>
               <button @click="editBookmark(bookmark)" class="p-1.5 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
                 <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -250,6 +256,7 @@ import { useBookmarkStore } from '../stores/bookmarks'
 import { useToastStore } from '../stores/toast'
 import { useI18n } from '../i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { copyBookmarkLink } from '../utils/share'
 import PinIcon from '../components/PinIcon.vue'
 import BookmarkForm from '../components/BookmarkForm.vue'
 import CollectionForm from '../components/CollectionForm.vue'

@@ -53,51 +53,61 @@
     </div>
 
     <!-- Grid view -->
-    <div v-if="processedBookmarks.length > 0 && viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-6">
+    <div v-if="processedBookmarks.length > 0 && viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
       <div v-for="bookmark in visibleBookmarks" :key="bookmark.id"
-        class="group flex items-start gap-3 p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200">
-        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-          :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
-          <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" />
-          <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5">
-            <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="font-medium text-sm text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
-            <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs flex-shrink-0">{{ t('pinned') }}</div>
-          </div>
-          <span class="text-xs text-gray-400 dark:text-gray-500 truncate block mt-0.5">{{ bookmark.url }}</span>
-          <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{{ bookmark.description }}</p>
-          <div class="flex items-center justify-between mt-2">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="text-2xs px-1.5 py-0.5 rounded font-medium flex-shrink-0"
-                  :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">
-                  {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
-                </span>
-              <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
-                <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+        class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+        <div class="p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+              :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
+              <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" loading="lazy" />
+              <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="font-medium text-sm text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
+                <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs flex-shrink-0">{{ t('pinned') }}</div>
               </div>
+              <span class="text-xs text-gray-400 dark:text-gray-500 truncate block mt-1">{{ bookmark.url }}</span>
             </div>
-            <div class="flex items-center gap-0.5 flex-shrink-0">
-              <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
-              </button>
-              <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-400 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-              </button>
+          </div>
+          <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-2.5 line-clamp-2 leading-relaxed">{{ bookmark.description }}</p>
+        </div>
+        <div class="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-2xs px-1.5 py-0.5 rounded font-medium flex-shrink-0"
+              :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">
+              {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
+            </span>
+            <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
+              <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
             </div>
+          </div>
+          <div class="flex items-center gap-0.5 flex-shrink-0">
+            <button @click="copyBookmarkLink(bookmark, toast, t)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+            </button>
+            <button @click="togglePin(bookmark)" class="p-1 rounded transition-colors" :class="bookmark.is_pinned ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500 opacity-0 group-hover:opacity-100'">
+              <PinIcon :isPinned="!!bookmark.is_pinned" class="w-3.5 h-3.5" />
+            </button>
+            <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+            </button>
+            <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-400 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- List view -->
-    <div v-if="processedBookmarks.length > 0 && viewMode === 'list'" class="space-y-2 mb-6">
+    <div v-if="processedBookmarks.length > 0 && viewMode === 'list'" class="space-y-3 mb-6">
       <div v-for="bookmark in visibleBookmarks" :key="bookmark.id"
-        class="group flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
+        class="bookmark-card group flex items-center gap-4 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
         <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
-          <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" />
+          <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" loading="lazy" />
           <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
         </div>
         <div class="flex-1 min-w-0">
@@ -105,8 +115,8 @@
             <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
             <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs">{{ t('pinned') }}</div>
           </div>
-          <span class="text-xs text-gray-400 dark:text-gray-500 truncate block">{{ bookmark.url }}</span>
-          <div class="flex items-center gap-2 mt-1">
+          <span class="text-xs text-gray-400 dark:text-gray-500 truncate block mt-1">{{ bookmark.url }}</span>
+          <div class="flex items-center gap-2 mt-2">
             <span class="text-2xs px-1.5 py-0.5 rounded font-medium"
               :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">
               {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
@@ -117,11 +127,17 @@
           </div>
         </div>
         <span class="text-2xs text-gray-400 flex-shrink-0 hidden sm:block">{{ formatDate(bookmark.created_at) }}</span>
-        <div class="flex items-center gap-0.5 flex-shrink-0">
-          <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <button @click="copyBookmarkLink(bookmark, toast, t)" class="p-1.5 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+          </button>
+          <button @click="togglePin(bookmark)" class="p-1.5 rounded transition-colors" :class="bookmark.is_pinned ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500 opacity-0 group-hover:opacity-100'">
+            <PinIcon :isPinned="!!bookmark.is_pinned" class="w-4 h-4" />
+          </button>
+          <button @click="editBookmark(bookmark)" class="p-1.5 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
             <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
           </button>
-          <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-400 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100">
+          <button @click="confirmDeleteBookmark(bookmark)" class="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100">
             <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
           </button>
         </div>
@@ -173,6 +189,8 @@ import { useBookmarkStore } from '../stores/bookmarks'
 import { useToastStore } from '../stores/toast'
 import { useI18n } from '../i18n'
 import BookmarkForm from '../components/BookmarkForm.vue'
+import PinIcon from '../components/PinIcon.vue'
+import { copyBookmarkLink } from '../utils/share'
 
 const { t: _t } = useI18n()
 const t = (key, params) => _t.value(key, params)
@@ -293,6 +311,8 @@ async function updateBookmarkData(updated) {
 }
 
 function confirmDeleteBookmark(bookmark) { bookmarkToDelete.value = bookmark; showDeleteConfirmModal.value = true }
+
+async function togglePin(bookmark) { await bookmarkStore.toggleBookmarkPin(bookmark.id) }
 
 let observer = null
 watch(sentinelRef, (el) => {

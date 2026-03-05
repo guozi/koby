@@ -18,6 +18,10 @@
             <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
           </div>
         </div>
+        <div v-if="duplicateBookmark" class="mt-1.5 flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+          <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          <span>{{ t('bf.duplicateWarning') }}<template v-if="duplicateCollectionName"> · {{ t('bf.duplicateIn', { name: duplicateCollectionName }) }}</template></span>
+        </div>
       </div>
 
       <!-- Title -->
@@ -91,10 +95,12 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../i18n';
+import { useBookmarkStore } from '../stores/bookmarks';
 import { bookmarksAPI } from '../services/api';
 
 const { t: _t } = useI18n();
 const t = (key, params) => _t.value(key, params);
+const bookmarkStore = useBookmarkStore();
 
 const props = defineProps({
   bookmark: { type: Object, default: () => ({ url: '', title: '', description: '', collection_id: 1, favicon: '', tags: [], is_pinned: false }) },
@@ -125,6 +131,18 @@ watch(() => props.bookmark, (newVal) => {
   formData.value = { ...newVal };
   tagsInput.value = newVal.tags && Array.isArray(newVal.tags) ? newVal.tags.join(', ') : '';
 }, { deep: true });
+
+const duplicateBookmark = computed(() => {
+  const url = formData.value.url?.trim()
+  if (!url || props.isEditing) return null
+  return bookmarkStore.bookmarks.find(b => b.url === url) || null
+})
+
+const duplicateCollectionName = computed(() => {
+  if (!duplicateBookmark.value) return ''
+  const col = bookmarkStore.getAllCollections.find(c => c.id === duplicateBookmark.value.collection_id)
+  return col?.name || ''
+})
 
 const fetchingMeta = ref(false)
 let lastFetchedUrl = ''

@@ -35,6 +35,23 @@ module.exports = (pool) => {
     }
   });
 
+  // 搜索书签
+  router.get('/search', async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || !q.trim()) return res.json([]);
+      const keyword = `%${q.trim()}%`;
+      const [rows] = await pool.query(
+        'SELECT * FROM bookmarks WHERE user_id = ? AND (title LIKE ? OR url LIKE ? OR description LIKE ?) ORDER BY is_pinned DESC, created_at DESC LIMIT 20',
+        [req.userId, keyword, keyword, keyword]
+      );
+      res.json(rows);
+    } catch (error) {
+      console.error('搜索书签失败:', error);
+      res.status(500).json({ error: true, message: '搜索书签失败' });
+    }
+  });
+
   // 获取所有书签（当前用户）
   router.get('/', async (req, res) => {
     try {
