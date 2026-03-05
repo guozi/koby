@@ -32,29 +32,53 @@
       </div>
     </div>
 
-    <!-- Collections quick access -->
-    <section v-if="collections.length > 0" class="mb-10">
+    <!-- Pinned bookmarks -->
+    <section v-if="pinnedBookmarks.length > 0" class="mb-10">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('home.collections') }}</h2>
-        <router-link to="/collections" class="text-sm text-primary hover:text-primary-600 font-medium">{{ t('home.viewAll') }}</router-link>
+        <div class="flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('home.pinned') }}</h2>
+          <span class="text-xs text-gray-400 dark:text-gray-500">{{ pinnedBookmarks.length }}</span>
+        </div>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        <router-link
-          v-for="collection in collections.slice(0, 10)"
-          :key="collection.id"
-          :to="`/collections?id=${collection.id}`"
-          class="group flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
-                 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200"
-        >
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg"
-               :style="{ backgroundColor: collection.color + '15' }">
-            {{ collection.icon }}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div v-for="bookmark in pinnedBookmarks" :key="bookmark.id"
+          class="group flex items-start gap-3 p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md transition-all duration-200">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
+            <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" loading="lazy" />
+            <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
           </div>
-          <div class="min-w-0">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">{{ collection.name }}</h3>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ getBookmarkCount(collection.id) }} {{ t('cf.links') }}</p>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5">
+              <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="font-medium text-sm text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
+            </div>
+            <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{{ bookmark.description }}</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-2xs px-1.5 py-0.5 rounded font-medium flex-shrink-0"
+                  :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">
+                  {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
+                </span>
+                <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
+                  <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-0.5 flex-shrink-0">
+                <button @click="copyBookmarkLink(bookmark, toast, t)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100" :title="t('toast.linkCopied')">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                </button>
+                <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                </button>
+                <button @click="togglePin(bookmark)" class="p-1 text-amber-500 hover:text-amber-600 rounded transition-colors opacity-0 group-hover:opacity-100">
+                  <PinIcon :isPinned="true" class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
-        </router-link>
+        </div>
       </div>
     </section>
 
@@ -165,6 +189,7 @@ import { useBookmarkStore } from '../stores/bookmarks'
 import { useToastStore } from '../stores/toast'
 import { useI18n } from '../i18n'
 import BookmarkForm from '../components/BookmarkForm.vue'
+import PinIcon from '../components/PinIcon.vue'
 import { copyBookmarkLink } from '../utils/share'
 
 const { t: _t } = useI18n()
@@ -177,11 +202,19 @@ const collections = computed(() => bookmarkStore.getAllCollections)
 const flatCollections = computed(() => bookmarkStore.flatCollectionsWithDepth)
 const bookmarks = computed(() => bookmarkStore.bookmarks)
 
+const pinnedBookmarks = computed(() => {
+  return bookmarks.value.filter(b => b.is_pinned)
+})
+
 const recentBookmarks = computed(() => {
   return [...bookmarks.value]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 8)
 })
+
+async function togglePin(bookmark) {
+  await bookmarkStore.toggleBookmarkPin(bookmark.id)
+}
 
 const showAddBookmarkModal = ref(false)
 const defaultCollectionId = computed(() => collections.value.length > 0 ? collections.value[0].id : null)
@@ -193,10 +226,6 @@ const editingBookmark = ref(null)
 const showDeleteConfirmModal = ref(false)
 const bookmarkToDelete = ref(null)
 const submitting = ref(false)
-
-function getBookmarkCount(collection_id) {
-  return bookmarks.value.filter(b => b.collection_id === collection_id).length
-}
 
 function getCollection(collection_id) {
   return collections.value.find(c => c.id === collection_id) || null

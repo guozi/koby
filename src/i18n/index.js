@@ -161,6 +161,8 @@ const messages = {
 
     // Pinned
     'pinned': '已置顶',
+    'home.pinned': '置顶书签',
+    'home.pinnedDesc': '快速访问您置顶的重要书签',
   },
   en: {
     'nav.home': 'Home',
@@ -305,6 +307,8 @@ const messages = {
     'col.deleteCollection': 'Delete',
 
     'pinned': 'Pinned',
+    'home.pinned': 'Pinned',
+    'home.pinnedDesc': 'Quick access to your pinned bookmarks',
   }
 }
 
