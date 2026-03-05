@@ -1,33 +1,47 @@
-# Koby - 书签管理工具
+# Koby
 
 <p align="center">
   <img src="public/logo.svg" alt="Koby Logo" width="120" height="120">
 </p>
 
-Koby 是一个简洁高效的多用户书签管理工具，帮助您整理、分类和快速访问重要网页书签。支持用户注册登录、邮箱验证、收藏夹管理、标签系统、暗色主题等功能，数据存储在 Cloudflare D1 上，部署在 Vercel。
+<p align="center">
+  <strong>A Clean & Efficient Bookmark Manager</strong>
+</p>
 
-## 功能特点
+<p align="center">
+  <a href="./README_CN.md">中文文档</a>
+</p>
 
-- **用户认证**：邮箱注册/登录，JWT 认证，邮箱验证，密码找回，多用户数据隔离
-- **收藏夹管理**：树形嵌套收藏夹，自定义 emoji 图标和颜色，收藏夹颜色贯穿书签卡片
-- **书签管理**：添加、编辑、删除、搜索、置顶，自动获取 Favicon
-- **标签系统**：为书签添加标签（`#tag` 样式），支持按标签筛选
-- **视图切换**：网格视图 / 列表视图，无限滚动懒加载
-- **中英文切换**：完整的双语支持（简体中文 / English），一键切换
-- **暗色/亮色主题**：支持自动跟随系统或手动切换
-- **数据导入导出**：支持 JSON 和浏览器 HTML 书签格式
-- **响应式设计**：桌面端侧边栏布局，移动端自动折叠为抽屉菜单
-- **安全防护**：请求频率限制、输入校验、XSS 防护、邮箱标准化
+---
 
-## 快速开始
+Koby is a clean and efficient multi-user bookmark manager that helps you organize, categorize, and quickly access your important web bookmarks. It supports user registration, email verification, collection management, tagging, dark mode, and more. Data is stored on Cloudflare D1 and deployed on Vercel.
 
-### 环境要求
+## Features
+
+- **Authentication** — Email registration/login, JWT auth, email verification, password reset, multi-user data isolation
+- **Collections** — Nested tree structure, custom emoji icons and colors, collection colors applied across bookmark cards
+- **Bookmark Management** — Add, edit, delete, search, pin bookmarks with auto favicon & metadata fetching
+- **Tagging** — Add tags to bookmarks (`#tag` style), filter by tags
+- **Sharing** — One-click copy bookmark title and link to clipboard
+- **Duplicate Detection** — Automatically detect existing URLs when adding bookmarks
+- **View Modes** — Grid / List view with infinite scroll lazy loading
+- **Global Search** — Ctrl+K / Cmd+K shortcut, dual-mode instant client-side + backend search
+- **Bilingual** — Full Chinese / English support with one-click switching
+- **Dark / Light Theme** — System auto-detection or manual toggle
+- **Import / Export** — JSON and browser HTML bookmark formats
+- **Responsive** — Desktop sidebar layout, mobile drawer menu
+- **PWA** — Service Worker offline caching, installable as desktop app
+- **Security** — Rate limiting, input validation, XSS protection, email normalization
+
+## Quick Start
+
+### Requirements
 
 - Node.js >= 18
-- Cloudflare D1 数据库
-- Resend 邮件服务（用于注册验证，https://resend.com）
+- Cloudflare D1 database
+- Resend email service (for verification)
 
-### 安装
+### Install
 
 ```bash
 git clone <repo-url>
@@ -35,175 +49,163 @@ cd koby
 npm install
 ```
 
-### 配置
+### Configure
 
 ```bash
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，填入实际配置：
+Edit `.env` with your actual values:
 
-| 变量 | 说明 |
-|------|------|
-| `CF_ACCOUNT_ID` | Cloudflare 账户 ID |
-| `CF_D1_DATABASE_ID` | D1 数据库 ID |
+| Variable | Description |
+| ---- | ---- |
+| `CF_ACCOUNT_ID` | Cloudflare Account ID |
+| `CF_D1_DATABASE_ID` | D1 Database ID |
 | `CF_API_TOKEN` | Cloudflare API Token |
-| `JWT_SECRET` | JWT 签名密钥（随机字符串） |
-| `CLIENT_URL` | 前端地址（CORS + 验证邮件链接） |
-| `RESEND_API_KEY` | Resend API 密钥 |
-| `RESEND_FROM` | 发件人地址（需配置自定义域名） |
-| `VITE_API_URL` | 后端 API 地址（Vercel 部署时留空） |
+| `JWT_SECRET` | JWT signing secret (random string) |
+| `CLIENT_URL` | Frontend URL (for CORS & verification emails) |
+| `RESEND_API_KEY` | Resend API key |
+| `RESEND_FROM` | Sender address (requires custom domain) |
+| `VITE_API_URL` | Backend API URL (leave empty for Vercel) |
 
-### 初始化数据库
+### Initialize Database
 
-在 Cloudflare D1 控制台执行 `db/init-d1.sql` 中的建表语句。
+Run the SQL statements in `db/init-d1.sql` on the Cloudflare D1 console.
 
-### 本地开发
+### Local Development
 
 ```bash
-# 同时启动前端和后端
+# Start both frontend and backend
 npm run dev:all
 
-# 或分别启动
-npm run dev      # 前端 (http://localhost:5173)
-npm run server   # 后端 (http://localhost:3001)
+# Or start separately
+npm run dev      # Frontend (http://localhost:5173)
+npm run server   # Backend (http://localhost:3001)
 ```
 
-### 构建部署
+### Build & Deploy
 
 ```bash
 npm run build
 ```
 
-Vercel 部署时在项目设置中配置环境变量，`VITE_API_URL` 留空，`CLIENT_URL` 设为实际域名。
+For Vercel deployment, configure environment variables in project settings. Leave `VITE_API_URL` empty, set `CLIENT_URL` to your actual domain.
 
-## 技术栈
+## Tech Stack
 
-### 前端
-- **框架**：Vue 3 (Composition API)
-- **状态管理**：Pinia
-- **路由**：Vue Router（含 Auth Guard）
-- **样式**：Tailwind CSS
-- **构建**：Vite
-- **HTTP**：Axios（自动注入 Token、401 拦截）
+**Frontend**: Vue 3 (Composition API) · Pinia · Vue Router · Tailwind CSS · Vite · Axios
 
-### 后端
-- **服务器**：Node.js + Express
-- **数据库**：Cloudflare D1 (SQLite)
-- **认证**：JWT + bcryptjs
-- **ID 生成**：nanoid（URL 安全的唯一 ID，替代自增整数）
-- **邮件**：Resend
-- **安全**：express-rate-limit
+**Backend**: Node.js · Express · Cloudflare D1 (SQLite) · JWT · bcryptjs · nanoid · Resend
 
-### 部署
-- **前端 + API**：Vercel (Serverless Functions)
-- **数据库**：Cloudflare D1
+**Deployment**: Vercel (Serverless Functions) · Cloudflare D1
 
-## 项目结构
+## Project Structure
 
-```
+```text
 koby/
-├── api/index.js              # Vercel Serverless 入口
-├── db/init-d1.sql            # D1 数据库 Schema
-├── server.js                 # 本地开发服务器
+├── api/index.js              # Vercel Serverless entry
+├── db/init-d1.sql            # D1 database schema
+├── server.js                 # Local dev server
 ├── server/
-│   ├── db/database.js        # D1 数据库适配层
-│   ├── middleware/auth.js     # JWT 认证中间件
+│   ├── db/database.js        # D1 database adapter
+│   ├── middleware/auth.js     # JWT auth middleware
 │   ├── routes/
-│   │   ├── auth.js           # 认证路由（注册/登录/验证）
-│   │   ├── bookmarks.js      # 书签路由
-│   │   └── collections.js    # 收藏夹路由
+│   │   ├── auth.js           # Auth routes (register/login/verify)
+│   │   ├── bookmarks.js      # Bookmark routes (incl. search)
+│   │   └── collections.js    # Collection routes
 │   └── utils/
-│       ├── bookmarkParser.js # HTML 书签解析
-│       ├── email.js          # 邮件发送
-│       ├── favicon.js        # Favicon 获取
-│       └── id.js             # nanoid 生成唯一 ID
+│       ├── bookmarkParser.js # HTML bookmark parser
+│       ├── email.js          # Email sending
+│       ├── favicon.js        # Favicon fetching
+│       └── id.js             # nanoid unique ID generation
 ├── src/
-│   ├── App.vue               # 根组件
-│   ├── router/index.js       # 前端路由 + Auth Guard
-│   ├── services/api.js       # API 服务层
-│   ├── i18n/index.js          # 国际化翻译（中/英）
+│   ├── App.vue               # Root component (sidebar + topbar + search)
+│   ├── router/index.js       # Frontend router + Auth Guard
+│   ├── services/api.js       # API service layer
+│   ├── i18n/index.js         # i18n translations (zh/en)
+│   ├── utils/share.js        # Bookmark sharing utility
 │   ├── stores/
-│   │   ├── auth.js           # 认证状态
-│   │   ├── bookmarks.js      # 书签/收藏夹状态（含树形 getter）
-│   │   ├── theme.js          # 主题状态
-│   │   ├── locale.js         # 语言切换状态
-│   │   └── toast.js          # 消息提示状态
+│   │   ├── auth.js           # Auth state
+│   │   ├── bookmarks.js      # Bookmarks/collections state (tree getter)
+│   │   ├── theme.js          # Theme state
+│   │   ├── locale.js         # Locale switching state
+│   │   └── toast.js          # Toast notification state
 │   ├── views/
-│   │   ├── HomeView.vue      # 首页（统计+收藏夹快捷入口+最近书签）
-│   │   ├── CollectionsView.vue # 双模式：收藏夹管理 / 收藏夹书签详情
-│   │   ├── AllBookmarksView.vue # 全部书签浏览
-│   │   ├── LoginView.vue     # 登录/注册
-│   │   ├── VerifyEmailView.vue # 邮箱验证
-│   │   ├── ForgotPasswordView.vue # 忘记密码
-│   │   ├── ResetPasswordView.vue # 重置密码
-│   │   └── SettingsView.vue  # 设置
-│   └── components/           # 通用组件（BookmarkForm, CollectionForm 等）
-└── vercel.json               # Vercel 部署配置
+│   │   ├── HomeView.vue      # Home (pinned + recent bookmarks)
+│   │   ├── CollectionsView.vue # Collection management / detail
+│   │   ├── AllBookmarksView.vue # All bookmarks browser
+│   │   ├── LoginView.vue     # Login / Register
+│   │   ├── VerifyEmailView.vue # Email verification
+│   │   ├── ForgotPasswordView.vue # Forgot password
+│   │   ├── ResetPasswordView.vue # Reset password
+│   │   └── SettingsView.vue  # Settings (import/export)
+│   └── components/           # Shared components
+└── vercel.json               # Vercel deployment config
 ```
 
-## API 接口
+## API Endpoints
 
-### 认证（无需 Token，有频率限制）
+### Auth (no token required, rate limited)
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/auth/register` | 注册 |
-| POST | `/api/auth/login` | 登录 |
-| POST | `/api/auth/verify-email` | 验证邮箱 |
-| POST | `/api/auth/resend-verification` | 重发验证邮件 |
-| POST | `/api/auth/forgot-password` | 发送密码重置邮件 |
-| POST | `/api/auth/reset-password` | 重置密码 |
-| GET | `/api/auth/me` | 获取当前用户（需 Token） |
+| Method | Path | Description |
+| ---- | ---- | ---- |
+| POST | `/api/auth/register` | Register |
+| POST | `/api/auth/login` | Login |
+| POST | `/api/auth/verify-email` | Verify email |
+| POST | `/api/auth/resend-verification` | Resend verification email |
+| POST | `/api/auth/forgot-password` | Send password reset email |
+| POST | `/api/auth/reset-password` | Reset password |
+| GET | `/api/auth/me` | Get current user (token required) |
 
-### 书签（需 Token）
+### Bookmarks (token required)
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/bookmarks` | 获取所有书签 |
-| GET | `/api/bookmarks/collection/:id` | 获取收藏夹下的书签 |
-| POST | `/api/bookmarks` | 添加书签 |
-| PUT | `/api/bookmarks/:id` | 更新书签 |
-| DELETE | `/api/bookmarks/:id` | 删除书签 |
-| POST | `/api/bookmarks/parse-html` | 解析 HTML 书签文件 |
+| Method | Path | Description |
+| ---- | ---- | ---- |
+| GET | `/api/bookmarks` | Get all bookmarks |
+| GET | `/api/bookmarks/search?q=` | Search bookmarks |
+| GET | `/api/bookmarks/collection/:id` | Get bookmarks in collection |
+| POST | `/api/bookmarks` | Add bookmark |
+| PUT | `/api/bookmarks/:id` | Update bookmark |
+| DELETE | `/api/bookmarks/:id` | Delete bookmark |
+| POST | `/api/bookmarks/parse-html` | Parse HTML bookmark file |
 
-### 收藏夹（需 Token）
+### Collections (token required)
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/collections` | 获取所有收藏夹 |
-| GET | `/api/collections/:id` | 获取单个收藏夹 |
-| POST | `/api/collections` | 添加收藏夹 |
-| PUT | `/api/collections/:id` | 更新收藏夹 |
-| DELETE | `/api/collections/:id` | 删除收藏夹 |
+| Method | Path | Description |
+| ---- | ---- | ---- |
+| GET | `/api/collections` | Get all collections |
+| GET | `/api/collections/:id` | Get single collection |
+| POST | `/api/collections` | Add collection |
+| PUT | `/api/collections/:id` | Update collection |
+| DELETE | `/api/collections/:id` | Delete collection |
 
-## 应用截图
+## Screenshots
 
 <details>
-  <summary><b>亮色模式</b></summary>
-  <img src="public/img/light_mode.png" alt="亮色模式" width="100%">
+  <summary><b>Light Mode</b></summary>
+  <img src="public/img/light_mode.png" alt="Light Mode" width="100%">
 </details>
 <details>
-  <summary><b>暗色模式</b></summary>
-  <img src="public/img/dark_mode.png" alt="暗色模式" width="100%">
+  <summary><b>Dark Mode</b></summary>
+  <img src="public/img/dark_mode.png" alt="Dark Mode" width="100%">
 </details>
 <details>
-  <summary><b>收藏夹页面</b></summary>
-  <img src="public/img/collection_1.png" alt="收藏夹页面" width="100%">
+  <summary><b>Collections</b></summary>
+  <img src="public/img/collection_1.png" alt="Collections" width="100%">
 </details>
 
-## 许可证
+## License
 
 [MIT](LICENSE)
 
-## 赞赏支持
+## Sponsor
 
-如果您觉得 Koby 对您有所帮助，欢迎扫描下方二维码进行赞赏：
+If you find Koby helpful, feel free to scan the QR code below to show your support:
 
 <p align="center">
-  <img src="public/img/sponsor-qrcode.png" alt="赞赏二维码" width="350" height="350">
+  <img src="public/img/sponsor-qrcode.png" alt="Sponsor QR Code" width="350" height="350">
 </p>
 
 ---
 
-使用 [Trae](https://www.trae.ai/) 构建
+Built with [Trae](https://www.trae.ai/)
