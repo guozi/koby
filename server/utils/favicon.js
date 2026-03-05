@@ -80,4 +80,50 @@ async function getFaviconUrl(url) {
   }
 }
 
-module.exports = { getFaviconUrl };
+async function getUrlMeta(url) {
+  try {
+    if (!url.startsWith('http')) url = 'https://' + url;
+
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      },
+      timeout: 5000
+    });
+
+    const $ = cheerio.load(response.data);
+
+    const title = $('title').first().text().trim() ||
+                  $('meta[property="og:title"]').attr('content') ||
+                  $('meta[name="twitter:title"]').attr('content') || '';
+
+    const description = $('meta[name="description"]').attr('content') ||
+                        $('meta[property="og:description"]').attr('content') || '';
+
+    let favicon = $('link[rel="apple-touch-icon"]').attr('href') ||
+                  $('link[rel="icon"]').attr('href') ||
+                  $('link[rel="shortcut icon"]').attr('href');
+
+    if (!favicon) {
+      const urlObj = new URL(url);
+      favicon = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+    } else if (!favicon.startsWith('http')) {
+      const urlObj = new URL(url);
+      if (favicon.startsWith('//')) favicon = `https:${favicon}`;
+      else if (favicon.startsWith('/')) favicon = `${urlObj.protocol}//${urlObj.hostname}${favicon}`;
+      else favicon = `${urlObj.protocol}//${urlObj.hostname}/${favicon}`;
+    }
+
+    return { title, description, favicon };
+  } catch (error) {
+    console.error('获取URL元数据失败:', error.message);
+    try {
+      const urlObj = new URL(url);
+      return { title: '', description: '', favicon: `${urlObj.protocol}//${urlObj.hostname}/favicon.ico` };
+    } catch {
+      return { title: '', description: '', favicon: null };
+    }
+  }
+}
+
+module.exports = { getFaviconUrl, getUrlMeta };

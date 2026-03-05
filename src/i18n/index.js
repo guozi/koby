@@ -63,6 +63,12 @@ const messages = {
     'bf.descPlaceholder': '简短描述...',
     'bf.tagsPlaceholder': '工作, 学习, 设计...',
     'bf.loadMore': '加载更多',
+    'bf.fetching': '正在获取...',
+
+    // Search
+    'search.placeholder': '搜索书签...',
+    'search.noResults': '没有找到匹配的书签',
+    'search.hint': '输入关键词搜索标题、网址或描述',
 
     // Collection Form
     'cf.newCollection': '新建收藏夹',
@@ -206,6 +212,11 @@ const messages = {
     'bf.descPlaceholder': 'Brief description...',
     'bf.tagsPlaceholder': 'work, study, design...',
     'bf.loadMore': 'Load more',
+    'bf.fetching': 'Fetching...',
+
+    'search.placeholder': 'Search bookmarks...',
+    'search.noResults': 'No matching bookmarks found',
+    'search.hint': 'Search by title, URL, or description',
 
     'cf.newCollection': 'New Collection',
     'cf.editCollection': 'Edit Collection',

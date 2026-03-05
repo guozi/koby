@@ -63,10 +63,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5">
-            <h4 class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ bookmark.title }}</h4>
+            <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="font-medium text-sm text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
             <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs flex-shrink-0">{{ t('pinned') }}</div>
           </div>
-          <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-xs text-primary hover:underline truncate block mt-0.5">{{ bookmark.url }}</a>
+          <span class="text-xs text-gray-400 dark:text-gray-500 truncate block mt-0.5">{{ bookmark.url }}</span>
           <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{{ bookmark.description }}</p>
           <div class="flex items-center justify-between mt-2">
             <div class="flex items-center gap-1.5 min-w-0">
@@ -102,10 +102,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ bookmark.title }}</h4>
+            <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
             <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs">{{ t('pinned') }}</div>
           </div>
-          <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-xs text-primary hover:underline truncate block">{{ bookmark.url }}</a>
+          <span class="text-xs text-gray-400 dark:text-gray-500 truncate block">{{ bookmark.url }}</span>
           <div class="flex items-center gap-2 mt-1">
             <span class="text-2xs px-1.5 py-0.5 rounded font-medium"
               :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">

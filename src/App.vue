@@ -47,6 +47,10 @@
             <span>{{ currentPageTitle }}</span>
           </div>
           <div class="flex items-center gap-2">
+            <button @click="searchModalRef?.open()" class="btn-ghost rounded-lg px-2.5 py-1.5 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary flex items-center gap-1.5" :title="t('search.placeholder')">
+              <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <kbd class="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-2xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">{{ isMac ? '⌘' : 'Ctrl' }}+K</kbd>
+            </button>
             <span class="hidden sm:inline text-sm text-gray-500 dark:text-gray-400">{{ authStore.user?.name }}</span>
             <LangToggle />
             <ThemeToggle />
@@ -95,6 +99,7 @@
     </template>
 
     <Toast />
+    <SearchModal v-if="authStore.isLoggedIn" ref="searchModalRef" />
   </div>
 </template>
 
@@ -108,6 +113,7 @@ import { useI18n } from './i18n';
 import ThemeToggle from './components/ThemeToggle.vue';
 import LangToggle from './components/LangToggle.vue';
 import Toast from './components/Toast.vue';
+import SearchModal from './components/SearchModal.vue';
 
 const { t: _t } = useI18n();
 const t = (key, params) => _t.value(key, params);
@@ -117,6 +123,8 @@ const bookmarkStore = useBookmarkStore();
 const themeStore = useThemeStore();
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
+const searchModalRef = ref(null);
+const isMac = computed(() => navigator.platform.toUpperCase().includes('MAC'));
 
 const sidebarCollections = computed(() => bookmarkStore.getAllCollections);
 

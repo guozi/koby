@@ -76,7 +76,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-1.5">
-              <h3 class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ bookmark.title }}</h3>
+              <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="font-medium text-sm text-gray-900 dark:text-white truncate hover:text-primary transition-colors">{{ bookmark.title }}</a>
               <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs flex-shrink-0">{{ t('pinned') }}</div>
             </div>
             <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{{ bookmark.description }}</p>

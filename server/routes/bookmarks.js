@@ -19,6 +19,22 @@ module.exports = (pool) => {
     return rows.length > 0;
   }
 
+  // 获取URL元数据（标题、描述、favicon）
+  router.get('/fetch-meta', async (req, res) => {
+    try {
+      const { url } = req.query;
+      if (!url) return res.status(400).json({ error: true, message: 'URL is required' });
+      if (!isSafeUrl(url)) return res.status(400).json({ error: true, message: 'Invalid URL' });
+
+      const { getUrlMeta } = require('../utils/favicon');
+      const meta = await getUrlMeta(url);
+      res.json(meta);
+    } catch (error) {
+      console.error('获取URL元数据失败:', error);
+      res.status(500).json({ error: true, message: '获取URL元数据失败' });
+    }
+  });
+
   // 获取所有书签（当前用户）
   router.get('/', async (req, res) => {
     try {

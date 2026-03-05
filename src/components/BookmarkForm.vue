@@ -13,7 +13,10 @@
         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">{{ t('bf.url') }}</label>
         <div class="relative">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-          <input v-model="formData.url" type="url" required class="input pl-9" placeholder="https://example.com" />
+          <input v-model="formData.url" type="url" required class="input pl-9" placeholder="https://example.com" @blur="fetchUrlMeta" />
+          <div v-if="fetchingMeta" class="absolute right-3 top-1/2 -translate-y-1/2">
+            <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+          </div>
         </div>
       </div>
 
@@ -88,6 +91,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../i18n';
+import { bookmarksAPI } from '../services/api';
 
 const { t: _t } = useI18n();
 const t = (key, params) => _t.value(key, params);
@@ -121,6 +125,27 @@ watch(() => props.bookmark, (newVal) => {
   formData.value = { ...newVal };
   tagsInput.value = newVal.tags && Array.isArray(newVal.tags) ? newVal.tags.join(', ') : '';
 }, { deep: true });
+
+const fetchingMeta = ref(false)
+let lastFetchedUrl = ''
+
+async function fetchUrlMeta() {
+  const url = formData.value.url
+  if (!url || !isSafeUrl(url) || url === lastFetchedUrl || props.isEditing) return
+  if (formData.value.title) return
+
+  fetchingMeta.value = true
+  lastFetchedUrl = url
+  try {
+    const meta = await bookmarksAPI.fetchMeta(url)
+    if (formData.value.url === url) {
+      if (!formData.value.title && meta.title) formData.value.title = meta.title
+      if (!formData.value.description && meta.description) formData.value.description = meta.description
+      if (!formData.value.favicon && meta.favicon) formData.value.favicon = meta.favicon
+    }
+  } catch { /* ignore fetch errors */ }
+  finally { fetchingMeta.value = false }
+}
 
 function isSafeUrl(url) {
   try { const parsed = new URL(url); return ['http:', 'https:'].includes(parsed.protocol) } catch { return false }
