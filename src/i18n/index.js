@@ -12,7 +12,7 @@ const messages = {
 
     // Home
     'home.title': '我的书签',
-    'home.subtitle': '浏览您精心整理的链接收藏。在这里搜索、组织和管理所有书签。',
+    'home.subtitle': '浏览您精心整理的书签收藏。在这里搜索、组织和管理所有书签。',
     'home.addBookmark': '添加书签',
     'home.browseAll': '查看全部',
     'home.bookmarks': '书签',
@@ -73,7 +73,7 @@ const messages = {
     // Duplicate & Share
     'bf.duplicateWarning': '该网址已存在于书签中',
     'bf.duplicateIn': '所在收藏夹：{name}',
-    'toast.linkCopied': '链接已复制到剪贴板',
+    'toast.linkCopied': '书签已复制到剪贴板',
     'toast.copyFailed': '复制失败',
 
     // Collection Form
@@ -86,7 +86,7 @@ const messages = {
     'cf.color': '颜色',
     'cf.preview': '预览',
     'cf.previewName': '收藏夹名称',
-    'cf.links': '个链接',
+    'cf.links': '个书签',
     'cf.cancel': '取消',
     'cf.saving': '保存中...',
     'cf.update': '更新',
@@ -120,7 +120,7 @@ const messages = {
     'settings.email': '邮箱',
     'settings.data': '数据',
     'settings.about': '关于',
-    'settings.aboutDesc': '一个简洁的书签管理工具，帮助您整理和管理网络链接。',
+    'settings.aboutDesc': '一个简洁的书签管理工具，帮助您整理和管理网络书签。',
 
     // Import/Export
     'ie.export': '导出',
@@ -170,7 +170,7 @@ const messages = {
     'nav.logout': 'Sign out',
 
     'home.title': 'My Bookmarks',
-    'home.subtitle': 'Explore your curated collection of links. Organize, search, and manage all your bookmarks in one place.',
+    'home.subtitle': 'Explore your curated bookmarks. Organize, search, and manage all your bookmarks in one place.',
     'home.addBookmark': 'Add Bookmark',
     'home.browseAll': 'Browse All',
     'home.bookmarks': 'Bookmarks',
@@ -238,7 +238,7 @@ const messages = {
     'cf.color': 'Color',
     'cf.preview': 'Preview',
     'cf.previewName': 'Collection name',
-    'cf.links': 'links',
+    'cf.links': 'bookmarks',
     'cf.cancel': 'Cancel',
     'cf.saving': 'Saving...',
     'cf.update': 'Update',
@@ -269,7 +269,7 @@ const messages = {
     'settings.email': 'Email',
     'settings.data': 'Data',
     'settings.about': 'About',
-    'settings.aboutDesc': 'A clean and simple bookmark manager to organize and manage your web links.',
+    'settings.aboutDesc': 'A clean and simple bookmark manager to organize and manage your bookmarks.',
 
     'ie.export': 'Export',
     'ie.exportDesc': 'Download all bookmarks and collections as JSON.',
