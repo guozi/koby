@@ -1,96 +1,129 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold">我的链接</h2>
-      <button @click="showAddBookmarkModal = true" class="btn btn-primary flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        添加链接
-      </button>
+    <!-- Hero section -->
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{{ t('home.title') }}</h1>
+        <p class="mt-1.5 text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-xl">
+          {{ t('home.subtitle') }}
+        </p>
+        <div class="mt-4 flex items-center gap-3">
+          <button @click="showAddBookmarkModal = true" class="btn btn-primary">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            {{ t('home.addBookmark') }}
+          </button>
+          <router-link to="/bookmarks" class="btn btn-outline">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+            {{ t('home.browseAll') }}
+          </router-link>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="flex items-center gap-6 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ bookmarks.length }}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('home.bookmarks') }}</div>
+        </div>
+        <div class="w-px h-10 bg-gray-200 dark:bg-gray-700"></div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ collections.length }}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('home.collections') }}</div>
+        </div>
+      </div>
     </div>
 
-    <!-- 收藏夹快速访问 -->
-    <div class="mb-8">
-      <h3 class="text-lg font-semibold mb-3">我的收藏夹</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <router-link 
-          v-for="collection in collections" 
+    <!-- Collections quick access -->
+    <section v-if="collections.length > 0" class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('home.collections') }}</h2>
+        <router-link to="/collections" class="text-sm text-primary hover:text-primary-600 font-medium">{{ t('home.viewAll') }}</router-link>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        <router-link
+          v-for="collection in collections.slice(0, 10)"
           :key="collection.id"
           :to="`/collections?id=${collection.id}`"
-          class="card flex items-center p-4 hover:border-primary border-2 border-transparent dark:bg-gray-800 dark:hover:border-primary"
+          class="group flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
+                 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200"
         >
-          <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3" :style="{ backgroundColor: collection.color + '20' }">
-            <span class="text-xl">{{ collection.icon }}</span>
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg"
+               :style="{ backgroundColor: collection.color + '15' }">
+            {{ collection.icon }}
           </div>
-          <div>
-            <h4 class="font-medium dark:text-white">{{ collection.name }}</h4>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ getBookmarkCount(collection.id) }} 个链接</p>
+          <div class="min-w-0">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">{{ collection.name }}</h3>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ getBookmarkCount(collection.id) }} {{ t('cf.links') }}</p>
           </div>
         </router-link>
       </div>
-    </div>
+    </section>
 
-    <!-- 最近添加的链接 -->
-    <div>
-      <h3 class="text-lg font-semibold mb-3">最近添加</h3>
-      <div v-if="recentBookmarks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div v-for="bookmark in recentBookmarks" :key="bookmark.id" class="card dark:bg-gray-800">
-          <div class="flex items-start">
-            <div class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3 overflow-hidden">
-              <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="favicon" class="w-6 h-6" />
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-medium truncate dark:text-white">{{ bookmark.title }}</h4>
-              <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-500 hover:underline truncate block">{{ bookmark.url }}</a>
-              <div class="flex items-center mt-2">
-                <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 mr-2">
-                  {{ getCollectionName(bookmark.collection_id) }}
-                </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(bookmark.created_at) }}</span>
-              </div>
-              <!-- 标签 -->
-              <div v-if="bookmark.tags && bookmark.tags.length > 0" class="mt-2 flex flex-wrap gap-1">
-                <span 
-                  v-for="tag in bookmark.tags" 
-                  :key="tag" 
-                  class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-800">
-                  {{ tag }}
-                </span>
-              </div>
-            </div>
+    <!-- Recent bookmarks -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('home.recent') }}</h2>
+      </div>
+
+      <div v-if="recentBookmarks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div v-for="bookmark in recentBookmarks" :key="bookmark.id"
+          class="group flex items-start gap-3 p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
+            <img v-if="bookmark.favicon" :src="bookmark.favicon" alt="" class="w-6 h-6 rounded" />
+            <svg v-else class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
           </div>
-          <div class="flex justify-end mt-2">
-            <button @click="editBookmark(bookmark)" class="p-1 text-gray-500 hover:text-primary" aria-label="编辑链接">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
-            </button>
-            <button @click="confirmDeleteBookmark(bookmark)" class="p-1 text-gray-500 hover:text-red-500" aria-label="删除链接">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-            </button>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h3 class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ bookmark.title }}</h3>
+              <div v-if="bookmark.is_pinned" class="badge badge-featured text-2xs flex-shrink-0">{{ t('pinned') }}</div>
+            </div>
+            <p v-if="bookmark.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{{ bookmark.description }}</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-2xs px-1.5 py-0.5 rounded font-medium flex-shrink-0"
+                  :style="getCollection(bookmark.collection_id) ? { backgroundColor: getCollection(bookmark.collection_id).color + '15', color: getCollection(bookmark.collection_id).color } : {}">
+                  {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
+                </span>
+                <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
+                  <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-0.5 flex-shrink-0">
+                <button @click="editBookmark(bookmark)" class="p-1 text-gray-400 hover:text-primary rounded transition-colors opacity-0 group-hover:opacity-100">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                </button>
+                <a :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer" class="p-1 text-gray-400 hover:text-primary rounded transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div v-else class="text-center py-12">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-        </svg>
-        <h3 class="mt-4 text-lg font-medium text-gray-500">还没有链接</h3>
-        <p class="mt-1 text-gray-400">点击上方"添加链接"按钮开始收藏吧</p>
-      </div>
-    </div>
 
-    <!-- 添加书签模态框 -->
-    <div v-if="showAddBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <!-- Empty state -->
+      <div v-else class="text-center py-16">
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+        </div>
+        <h3 class="text-base font-medium text-gray-500 dark:text-gray-400">{{ t('home.noBookmarks') }}</h3>
+        <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">{{ t('home.noBookmarksDesc') }}</p>
+        <button @click="showAddBookmarkModal = true" class="mt-4 btn btn-primary">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+          {{ t('home.addBookmark') }}
+        </button>
+      </div>
+    </section>
+
+    <!-- Add bookmark modal -->
+    <div v-if="showAddBookmarkModal" class="modal-overlay">
       <BookmarkForm
         :bookmark="newBookmark"
-        :collections="collections"
+        :collections="flatCollections"
         :isEditing="false"
         :submitting="submitting"
         @submit="addNewBookmark"
@@ -98,11 +131,11 @@
       />
     </div>
 
-    <!-- 编辑书签模态框 -->
-    <div v-if="showEditBookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+    <!-- Edit bookmark modal -->
+    <div v-if="showEditBookmarkModal" class="modal-overlay">
       <BookmarkForm
         :bookmark="editingBookmark"
-        :collections="collections"
+        :collections="flatCollections"
         :isEditing="true"
         :submitting="submitting"
         @submit="updateBookmarkData"
@@ -110,25 +143,15 @@
       />
     </div>
 
-    <!-- 删除确认模态框 -->
-    <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 dark:text-white">确认删除</h3>
-        <p class="mb-4 dark:text-gray-300">确定要删除链接 "{{ bookmarkToDelete?.title }}" 吗？此操作无法撤销。</p>
-        <div class="flex justify-end space-x-2">
-          <button
-            @click="showDeleteConfirmModal = false"
-            :disabled="submitting"
-            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-50"
-          >
-            取消
-          </button>
-          <button
-            @click="deleteBookmark()"
-            :disabled="submitting"
-            class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ submitting ? '删除中...' : '删除' }}
+    <!-- Delete confirm modal -->
+    <div v-if="showDeleteConfirmModal" class="modal-overlay">
+      <div class="modal-content max-w-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ t('modal.confirmDelete') }}</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ t('modal.deleteBookmark', { name: bookmarkToDelete?.title }) }}</p>
+        <div class="flex justify-end gap-3">
+          <button @click="showDeleteConfirmModal = false" :disabled="submitting" class="btn btn-outline">{{ t('modal.cancel') }}</button>
+          <button @click="deleteBookmark()" :disabled="submitting" class="btn bg-red-500 text-white hover:bg-red-600 disabled:opacity-50">
+            {{ submitting ? t('modal.deleting') : t('modal.delete') }}
           </button>
         </div>
       </div>
@@ -140,62 +163,44 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { useToastStore } from '../stores/toast'
+import { useI18n } from '../i18n'
 import BookmarkForm from '../components/BookmarkForm.vue'
+
+const { t: _t } = useI18n()
+const t = (key, params) => _t.value(key, params)
 
 const bookmarkStore = useBookmarkStore()
 const toast = useToastStore()
 
-// 获取收藏夹和书签数据
 const collections = computed(() => bookmarkStore.getAllCollections)
+const flatCollections = computed(() => bookmarkStore.flatCollectionsWithDepth)
 const bookmarks = computed(() => bookmarkStore.bookmarks)
 
-// 最近添加的书签（最多8个）
 const recentBookmarks = computed(() => {
   return [...bookmarks.value]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 8)
 })
 
-// 添加书签相关状态
 const showAddBookmarkModal = ref(false)
 const defaultCollectionId = computed(() => collections.value.length > 0 ? collections.value[0].id : null)
-const newBookmark = ref({
-  url: '',
-  title: '',
-  description: '',
-  collection_id: null,
-  favicon: '',
-  tags: []
-})
+const newBookmark = ref({ url: '', title: '', description: '', collection_id: null, favicon: '', tags: [] })
 
-// 编辑书签相关状态
 const showEditBookmarkModal = ref(false)
 const editingBookmark = ref(null)
-const editBookmarkTagsInput = ref('')
 
-// 删除书签相关状态
 const showDeleteConfirmModal = ref(false)
 const bookmarkToDelete = ref(null)
 const submitting = ref(false)
 
-// 获取收藏夹中的书签数量
 function getBookmarkCount(collection_id) {
   return bookmarks.value.filter(b => b.collection_id === collection_id).length
 }
 
-// 获取收藏夹名称
-function getCollectionName(collection_id) {
-  const collection = collections.value.find(c => c.id === collection_id)
-  return collection ? collection.name : '未分类'
+function getCollection(collection_id) {
+  return collections.value.find(c => c.id === collection_id) || null
 }
 
-// 格式化日期
-function formatDate(dateString) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-}
-
-// URL 安全过滤
 function safeUrl(url) {
   try {
     const parsed = new URL(url)
@@ -203,7 +208,6 @@ function safeUrl(url) {
   } catch { return '#' }
 }
 
-// 添加新书签
 async function addNewBookmark(bookmark) {
   if (submitting.value) return
   submitting.value = true
@@ -212,44 +216,38 @@ async function addNewBookmark(bookmark) {
     await bookmarkStore.addBookmark(bookmark)
     newBookmark.value = { url: '', title: '', description: '', collection_id: defaultCollectionId.value, favicon: '', tags: [], is_pinned: false }
     showAddBookmarkModal.value = false
-    toast.success('链接添加成功')
+    toast.success(t('toast.bookmarkAdded'))
   } catch {
-    toast.error('添加链接失败，请重试')
+    toast.error(t('toast.addFailed'))
   } finally {
     submitting.value = false
   }
 }
 
-// 编辑书签
 function editBookmark(bookmark) {
   editingBookmark.value = { ...bookmark }
-  // 如果有标签，将其转换为逗号分隔的字符串
-  editBookmarkTagsInput.value = bookmark.tags && Array.isArray(bookmark.tags) ? bookmark.tags.join(', ') : ''
   showEditBookmarkModal.value = true
 }
 
-// 更新书签数据
 async function updateBookmarkData(updatedBookmark) {
   if (!updatedBookmark || submitting.value) return
   submitting.value = true
   try {
     await bookmarkStore.updateBookmark(updatedBookmark.id, updatedBookmark)
     showEditBookmarkModal.value = false
-    toast.success('链接更新成功')
+    toast.success(t('toast.bookmarkUpdated'))
   } catch {
-    toast.error('更新链接失败，请重试')
+    toast.error(t('toast.updateFailed'))
   } finally {
     submitting.value = false
   }
 }
 
-// 确认删除书签
 function confirmDeleteBookmark(bookmark) {
   bookmarkToDelete.value = bookmark
   showDeleteConfirmModal.value = true
 }
 
-// 删除书签
 async function deleteBookmark() {
   if (!bookmarkToDelete.value || submitting.value) return
   submitting.value = true
@@ -257,15 +255,14 @@ async function deleteBookmark() {
     await bookmarkStore.removeBookmark(bookmarkToDelete.value.id)
     showDeleteConfirmModal.value = false
     bookmarkToDelete.value = null
-    toast.success('链接已删除')
+    toast.success(t('toast.bookmarkDeleted'))
   } catch {
-    toast.error('删除链接失败，请重试')
+    toast.error(t('toast.deleteFailed'))
   } finally {
     submitting.value = false
   }
 }
 
-// Escape 关闭删除确认框
 function onEscape(e) {
   if (e.key === 'Escape') {
     if (showDeleteConfirmModal.value) showDeleteConfirmModal.value = false

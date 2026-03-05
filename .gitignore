@@ -32,6 +32,8 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+CC_FOR_CHENYUN.md
+
 # Testing
 /coverage
 

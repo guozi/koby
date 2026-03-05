@@ -4,21 +4,105 @@
 
 @layer base {
   body {
-    @apply transition-colors duration-200;
+    @apply transition-colors duration-200 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
   }
 }
 
 @layer components {
+  /* Buttons */
   .btn {
-    @apply px-4 py-2 rounded-md transition-colors duration-200 font-medium;
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 inline-flex items-center justify-center gap-1.5;
   }
   .btn-primary {
-    @apply bg-primary text-white hover:bg-blue-600;
+    @apply bg-primary text-white hover:bg-primary-600 active:bg-primary-700 shadow-sm hover:shadow;
   }
   .btn-secondary {
-    @apply bg-secondary text-white hover:bg-green-600;
+    @apply bg-secondary text-white hover:bg-secondary-600 shadow-sm hover:shadow;
   }
+  .btn-outline {
+    @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+  .btn-ghost {
+    @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white;
+  }
+
+  /* Cards */
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 dark:border dark:border-gray-700 transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
+    @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
+           shadow-card transition-all duration-300 ease-out
+           hover:shadow-card-hover hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-gray-600;
+  }
+
+  /* Sidebar nav item */
+  .sidebar-item {
+    @apply flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400
+           hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white
+           transition-colors duration-150 cursor-pointer;
+  }
+  .sidebar-item-active {
+    @apply bg-primary-50 dark:bg-primary-700/20 text-primary-600 dark:text-primary-400 font-medium;
+  }
+
+  /* Form inputs */
+  .input {
+    @apply w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg
+           bg-white dark:bg-gray-700 dark:text-white
+           focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           transition-all duration-200;
+  }
+
+  /* Unified select dropdown */
+  .select {
+    @apply w-full px-3 py-2.5 pr-9 text-sm border border-gray-300 dark:border-gray-600 rounded-lg
+           bg-white dark:bg-gray-700 dark:text-white
+           focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary
+           transition-all duration-200 cursor-pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem 1.25rem;
+  }
+
+  /* Tags */
+  .tag {
+    @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full
+           bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400;
+  }
+  .tag-primary {
+    @apply bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400
+           border border-primary-200 dark:border-primary-800;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-2xs font-semibold rounded-md uppercase tracking-wide;
+  }
+  .badge-featured {
+    @apply bg-orange-500 text-white;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in;
+  }
+  .modal-content {
+    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full animate-scale-in;
   }
 }

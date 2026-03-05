@@ -9,13 +9,14 @@ Koby 是一个简洁高效的多用户链接管理工具，帮助您整理、分
 ## 功能特点
 
 - **用户认证**：邮箱注册/登录，JWT 认证，邮箱验证，密码找回，多用户数据隔离
-- **收藏夹管理**：侧边栏+书签列表布局，自定义 emoji 图标和颜色
+- **收藏夹管理**：树形嵌套收藏夹，自定义 emoji 图标和颜色，收藏夹颜色贯穿书签卡片
 - **链接管理**：添加、编辑、删除、搜索、置顶，自动获取 Favicon
-- **标签系统**：为链接添加标签，支持按标签筛选
-- **视图切换**：网格视图 / 列表视图，可配置分页
+- **标签系统**：为链接添加标签（`#tag` 样式），支持按标签筛选
+- **视图切换**：网格视图 / 列表视图，无限滚动懒加载
+- **中英文切换**：完整的双语支持（简体中文 / English），一键切换
 - **暗色/亮色主题**：支持自动跟随系统或手动切换
 - **数据导入导出**：支持 JSON 和浏览器 HTML 书签格式
-- **响应式设计**：桌面端侧边栏布局，移动端自动折叠为下拉选择器
+- **响应式设计**：桌面端侧边栏布局，移动端自动折叠为抽屉菜单
 - **安全防护**：请求频率限制、输入校验、XSS 防护、邮箱标准化
 
 ## 快速开始
@@ -121,19 +122,23 @@ koby/
 │   ├── App.vue               # 根组件
 │   ├── router/index.js       # 前端路由 + Auth Guard
 │   ├── services/api.js       # API 服务层
+│   ├── i18n/index.js          # 国际化翻译（中/英）
 │   ├── stores/
 │   │   ├── auth.js           # 认证状态
-│   │   ├── bookmarks.js      # 书签/收藏夹状态
-│   │   └── theme.js          # 主题状态
+│   │   ├── bookmarks.js      # 书签/收藏夹状态（含树形 getter）
+│   │   ├── theme.js          # 主题状态
+│   │   ├── locale.js         # 语言切换状态
+│   │   └── toast.js          # 消息提示状态
 │   ├── views/
-│   │   ├── HomeView.vue      # 首页
-│   │   ├── CollectionsView.vue # 收藏夹（侧边栏+书签列表）
+│   │   ├── HomeView.vue      # 首页（统计+收藏夹快捷入口+最近书签）
+│   │   ├── CollectionsView.vue # 双模式：收藏夹管理 / 收藏夹书签详情
+│   │   ├── AllBookmarksView.vue # 全部书签浏览
 │   │   ├── LoginView.vue     # 登录/注册
 │   │   ├── VerifyEmailView.vue # 邮箱验证
 │   │   ├── ForgotPasswordView.vue # 忘记密码
 │   │   ├── ResetPasswordView.vue # 重置密码
 │   │   └── SettingsView.vue  # 设置
-│   └── components/           # 通用组件
+│   └── components/           # 通用组件（BookmarkForm, CollectionForm 等）
 └── vercel.json               # Vercel 部署配置
 ```
 

@@ -5,7 +5,7 @@
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          class="flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm font-medium backdrop-blur-sm"
+          class="flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium backdrop-blur-sm border"
           :class="toastClass(toast.type)"
           role="alert"
         >
@@ -39,9 +39,9 @@ const toasts = computed(() => toastStore.toasts)
 
 function toastClass(type) {
   switch (type) {
-    case 'success': return 'bg-green-600 text-white'
-    case 'error': return 'bg-red-600 text-white'
-    default: return 'bg-gray-800 text-white dark:bg-gray-700'
+    case 'success': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/80 dark:text-green-300 dark:border-green-800'
+    case 'error': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/80 dark:text-red-300 dark:border-red-800'
+    default: return 'bg-white text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700'
   }
 }
 </script>
