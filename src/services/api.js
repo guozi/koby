@@ -45,6 +45,7 @@ export const authAPI = {
   resendVerification: (email) => apiClient.post('/api/auth/resend-verification', { email }),
   forgotPassword: (email) => apiClient.post('/api/auth/forgot-password', { email }),
   resetPassword: (token, newPassword) => apiClient.post('/api/auth/reset-password', { token, newPassword }),
+  deleteAccount: (password) => apiClient.delete('/api/auth/account', { data: { password } }),
 };
 
 // 书签相关API

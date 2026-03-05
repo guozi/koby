@@ -330,5 +330,38 @@ module.exports = (pool) => {
     }
   });
 
+  // 删除账户（需要密码确认）
+  router.delete('/account', authMiddleware, async (req, res) => {
+    try {
+      const { password } = req.body;
+      if (!password) {
+        return res.status(400).json({ error: true, message: '请输入密码确认' });
+      }
+
+      const [users] = await pool.query(
+        'SELECT id, password_hash FROM users WHERE id = ?',
+        [req.userId]
+      );
+      if (users.length === 0) {
+        return res.status(404).json({ error: true, message: '用户不存在' });
+      }
+
+      const valid = await bcrypt.compare(password, users[0].password_hash);
+      if (!valid) {
+        return res.status(401).json({ error: true, message: '密码错误' });
+      }
+
+      // 按依赖顺序删除：书签 → 收藏夹 → 用户
+      await pool.query('DELETE FROM bookmarks WHERE user_id = ?', [req.userId]);
+      await pool.query('DELETE FROM collections WHERE user_id = ?', [req.userId]);
+      await pool.query('DELETE FROM users WHERE id = ?', [req.userId]);
+
+      res.json({ message: '账户已删除' });
+    } catch (error) {
+      console.error('删除账户失败:', error);
+      res.status(500).json({ error: true, message: '删除账户失败' });
+    }
+  });
+
   return router;
 };
