@@ -88,7 +88,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { authAPI } from '../services/api'
-import { useI18n } from '../i18n'
+import { useI18n, resolveErrorMessage } from '../i18n'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import LangToggle from '../components/LangToggle.vue'
 
@@ -121,9 +121,8 @@ async function handleLogin() {
     bookmarkStore.initialize()
     router.push('/')
   } catch (err) {
-    const resp = err.response?.data
-    errorMsg.value = resp?.message || 'Login failed'
-    if (resp?.needVerification) {
+    errorMsg.value = resolveErrorMessage(err, t) || t('error.AUTH_LOGIN_FAILED')
+    if (err.response?.data?.needVerification) {
       showResend.value = true
       resendEmail.value = loginForm.value.email
     }
@@ -141,7 +140,7 @@ async function handleRegister() {
     successMsg.value = data.message || 'Account created. Please check your email to verify.'
     activeTab.value = 'login'
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Registration failed'
+    errorMsg.value = resolveErrorMessage(err, t) || t('error.AUTH_REGISTER_FAILED')
   } finally {
     loading.value = false
   }
@@ -154,7 +153,7 @@ async function resendVerification() {
     errorMsg.value = ''
     showResend.value = false
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Failed to send'
+    errorMsg.value = resolveErrorMessage(err, t) || t('error.AUTH_RESEND_FAILED')
   }
 }
 </script>

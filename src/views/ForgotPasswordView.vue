@@ -43,6 +43,10 @@
 <script setup>
 import { ref } from 'vue'
 import { authAPI } from '../services/api'
+import { useI18n, resolveErrorMessage } from '../i18n'
+
+const { t: _t } = useI18n()
+const t = (key, params) => _t.value(key, params)
 
 const email = ref('')
 const loading = ref(false)
@@ -56,7 +60,7 @@ async function handleSubmit() {
     await authAPI.forgotPassword(email.value)
     submitted.value = true
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Request failed, please try again'
+    errorMsg.value = resolveErrorMessage(err, t) || t('error.AUTH_FORGOT_PASSWORD_FAILED')
   } finally {
     loading.value = false
   }

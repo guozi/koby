@@ -37,6 +37,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { authAPI } from '../services/api'
+import { useI18n, resolveErrorMessage } from '../i18n'
+
+const { t: _t } = useI18n()
+const t = (key, params) => _t.value(key, params)
 
 const route = useRoute()
 const router = useRouter()
@@ -61,7 +65,7 @@ onMounted(async () => {
     loading.value = false
     setTimeout(() => router.push('/'), 1500)
   } catch (err) {
-    error.value = err.response?.data?.message || 'Verification failed'
+    error.value = resolveErrorMessage(err, t) || t('error.AUTH_VERIFY_FAILED')
     loading.value = false
   }
 })

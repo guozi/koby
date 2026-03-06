@@ -24,7 +24,7 @@ const RESEND_COOLDOWN_MS = 60 * 1000; // 60 秒冷却
 const registerLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: { error: true, message: '注册请求过于频繁，请稍后再试' },
+  message: { error: true, code: 'RATE_LIMIT_REGISTER', message: '注册请求过于频繁，请稍后再试' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -33,7 +33,7 @@ const registerLimiter = rateLimit({
 const resendLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 3,
-  message: { error: true, message: '请求过于频繁，请稍后再试' },
+  message: { error: true, code: 'RATE_LIMIT_RESEND', message: '请求过于频繁，请稍后再试' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -42,7 +42,7 @@ const resendLimiter = rateLimit({
 const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: { error: true, message: '请求过于频繁，请稍后再试' },
+  message: { error: true, code: 'RATE_LIMIT_FORGOT_PASSWORD', message: '请求过于频繁，请稍后再试' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -55,25 +55,25 @@ module.exports = (pool) => {
       let { email } = req.body;
 
       if (!email || !password || !name) {
-        return res.status(400).json({ error: true, message: '邮箱、密码和昵称为必填项' });
+        return res.status(400).json({ error: true, code: 'AUTH_FIELDS_REQUIRED', message: '邮箱、密码和昵称为必填项' });
       }
 
       email = email.trim().toLowerCase();
       const trimmedName = name.trim();
 
       if (!isValidEmail(email) || email.length > MAX_EMAIL_LEN) {
-        return res.status(400).json({ error: true, message: '邮箱格式不正确' });
+        return res.status(400).json({ error: true, code: 'AUTH_EMAIL_INVALID', message: '邮箱格式不正确' });
       }
       if (trimmedName.length === 0 || trimmedName.length > MAX_NAME_LEN) {
-        return res.status(400).json({ error: true, message: `昵称不能为空且不超过 ${MAX_NAME_LEN} 个字符` });
+        return res.status(400).json({ error: true, code: 'AUTH_NAME_INVALID', message: `昵称不能为空且不超过 ${MAX_NAME_LEN} 个字符` });
       }
       if (password.length < 6 || password.length > MAX_PASSWORD_LEN) {
-        return res.status(400).json({ error: true, message: '密码长度 6-128 位' });
+        return res.status(400).json({ error: true, code: 'AUTH_PASSWORD_INVALID', message: '密码长度 6-128 位' });
       }
 
       const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
       if (existing.length > 0) {
-        return res.status(409).json({ error: true, message: '该邮箱已注册' });
+        return res.status(409).json({ error: true, code: 'AUTH_EMAIL_EXISTS', message: '该邮箱已注册' });
       }
 
       const password_hash = await bcrypt.hash(password, 10);
@@ -93,7 +93,7 @@ module.exports = (pool) => {
       res.status(201).json({ message: '注册成功，请查收验证邮件' });
     } catch (error) {
       console.error('注册失败:', error);
-      res.status(500).json({ error: true, message: '注册失败' });
+      res.status(500).json({ error: true, code: 'AUTH_REGISTER_FAILED', message: '注册失败' });
     }
   });
 
@@ -103,7 +103,7 @@ module.exports = (pool) => {
       const { password } = req.body;
       let { email } = req.body;
       if (!email || !password) {
-        return res.status(400).json({ error: true, message: '邮箱和密码为必填项' });
+        return res.status(400).json({ error: true, code: 'AUTH_LOGIN_FIELDS_REQUIRED', message: '邮箱和密码为必填项' });
       }
 
       email = email.trim().toLowerCase();
@@ -113,17 +113,17 @@ module.exports = (pool) => {
         [email]
       );
       if (users.length === 0) {
-        return res.status(401).json({ error: true, message: '邮箱或密码错误' });
+        return res.status(401).json({ error: true, code: 'AUTH_CREDENTIALS_INVALID', message: '邮箱或密码错误' });
       }
 
       const user = users[0];
       const valid = await bcrypt.compare(password, user.password_hash);
       if (!valid) {
-        return res.status(401).json({ error: true, message: '邮箱或密码错误' });
+        return res.status(401).json({ error: true, code: 'AUTH_CREDENTIALS_INVALID', message: '邮箱或密码错误' });
       }
 
       if (!user.is_verified) {
-        return res.status(403).json({ error: true, message: '请先验证邮箱', needVerification: true });
+        return res.status(403).json({ error: true, code: 'AUTH_EMAIL_NOT_VERIFIED', message: '请先验证邮箱', needVerification: true });
       }
 
       const token = signToken(user.id);
@@ -133,7 +133,7 @@ module.exports = (pool) => {
       });
     } catch (error) {
       console.error('登录失败:', error);
-      res.status(500).json({ error: true, message: '登录失败' });
+      res.status(500).json({ error: true, code: 'AUTH_LOGIN_FAILED', message: '登录失败' });
     }
   });
 
@@ -142,7 +142,7 @@ module.exports = (pool) => {
     try {
       const { token } = req.body;
       if (!token) {
-        return res.status(400).json({ error: true, message: '缺少验证 token' });
+        return res.status(400).json({ error: true, code: 'AUTH_TOKEN_MISSING', message: '缺少验证 token' });
       }
 
       // 先查用户
@@ -152,13 +152,13 @@ module.exports = (pool) => {
       );
 
       if (users.length === 0) {
-        return res.status(400).json({ error: true, message: '验证链接无效或已过期' });
+        return res.status(400).json({ error: true, code: 'AUTH_TOKEN_INVALID', message: '验证链接无效或已过期' });
       }
 
       const user = users[0];
 
       if (user.is_verified) {
-        return res.status(400).json({ error: true, message: '邮箱已验证，请直接登录' });
+        return res.status(400).json({ error: true, code: 'AUTH_ALREADY_VERIFIED', message: '邮箱已验证，请直接登录' });
       }
 
       // 原子更新：加 is_verified = 0 条件，只有第一个请求能成功
@@ -168,7 +168,7 @@ module.exports = (pool) => {
       );
 
       if (updateResult.affectedRows === 0) {
-        return res.status(400).json({ error: true, message: '邮箱已验证，请直接登录' });
+        return res.status(400).json({ error: true, code: 'AUTH_ALREADY_VERIFIED', message: '邮箱已验证，请直接登录' });
       }
 
       // 创建默认收藏夹
@@ -186,7 +186,7 @@ module.exports = (pool) => {
       });
     } catch (error) {
       console.error('验证邮箱失败:', error);
-      res.status(500).json({ error: true, message: '验证邮箱失败' });
+      res.status(500).json({ error: true, code: 'AUTH_VERIFY_FAILED', message: '验证邮箱失败' });
     }
   });
 
@@ -195,12 +195,12 @@ module.exports = (pool) => {
     try {
       const [users] = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = ?', [req.userId]);
       if (users.length === 0) {
-        return res.status(404).json({ error: true, message: '用户不存在' });
+        return res.status(404).json({ error: true, code: 'AUTH_USER_NOT_FOUND', message: '用户不存在' });
       }
       res.json(users[0]);
     } catch (error) {
       console.error('获取用户信息失败:', error);
-      res.status(500).json({ error: true, message: '获取用户信息失败' });
+      res.status(500).json({ error: true, code: 'AUTH_FETCH_FAILED', message: '获取用户信息失败' });
     }
   });
 
@@ -209,18 +209,18 @@ module.exports = (pool) => {
     try {
       const { name } = req.body;
       if (!name || typeof name !== 'string' || name.trim().length === 0) {
-        return res.status(400).json({ error: true, message: '昵称不能为空' });
+        return res.status(400).json({ error: true, code: 'AUTH_NAME_REQUIRED', message: '昵称不能为空' });
       }
       const trimmedName = name.trim();
       if (trimmedName.length > MAX_NAME_LEN) {
-        return res.status(400).json({ error: true, message: `昵称不能超过 ${MAX_NAME_LEN} 个字符` });
+        return res.status(400).json({ error: true, code: 'AUTH_NAME_TOO_LONG', message: `昵称不能超过 ${MAX_NAME_LEN} 个字符` });
       }
       await pool.query('UPDATE users SET name = ? WHERE id = ?', [trimmedName, req.userId]);
       const [users] = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = ?', [req.userId]);
       res.json(users[0]);
     } catch (error) {
       console.error('修改昵称失败:', error);
-      res.status(500).json({ error: true, message: '修改昵称失败' });
+      res.status(500).json({ error: true, code: 'AUTH_UPDATE_NAME_FAILED', message: '修改昵称失败' });
     }
   });
 
@@ -229,7 +229,7 @@ module.exports = (pool) => {
     try {
       let { email } = req.body;
       if (!email) {
-        return res.status(400).json({ error: true, message: '邮箱为必填项' });
+        return res.status(400).json({ error: true, code: 'AUTH_EMAIL_REQUIRED', message: '邮箱为必填项' });
       }
 
       email = email.trim().toLowerCase();
@@ -252,7 +252,7 @@ module.exports = (pool) => {
         const expiresAt = new Date(user.verification_expires_at).getTime();
         const sentAt = expiresAt - 24 * 60 * 60 * 1000;
         if (Date.now() - sentAt < RESEND_COOLDOWN_MS) {
-          return res.status(429).json({ error: true, message: '请等待 60 秒后再重新发送' });
+          return res.status(429).json({ error: true, code: 'AUTH_RESEND_COOLDOWN', message: '请等待 60 秒后再重新发送' });
         }
       }
 
@@ -271,7 +271,7 @@ module.exports = (pool) => {
       res.json({ message: '验证邮件已发送，请查收' });
     } catch (error) {
       console.error('重发验证邮件失败:', error);
-      res.status(500).json({ error: true, message: '发送失败' });
+      res.status(500).json({ error: true, code: 'AUTH_RESEND_FAILED', message: '发送失败' });
     }
   });
 
@@ -280,7 +280,7 @@ module.exports = (pool) => {
     try {
       let { email } = req.body;
       if (!email) {
-        return res.status(400).json({ error: true, message: '邮箱为必填项' });
+        return res.status(400).json({ error: true, code: 'AUTH_EMAIL_REQUIRED', message: '邮箱为必填项' });
       }
 
       email = email.trim().toLowerCase();
@@ -311,7 +311,7 @@ module.exports = (pool) => {
       res.json({ message: genericMsg });
     } catch (error) {
       console.error('忘记密码失败:', error);
-      res.status(500).json({ error: true, message: '请求失败' });
+      res.status(500).json({ error: true, code: 'AUTH_FORGOT_PASSWORD_FAILED', message: '请求失败' });
     }
   });
 
@@ -320,11 +320,11 @@ module.exports = (pool) => {
     try {
       const { token, newPassword } = req.body;
       if (!token || !newPassword) {
-        return res.status(400).json({ error: true, message: '缺少必要参数' });
+        return res.status(400).json({ error: true, code: 'AUTH_RESET_PARAMS_MISSING', message: '缺少必要参数' });
       }
 
       if (newPassword.length < 6 || newPassword.length > MAX_PASSWORD_LEN) {
-        return res.status(400).json({ error: true, message: '密码长度 6-128 位' });
+        return res.status(400).json({ error: true, code: 'AUTH_PASSWORD_INVALID', message: '密码长度 6-128 位' });
       }
 
       const [users] = await pool.query(
@@ -333,7 +333,7 @@ module.exports = (pool) => {
       );
 
       if (users.length === 0) {
-        return res.status(400).json({ error: true, message: '重置链接无效或已过期' });
+        return res.status(400).json({ error: true, code: 'AUTH_RESET_TOKEN_INVALID', message: '重置链接无效或已过期' });
       }
 
       const password_hash = await bcrypt.hash(newPassword, 10);
@@ -346,7 +346,7 @@ module.exports = (pool) => {
       res.json({ message: '密码重置成功，请使用新密码登录' });
     } catch (error) {
       console.error('重置密码失败:', error);
-      res.status(500).json({ error: true, message: '重置密码失败' });
+      res.status(500).json({ error: true, code: 'AUTH_RESET_FAILED', message: '重置密码失败' });
     }
   });
 
@@ -355,7 +355,7 @@ module.exports = (pool) => {
     try {
       const { password } = req.body;
       if (!password) {
-        return res.status(400).json({ error: true, message: '请输入密码确认' });
+        return res.status(400).json({ error: true, code: 'AUTH_PASSWORD_REQUIRED', message: '请输入密码确认' });
       }
 
       const [users] = await pool.query(
@@ -363,12 +363,12 @@ module.exports = (pool) => {
         [req.userId]
       );
       if (users.length === 0) {
-        return res.status(404).json({ error: true, message: '用户不存在' });
+        return res.status(404).json({ error: true, code: 'AUTH_USER_NOT_FOUND', message: '用户不存在' });
       }
 
       const valid = await bcrypt.compare(password, users[0].password_hash);
       if (!valid) {
-        return res.status(401).json({ error: true, message: '密码错误' });
+        return res.status(401).json({ error: true, code: 'AUTH_PASSWORD_WRONG', message: '密码错误' });
       }
 
       // 按依赖顺序删除：书签 → 收藏夹 → 用户
@@ -379,7 +379,7 @@ module.exports = (pool) => {
       res.json({ message: '账户已删除' });
     } catch (error) {
       console.error('删除账户失败:', error);
-      res.status(500).json({ error: true, message: '删除账户失败' });
+      res.status(500).json({ error: true, code: 'AUTH_DELETE_FAILED', message: '删除账户失败' });
     }
   });
 

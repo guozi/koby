@@ -59,6 +59,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { authAPI } from '../services/api'
+import { useI18n, resolveErrorMessage } from '../i18n'
+
+const { t: _t } = useI18n()
+const t = (key, params) => _t.value(key, params)
 
 const route = useRoute()
 
@@ -87,7 +91,7 @@ async function handleReset() {
     await authAPI.resetPassword(token, newPassword.value)
     success.value = true
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Reset failed, please try again'
+    errorMsg.value = resolveErrorMessage(err, t) || t('error.AUTH_RESET_FAILED')
   } finally {
     loading.value = false
   }

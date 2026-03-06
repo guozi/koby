@@ -13,7 +13,7 @@ module.exports = (pool) => {
       res.json(rows);
     } catch (error) {
       console.error('获取收藏夹失败:', error);
-      res.status(500).json({ error: true, message: '获取收藏夹失败' });
+      res.status(500).json({ error: true, code: 'COLLECTION_LIST_FAILED', message: '获取收藏夹失败' });
     }
   });
 
@@ -27,13 +27,13 @@ module.exports = (pool) => {
       );
 
       if (rows.length === 0) {
-        return res.status(404).json({ error: true, message: '收藏夹不存在' });
+        return res.status(404).json({ error: true, code: 'COLLECTION_NOT_FOUND', message: '收藏夹不存在' });
       }
 
       res.json(rows[0]);
     } catch (error) {
       console.error('获取收藏夹失败:', error);
-      res.status(500).json({ error: true, message: '获取收藏夹失败' });
+      res.status(500).json({ error: true, code: 'COLLECTION_FETCH_FAILED', message: '获取收藏夹失败' });
     }
   });
 
@@ -43,7 +43,7 @@ module.exports = (pool) => {
       const { name, icon, color, parent_id } = req.body;
 
       if (!name) {
-        return res.status(400).json({ error: true, message: '收藏夹名称是必填项' });
+        return res.status(400).json({ error: true, code: 'COLLECTION_NAME_REQUIRED', message: '收藏夹名称是必填项' });
       }
 
       // 验证父收藏夹归属
@@ -53,12 +53,12 @@ module.exports = (pool) => {
           [parent_id, req.userId]
         );
         if (parent.length === 0) {
-          return res.status(400).json({ error: true, message: '父收藏夹不存在' });
+          return res.status(400).json({ error: true, code: 'COLLECTION_PARENT_NOT_FOUND', message: '父收藏夹不存在' });
         }
         // 检查深度限制
         const parentDepth = await getAncestorDepth(pool, parent_id, req.userId);
         if (parentDepth + 1 > MAX_DEPTH) {
-          return res.status(400).json({ error: true, message: '收藏夹层级不能超过三层' });
+          return res.status(400).json({ error: true, code: 'COLLECTION_MAX_DEPTH', message: '收藏夹层级不能超过三层' });
         }
       }
 
@@ -85,7 +85,7 @@ module.exports = (pool) => {
       res.status(201).json(newCollection[0]);
     } catch (error) {
       console.error('添加收藏夹失败:', error);
-      res.status(500).json({ error: true, message: '添加收藏夹失败' });
+      res.status(500).json({ error: true, code: 'COLLECTION_ADD_FAILED', message: '添加收藏夹失败' });
     }
   });
 
@@ -150,7 +150,7 @@ module.exports = (pool) => {
       const { name, icon, color, parent_id } = req.body;
 
       if (!name) {
-        return res.status(400).json({ error: true, message: '收藏夹名称是必填项' });
+        return res.status(400).json({ error: true, code: 'COLLECTION_NAME_REQUIRED', message: '收藏夹名称是必填项' });
       }
 
       // 验证父收藏夹
@@ -160,13 +160,13 @@ module.exports = (pool) => {
           [parent_id, req.userId]
         );
         if (parent.length === 0) {
-          return res.status(400).json({ error: true, message: '父收藏夹不存在' });
+          return res.status(400).json({ error: true, code: 'COLLECTION_PARENT_NOT_FOUND', message: '父收藏夹不存在' });
         }
       }
 
       // 防止循环嵌套
       if (await wouldCreateCycle(pool, collection_id, parent_id, req.userId)) {
-        return res.status(400).json({ error: true, message: '不能将收藏夹移动到自身或其子收藏夹下' });
+        return res.status(400).json({ error: true, code: 'COLLECTION_CYCLE_DETECTED', message: '不能将收藏夹移动到自身或其子收藏夹下' });
       }
 
       // 检查深度限制：父节点深度 + 1（自身）+ 子树深度 不能超过 MAX_DEPTH
@@ -174,7 +174,7 @@ module.exports = (pool) => {
         const parentDepth = await getAncestorDepth(pool, parent_id, req.userId);
         const subtreeDepth = await getMaxSubtreeDepth(pool, collection_id, req.userId);
         if (parentDepth + 1 + subtreeDepth > MAX_DEPTH) {
-          return res.status(400).json({ error: true, message: '移动后收藏夹层级将超过三层限制' });
+          return res.status(400).json({ error: true, code: 'COLLECTION_DEPTH_EXCEEDED', message: '移动后收藏夹层级将超过三层限制' });
         }
       }
 
@@ -186,13 +186,13 @@ module.exports = (pool) => {
       const [updatedCollection] = await pool.query('SELECT * FROM collections WHERE id = ? AND user_id = ?', [collection_id, req.userId]);
 
       if (updatedCollection.length === 0) {
-        return res.status(404).json({ error: true, message: '收藏夹不存在' });
+        return res.status(404).json({ error: true, code: 'COLLECTION_NOT_FOUND', message: '收藏夹不存在' });
       }
 
       res.json(updatedCollection[0]);
     } catch (error) {
       console.error('更新收藏夹失败:', error);
-      res.status(500).json({ error: true, message: '更新收藏夹失败' });
+      res.status(500).json({ error: true, code: 'COLLECTION_UPDATE_FAILED', message: '更新收藏夹失败' });
     }
   });
 
@@ -207,7 +207,7 @@ module.exports = (pool) => {
         [req.userId]
       );
       if (allCollections.length <= 1) {
-        return res.status(400).json({ error: true, message: '不能删除最后一个收藏夹' });
+        return res.status(400).json({ error: true, code: 'COLLECTION_LAST_DELETE', message: '不能删除最后一个收藏夹' });
       }
 
       // 获取被删除收藏夹的 parent_id
@@ -216,7 +216,7 @@ module.exports = (pool) => {
         [collection_id, req.userId]
       );
       if (target.length === 0) {
-        return res.status(404).json({ error: true, message: '收藏夹不存在' });
+        return res.status(404).json({ error: true, code: 'COLLECTION_NOT_FOUND', message: '收藏夹不存在' });
       }
       const parentId = target[0].parent_id;
 
@@ -248,7 +248,7 @@ module.exports = (pool) => {
         if (result.affectedRows === 0) {
           await connection.rollback();
           connection.release();
-          return res.status(404).json({ error: true, message: '收藏夹不存在' });
+          return res.status(404).json({ error: true, code: 'COLLECTION_NOT_FOUND', message: '收藏夹不存在' });
         }
 
         await connection.commit();
@@ -261,7 +261,7 @@ module.exports = (pool) => {
       }
     } catch (error) {
       console.error('删除收藏夹失败:', error);
-      res.status(500).json({ error: true, message: '删除收藏夹失败' });
+      res.status(500).json({ error: true, code: 'COLLECTION_DELETE_FAILED', message: '删除收藏夹失败' });
     }
   });
 

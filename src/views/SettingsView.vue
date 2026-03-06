@@ -200,7 +200,7 @@
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useBookmarkStore } from '../stores/bookmarks'
-import { useI18n } from '../i18n'
+import { useI18n, resolveErrorMessage } from '../i18n'
 import { useToastStore } from '../stores/toast'
 import { authAPI } from '../services/api'
 import ImportExportPanel from '../components/ImportExportPanel.vue'
@@ -284,11 +284,11 @@ async function confirmDeleteAccount() {
     await authAPI.deleteAccount(deletePassword.value)
     authStore.logout()
   } catch (err) {
-    const status = err.response?.status
-    if (status === 401) {
-      deleteError.value = t('settings.passwordWrong')
+    const code = err.response?.data?.code
+    if (code === 'AUTH_PASSWORD_WRONG') {
+      deleteError.value = t('error.AUTH_PASSWORD_WRONG')
     } else {
-      deleteError.value = t('settings.deleteAccountFailed')
+      deleteError.value = resolveErrorMessage(err, t) || t('error.AUTH_DELETE_FAILED')
     }
   } finally {
     deletingAccount.value = false
