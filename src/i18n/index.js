@@ -267,6 +267,16 @@ const messages = {
     'toolbox.sqlDesc': 'SQL 语句美化与压缩',
     'toolbox.sqlInputHint': '粘贴 SQL 语句...',
     'toolbox.sqlApply': '应用到输入',
+    'toolbox.codeimg': '代码美化',
+    'toolbox.codeimgDesc': '代码语法高亮着色，一键生成分享图片',
+    'toolbox.language': '语言',
+    'toolbox.theme': '主题',
+    'toolbox.fontSize': '字号',
+    'toolbox.lineNumbers': '行号',
+    'toolbox.exportImage': '导出图片',
+    'toolbox.imageExported': '图片已保存',
+    'toolbox.preview': '预览',
+    'toolbox.codeInputHint': '粘贴代码...',
   },
   en: {
     'nav.home': 'Home',
@@ -517,6 +527,16 @@ const messages = {
     'toolbox.sqlDesc': 'Format and minify SQL statements',
     'toolbox.sqlInputHint': 'Paste SQL statement...',
     'toolbox.sqlApply': 'Apply to Input',
+    'toolbox.codeimg': 'Code Beautifier',
+    'toolbox.codeimgDesc': 'Syntax highlight code and export as shareable image',
+    'toolbox.language': 'Language',
+    'toolbox.theme': 'Theme',
+    'toolbox.fontSize': 'Font Size',
+    'toolbox.lineNumbers': 'Line Numbers',
+    'toolbox.exportImage': 'Export Image',
+    'toolbox.imageExported': 'Image saved',
+    'toolbox.preview': 'Preview',
+    'toolbox.codeInputHint': 'Paste code...',
   }
 }
 

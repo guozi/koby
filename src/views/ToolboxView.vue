@@ -300,6 +300,80 @@
             </div>
           </div>
 
+          <!-- Code Image -->
+          <div v-if="activeTool === 'codeimg'" class="space-y-4">
+            <!-- Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('toolbox.language') }}</label>
+                <select v-model="codeImgLang" class="select text-sm w-32">
+                  <option v-for="lang in codeImgLangs" :key="lang.id" :value="lang.id">{{ lang.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('toolbox.theme') }}</label>
+                <select v-model="codeImgTheme" class="select text-sm w-32">
+                  <option v-for="(th, key) in CODE_THEMES" :key="key" :value="key">{{ th.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('toolbox.fontSize') }}</label>
+                <select v-model.number="codeImgFontSize" class="select text-sm w-20">
+                  <option :value="12">12</option>
+                  <option :value="14">14</option>
+                  <option :value="16">16</option>
+                  <option :value="18">18</option>
+                  <option :value="20">20</option>
+                </select>
+              </div>
+              <div class="flex items-end gap-2 ml-auto">
+                <label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                  <input v-model="codeImgLineNums" type="checkbox" class="rounded border-gray-300 dark:border-gray-600" />
+                  {{ t('toolbox.lineNumbers') }}
+                </label>
+                <button @click="exportCodeImage" class="btn btn-primary text-sm">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  {{ t('toolbox.exportImage') }}
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Input -->
+              <div class="flex flex-col">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('toolbox.input') }}</label>
+                <textarea v-model="codeImgInput" class="input font-mono text-sm resize-none flex-1 min-h-[320px] max-h-[560px]" :placeholder="t('toolbox.codeInputHint')"></textarea>
+              </div>
+
+              <!-- Preview -->
+              <div class="flex flex-col">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ t('toolbox.preview') }}</label>
+                <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex-1 flex flex-col min-h-[320px] max-h-[560px]" :style="{ backgroundColor: currentTheme.bg }">
+                  <!-- Window chrome -->
+                  <div class="flex items-center gap-2 px-4 py-3" :style="{ backgroundColor: currentTheme.chrome }">
+                    <div class="flex gap-1.5">
+                      <span class="w-3 h-3 rounded-full bg-[#FF5F57]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#FEBC2E]"></span>
+                      <span class="w-3 h-3 rounded-full bg-[#28C840]"></span>
+                    </div>
+                    <span class="text-xs ml-2" :style="{ color: currentTheme.comment }">{{ codeImgLangName }}</span>
+                  </div>
+                  <!-- Code area -->
+                  <div class="p-4 overflow-auto flex-1" :style="{ backgroundColor: currentTheme.bg, fontSize: codeImgFontSize + 'px', lineHeight: '1.6' }">
+                    <table class="border-collapse">
+                      <tbody>
+                        <tr v-for="(line, i) in highlightedLines" :key="i">
+                          <td v-if="codeImgLineNums" class="pr-4 select-none text-right align-top" :style="{ color: currentTheme.comment, fontFamily: 'monospace', opacity: 0.5 }">{{ i + 1 }}</td>
+                          <td class="whitespace-pre" style="font-family: monospace"><span v-for="(token, j) in line" :key="j" :style="{ color: token.color }">{{ token.text }}</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Lorem Ipsum -->
           <div v-if="activeTool === 'lorem'" class="space-y-3">
             <div class="flex items-center gap-3">
@@ -328,15 +402,16 @@ const tools = computed(() => [
   { id: 'json',      icon: '{ }',  color: '#F59E0B', name: t('toolbox.json'),      desc: t('toolbox.jsonDesc') },
   { id: 'base64',    icon: 'B64',  color: '#8B5CF6', name: t('toolbox.base64'),    desc: t('toolbox.base64Desc') },
   { id: 'url',       icon: '%',    color: '#3B82F6', name: t('toolbox.url'),       desc: t('toolbox.urlDesc') },
-  { id: 'timestamp', icon: '',    color: '#10B981', name: t('toolbox.timestamp'), desc: t('toolbox.timestampDesc') },
+  { id: 'timestamp', icon: 'T',    color: '#10B981', name: t('toolbox.timestamp'), desc: t('toolbox.timestampDesc') },
   { id: 'uuid',      icon: '#',    color: '#EC4899', name: t('toolbox.uuid'),      desc: t('toolbox.uuidDesc') },
-  { id: 'color',     icon: '',    color: '#F43F5E', name: t('toolbox.color'),     desc: t('toolbox.colorDesc') },
+  { id: 'color',     icon: 'Rgb',  color: '#F43F5E', name: t('toolbox.color'),     desc: t('toolbox.colorDesc') },
   { id: 'wordcount', icon: 'Aa',   color: '#6366F1', name: t('toolbox.wordcount'), desc: t('toolbox.wordcountDesc') },
   { id: 'hash',      icon: '#!',   color: '#0EA5E9', name: t('toolbox.hash'),      desc: t('toolbox.hashDesc') },
   { id: 'regex',     icon: '.*',   color: '#D97706', name: t('toolbox.regex'),     desc: t('toolbox.regexDesc') },
   { id: 'diff',      icon: '+-',   color: '#059669', name: t('toolbox.diff'),      desc: t('toolbox.diffDesc') },
-  { id: 'datecalc',  icon: '',   color: '#0D9488', name: t('toolbox.datecalc'),  desc: t('toolbox.datecalcDesc') },
+  { id: 'datecalc',  icon: 'Cal',  color: '#0D9488', name: t('toolbox.datecalc'),  desc: t('toolbox.datecalcDesc') },
   { id: 'sql',       icon: 'SQL',  color: '#2563EB', name: t('toolbox.sql'),       desc: t('toolbox.sqlDesc') },
+  { id: 'codeimg',   icon: '</>',  color: '#6D28D9', name: t('toolbox.codeimg'),   desc: t('toolbox.codeimgDesc') },
   { id: 'lorem',     icon: 'Lp',   color: '#7C3AED', name: t('toolbox.lorem'),     desc: t('toolbox.loremDesc') },
 ])
 
@@ -691,6 +766,263 @@ function minifySql() {
   result = result.replace(/\s+/g, ' ').trim()
   strings.forEach((s, i) => { result = result.replace(`__STR${i}__`, s) })
   sqlOutput.value = result
+}
+
+// === Code Image ===
+const codeImgInput = ref('function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\n// Print first 10 numbers\nfor (let i = 0; i < 10; i++) {\n  console.log(fibonacci(i));\n}')
+const codeImgLang = ref('javascript')
+const codeImgTheme = ref('monokai')
+const codeImgFontSize = ref(14)
+const codeImgLineNums = ref(true)
+
+const codeImgLangs = [
+  { id: 'javascript', name: 'JavaScript' },
+  { id: 'typescript', name: 'TypeScript' },
+  { id: 'python', name: 'Python' },
+  { id: 'java', name: 'Java' },
+  { id: 'go', name: 'Go' },
+  { id: 'rust', name: 'Rust' },
+  { id: 'sql', name: 'SQL' },
+  { id: 'html', name: 'HTML' },
+  { id: 'css', name: 'CSS' },
+  { id: 'json', name: 'JSON' },
+  { id: 'shell', name: 'Shell' },
+  { id: 'csharp', name: 'C#' },
+  { id: 'cpp', name: 'C/C++' },
+  { id: 'php', name: 'PHP' },
+  { id: 'ruby', name: 'Ruby' },
+  { id: 'swift', name: 'Swift' },
+  { id: 'kotlin', name: 'Kotlin' },
+]
+
+const codeImgLangName = computed(() => codeImgLangs.find(l => l.id === codeImgLang.value)?.name || '')
+
+const CODE_THEMES = {
+  monokai:   { name: 'Monokai',         bg: '#272822', chrome: '#1e1f1c', text: '#f8f8f2', keyword: '#f92672', string: '#e6db74', comment: '#75715e', number: '#ae81ff', func: '#a6e22e', operator: '#f92672', type: '#66d9ef', tag: '#f92672', attr: '#a6e22e' },
+  dracula:   { name: 'Dracula',          bg: '#282a36', chrome: '#21222c', text: '#f8f8f2', keyword: '#ff79c6', string: '#f1fa8c', comment: '#6272a4', number: '#bd93f9', func: '#50fa7b', operator: '#ff79c6', type: '#8be9fd', tag: '#ff79c6', attr: '#50fa7b' },
+  onedark:   { name: 'One Dark',         bg: '#282c34', chrome: '#21252b', text: '#abb2bf', keyword: '#c678dd', string: '#98c379', comment: '#5c6370', number: '#d19a66', func: '#61afef', operator: '#56b6c2', type: '#e5c07b', tag: '#e06c75', attr: '#d19a66' },
+  github:    { name: 'GitHub Light',     bg: '#ffffff', chrome: '#f6f8fa', text: '#24292e', keyword: '#d73a49', string: '#032f62', comment: '#6a737d', number: '#005cc5', func: '#6f42c1', operator: '#d73a49', type: '#005cc5', tag: '#22863a', attr: '#6f42c1' },
+  solarized: { name: 'Solarized Light',  bg: '#fdf6e3', chrome: '#eee8d5', text: '#657b83', keyword: '#859900', string: '#2aa198', comment: '#93a1a1', number: '#d33682', func: '#268bd2', operator: '#859900', type: '#b58900', tag: '#268bd2', attr: '#b58900' },
+  nord:      { name: 'Nord',             bg: '#2e3440', chrome: '#272c36', text: '#d8dee9', keyword: '#81a1c1', string: '#a3be8c', comment: '#616e88', number: '#b48ead', func: '#88c0d0', operator: '#81a1c1', type: '#8fbcbb', tag: '#81a1c1', attr: '#8fbcbb' },
+  vitesse:   { name: 'Vitesse Dark',     bg: '#121212', chrome: '#0a0a0a', text: '#dbd7ca', keyword: '#4d9375', string: '#c98a7d', comment: '#758575', number: '#4c9a91', func: '#80a665', operator: '#cb7676', type: '#5da5e1', tag: '#4d9375', attr: '#b8a965' },
+}
+
+const currentTheme = computed(() => CODE_THEMES[codeImgTheme.value] || CODE_THEMES.monokai)
+
+// Language keyword sets
+const LANG_KEYWORDS = {
+  javascript: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|this|class|extends|import|export|default|from|async|await|try|catch|finally|throw|typeof|instanceof|in|of|null|undefined|true|false|yield|delete|void)\b/g,
+  typescript: /\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|this|class|extends|import|export|default|from|async|await|try|catch|finally|throw|typeof|instanceof|in|of|null|undefined|true|false|yield|delete|void|interface|type|enum|implements|abstract|private|protected|public|static|readonly|as|is|keyof|infer|never|unknown|any)\b/g,
+  python: /\b(def|class|return|if|elif|else|for|while|break|continue|import|from|as|try|except|finally|raise|with|yield|lambda|pass|and|or|not|in|is|None|True|False|self|async|await|global|nonlocal|del|assert)\b/g,
+  java: /\b(public|private|protected|static|final|abstract|class|interface|extends|implements|return|if|else|for|while|do|switch|case|break|continue|new|this|super|try|catch|finally|throw|throws|import|package|void|int|long|double|float|boolean|char|byte|short|String|null|true|false|instanceof|synchronized|volatile|transient)\b/g,
+  go: /\b(func|return|if|else|for|range|switch|case|break|continue|go|defer|select|chan|map|struct|interface|type|package|import|var|const|nil|true|false|make|append|len|cap|new|delete|panic|recover)\b/g,
+  rust: /\b(fn|let|mut|return|if|else|for|while|loop|match|break|continue|struct|enum|impl|trait|use|mod|pub|self|super|crate|as|in|ref|move|async|await|unsafe|where|type|const|static|true|false|None|Some|Ok|Err|Box|Vec|String|Option|Result)\b/g,
+  sql: /\b(SELECT|FROM|WHERE|AND|OR|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|ALTER|DROP|GROUP|BY|ORDER|HAVING|LIMIT|UNION|DISTINCT|EXISTS|BETWEEN|LIKE|IN|IS|NULL|NOT|CASE|WHEN|THEN|ELSE|END|COUNT|SUM|AVG|MIN|MAX|WITH|ASC|DESC)\b/gi,
+  html: /\b(html|head|body|div|span|class|id|style|src|href|alt|title|type|name|value|placeholder|action|method)\b/g,
+  css: /\b(display|position|width|height|margin|padding|border|color|background|font|text|flex|grid|align|justify|overflow|opacity|transition|transform|animation|z-index|none|auto|inherit|initial|important)\b/g,
+  json: /("(?:[^"\\]|\\.)*")\s*:/g,
+  shell: /\b(if|then|else|elif|fi|for|do|done|while|until|case|esac|function|return|exit|echo|export|source|alias|cd|ls|grep|awk|sed|cat|chmod|chown|mkdir|rm|cp|mv|sudo|apt|yum|brew|npm|pip|git)\b/g,
+  csharp: /\b(using|namespace|class|public|private|protected|static|void|int|string|bool|var|new|return|if|else|for|foreach|while|switch|case|break|try|catch|finally|throw|async|await|null|true|false|this|base|override|virtual|abstract|interface|enum|struct|readonly|const|delegate|event|get|set|value|yield)\b/g,
+  cpp: /\b(include|define|int|void|char|float|double|bool|long|short|unsigned|signed|const|static|class|struct|enum|union|public|private|protected|virtual|override|return|if|else|for|while|do|switch|case|break|continue|new|delete|this|nullptr|true|false|template|typename|namespace|using|auto|sizeof|typedef|inline|extern|throw|try|catch)\b/g,
+  php: /\b(function|class|public|private|protected|static|return|if|else|elseif|for|foreach|while|switch|case|break|continue|new|this|echo|print|require|include|use|namespace|try|catch|finally|throw|null|true|false|array|string|int|float|bool|void|self|parent|extends|implements|abstract|interface|trait|const|var|isset|unset|empty)\b/g,
+  ruby: /\b(def|class|module|return|if|elsif|else|unless|for|while|until|do|end|begin|rescue|ensure|raise|yield|block_given|require|include|extend|attr_accessor|attr_reader|attr_writer|self|super|nil|true|false|and|or|not|in|puts|print|lambda|proc)\b/g,
+  swift: /\b(func|class|struct|enum|protocol|extension|return|if|else|guard|for|while|repeat|switch|case|break|continue|let|var|import|self|super|nil|true|false|try|catch|throw|throws|async|await|public|private|internal|fileprivate|open|static|override|init|deinit|subscript|typealias|associatedtype|where|in|is|as|Any|Self|some)\b/g,
+  kotlin: /\b(fun|class|object|interface|return|if|else|when|for|while|do|break|continue|val|var|import|package|this|super|null|true|false|try|catch|finally|throw|is|as|in|by|constructor|init|companion|data|sealed|enum|abstract|open|override|private|protected|public|internal|suspend|inline|crossinline|noinline|reified|typealias|lateinit|lazy)\b/g,
+}
+
+function tokenizeLine(line, lang) {
+  const theme = currentTheme.value
+  const tokens = []
+
+  if (!line) { tokens.push({ text: ' ', color: theme.text }); return tokens }
+
+  // Build regex for all token types
+  const patterns = []
+
+  // Comments
+  if (['javascript','typescript','java','go','rust','css','csharp','cpp','php','swift','kotlin'].includes(lang)) {
+    patterns.push({ re: /\/\/.*$/g, color: theme.comment })
+    patterns.push({ re: /\/\*[\s\S]*?\*\//g, color: theme.comment })
+  }
+  if (['python','ruby','shell'].includes(lang)) patterns.push({ re: /#.*$/g, color: theme.comment })
+  if (lang === 'html') patterns.push({ re: /<!--[\s\S]*?-->/g, color: theme.comment })
+  if (lang === 'sql') patterns.push({ re: /--.*$/g, color: theme.comment })
+
+  // Strings
+  patterns.push({ re: /"(?:[^"\\]|\\.)*"/g, color: theme.string })
+  patterns.push({ re: /'(?:[^'\\]|\\.)*'/g, color: theme.string })
+  if (['javascript','typescript','python','ruby','shell','kotlin'].includes(lang)) {
+    patterns.push({ re: /`(?:[^`\\]|\\.)*`/g, color: theme.string })
+  }
+
+  // Numbers
+  patterns.push({ re: /\b\d+\.?\d*(?:e[+-]?\d+)?\b/gi, color: theme.number })
+
+  // HTML tags
+  if (lang === 'html') {
+    patterns.push({ re: /<\/?[a-zA-Z][a-zA-Z0-9]*\b/g, color: theme.tag })
+    patterns.push({ re: /\/?>/g, color: theme.tag })
+  }
+
+  // Keywords
+  const kwPattern = LANG_KEYWORDS[lang]
+  if (kwPattern) patterns.push({ re: new RegExp(kwPattern.source, kwPattern.flags), color: theme.keyword })
+
+  // Function calls
+  patterns.push({ re: /\b[a-zA-Z_]\w*(?=\s*\()/g, color: theme.func })
+
+  // Find all matches, sort by position
+  const allMatches = []
+  for (const p of patterns) {
+    const re = new RegExp(p.re.source, p.re.flags)
+    let m
+    while ((m = re.exec(line)) !== null) {
+      allMatches.push({ start: m.index, end: m.index + m[0].length, text: m[0], color: p.color })
+      if (!m[0]) break
+    }
+  }
+  allMatches.sort((a, b) => a.start - b.start || b.end - a.end)
+
+  // Remove overlapping matches (earlier/longer wins)
+  const filtered = []
+  let lastEnd = 0
+  for (const m of allMatches) {
+    if (m.start >= lastEnd) {
+      filtered.push(m)
+      lastEnd = m.end
+    }
+  }
+
+  // Build token list with plain text gaps
+  let pos = 0
+  for (const m of filtered) {
+    if (m.start > pos) tokens.push({ text: line.slice(pos, m.start), color: theme.text })
+    tokens.push({ text: m.text, color: m.color })
+    pos = m.end
+  }
+  if (pos < line.length) tokens.push({ text: line.slice(pos), color: theme.text })
+  if (tokens.length === 0) tokens.push({ text: ' ', color: theme.text })
+
+  return tokens
+}
+
+const highlightedLines = computed(() => {
+  const lines = codeImgInput.value.split('\n')
+  return lines.map(line => tokenizeLine(line, codeImgLang.value))
+})
+
+async function exportCodeImage() {
+  const theme = currentTheme.value
+  const lines = highlightedLines.value
+  const fontSize = codeImgFontSize.value
+  const lineHeight = fontSize * 1.6
+  const font = `${fontSize}px monospace`
+  const padding = 24
+  const chromeHeight = 40
+  const showLineNums = codeImgLineNums.value
+
+  // Measure text widths
+  const measureCanvas = document.createElement('canvas')
+  const mctx = measureCanvas.getContext('2d')
+  mctx.font = font
+
+  const lineNumWidth = showLineNums ? mctx.measureText(String(lines.length)).width + 20 : 0
+
+  let maxLineWidth = 0
+  for (const line of lines) {
+    const text = line.map(t => t.text).join('')
+    const w = mctx.measureText(text).width
+    if (w > maxLineWidth) maxLineWidth = w
+  }
+
+  const canvasWidth = Math.max(maxLineWidth + lineNumWidth + padding * 2 + 20, 400)
+  const canvasHeight = chromeHeight + lines.length * lineHeight + padding * 2
+
+  const canvas = document.createElement('canvas')
+  const dpr = window.devicePixelRatio || 2
+  canvas.width = canvasWidth * dpr
+  canvas.height = canvasHeight * dpr
+  const ctx = canvas.getContext('2d')
+  ctx.scale(dpr, dpr)
+
+  // Background with rounded corners
+  const radius = 12
+  ctx.beginPath()
+  ctx.moveTo(radius, 0)
+  ctx.lineTo(canvasWidth - radius, 0)
+  ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, radius)
+  ctx.lineTo(canvasWidth, canvasHeight - radius)
+  ctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - radius, canvasHeight)
+  ctx.lineTo(radius, canvasHeight)
+  ctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - radius)
+  ctx.lineTo(0, radius)
+  ctx.quadraticCurveTo(0, 0, radius, 0)
+  ctx.closePath()
+  ctx.fillStyle = theme.bg
+  ctx.fill()
+
+  // Chrome bar
+  ctx.fillStyle = theme.chrome
+  ctx.beginPath()
+  ctx.moveTo(radius, 0)
+  ctx.lineTo(canvasWidth - radius, 0)
+  ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, radius)
+  ctx.lineTo(canvasWidth, chromeHeight)
+  ctx.lineTo(0, chromeHeight)
+  ctx.lineTo(0, radius)
+  ctx.quadraticCurveTo(0, 0, radius, 0)
+  ctx.closePath()
+  ctx.fill()
+
+  // Traffic light dots
+  const dotY = chromeHeight / 2, dotR = 6
+  ctx.fillStyle = '#FF5F57'; ctx.beginPath(); ctx.arc(16 + dotR, dotY, dotR, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = '#FEBC2E'; ctx.beginPath(); ctx.arc(16 + dotR * 3 + 4, dotY, dotR, 0, Math.PI * 2); ctx.fill()
+  ctx.fillStyle = '#28C840'; ctx.beginPath(); ctx.arc(16 + dotR * 5 + 8, dotY, dotR, 0, Math.PI * 2); ctx.fill()
+
+  // Language label
+  ctx.font = `${fontSize - 2}px sans-serif`
+  ctx.fillStyle = theme.comment
+  ctx.fillText(codeImgLangName.value, 16 + dotR * 7 + 20, dotY + (fontSize - 2) / 3)
+
+  // Code lines
+  ctx.font = font
+  ctx.textBaseline = 'top'
+  const startY = chromeHeight + padding
+
+  lines.forEach((tokens, i) => {
+    const y = startY + i * lineHeight
+    let x = padding
+
+    // Line numbers
+    if (showLineNums) {
+      ctx.fillStyle = theme.comment
+      ctx.globalAlpha = 0.5
+      const numStr = String(i + 1)
+      const numW = mctx.measureText(numStr).width
+      ctx.fillText(numStr, padding + lineNumWidth - numW - 12, y)
+      ctx.globalAlpha = 1
+      x = padding + lineNumWidth
+    }
+
+    // Tokens
+    for (const token of tokens) {
+      ctx.fillStyle = token.color
+      ctx.fillText(token.text, x, y)
+      x += mctx.measureText(token.text).width
+    }
+  })
+
+  // Download
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `code-${Date.now()}.png`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(t('toolbox.imageExported'))
+  }, 'image/png')
 }
 
 // === Lorem Ipsum ===
