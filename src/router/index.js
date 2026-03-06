@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/toolbox',
+      name: 'toolbox',
+      component: () => import('../views/ToolboxView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('../views/SettingsView.vue'),

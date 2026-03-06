@@ -64,7 +64,7 @@ const KEYWORD_RULES = [
   { pattern: /\bcss\b|tailwind|sass|scss|styled/i,             tags: ['CSS'] },
   { pattern: /\bhtml\b|dom\b|web\s?component/i,                tags: ['HTML'] },
   { pattern: /docker|k8s|kubernetes|容器/i,                     tags: ['DevOps'] },
-  { pattern: /ci[\s/]cd|github\s?actions|jenkins/i,            tags: ['DevOps'] },
+  { pattern: /ci[\s/]cd|github\s?actions|gitlab\s?ci|jenkins/i, tags: ['DevOps'] },
   { pattern: /\bapi\b|rest\b|graphql|grpc/i,                   tags: ['API'] },
   { pattern: /数据库|database|\bsql\b|mongo|redis|postgres/i,   tags: ['Database'] },
   { pattern: /machine\s?learning|深度学习|\bai\b|gpt|llm|大模型/i, tags: ['AI/ML'] },
