@@ -27,7 +27,16 @@ const PORT = process.env.PORT || 3001;
 
 // 中间件
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow Chrome extension origins
+    if (origin.startsWith('chrome-extension://')) return callback(null, true);
+    // Allow configured client URL
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    if (origin === clientUrl) return callback(null, true);
+    callback(null, false);
+  },
   credentials: true
 }));
 app.use(bodyParser.json({ limit: '50mb'}));

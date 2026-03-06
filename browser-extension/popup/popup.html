@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koby</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Login View -->
+  <div id="login-view" class="view" style="display:none">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">K</div>
+        <span class="logo-text">Koby</span>
+      </div>
+      <p class="subtitle">Sign in to save bookmarks</p>
+    </div>
+    <form id="login-form">
+      <div class="field">
+        <label>Server URL</label>
+        <input type="url" id="api-base" placeholder="https://your-koby-server.com" required />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="email@example.com" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Password" required />
+      </div>
+      <div id="login-error" class="error" style="display:none"></div>
+      <button type="submit" id="login-btn" class="btn btn-primary btn-full">
+        Sign In
+      </button>
+    </form>
+  </div>
+
+  <!-- Save Bookmark View -->
+  <div id="save-view" class="view" style="display:none">
+    <div class="header-bar">
+      <div class="header-left">
+        <div class="logo-icon-sm">K</div>
+        <span class="header-title">Save Bookmark</span>
+      </div>
+      <button id="logout-btn" class="btn-icon" title="Sign out">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+      </button>
+    </div>
+
+    <!-- Page Info -->
+    <div class="page-info">
+      <img id="page-favicon" class="favicon" src="" alt="" />
+      <div class="page-meta">
+        <div id="page-title" class="page-title"></div>
+        <div id="page-url" class="page-url"></div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="save-form">
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="bookmark-title" required />
+      </div>
+      <div class="field">
+        <label>Collection</label>
+        <select id="bookmark-collection"></select>
+      </div>
+      <div class="field">
+        <label>Description <span class="optional">(optional)</span></label>
+        <textarea id="bookmark-desc" rows="2" placeholder="Brief description..."></textarea>
+      </div>
+      <div class="field">
+        <label>Tags <span class="optional">(comma separated)</span></label>
+        <input type="text" id="bookmark-tags" placeholder="work, dev, design..." />
+      </div>
+
+      <!-- Suggested Tags -->
+      <div id="suggested-tags" class="suggested-tags" style="display:none">
+        <span class="suggested-label">Suggested:</span>
+        <div id="suggested-tags-list" class="tags-list"></div>
+      </div>
+
+      <!-- Duplicate Warning -->
+      <div id="duplicate-warning" class="warning" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span id="duplicate-text"></span>
+      </div>
+
+      <div id="save-error" class="error" style="display:none"></div>
+
+      <div class="actions">
+        <button type="submit" id="save-btn" class="btn btn-primary btn-full">
+          Save Bookmark
+        </button>
+      </div>
+    </form>
+
+    <!-- Success state -->
+    <div id="save-success" class="success" style="display:none">
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+      </div>
+      <div class="success-text">Bookmark saved!</div>
+      <button id="save-another-btn" class="btn btn-outline btn-full">Save Another</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading-view" class="view loading-view">
+    <div class="spinner"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
