@@ -7,10 +7,17 @@
           <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{{ t('col.manageTitle') }}</h1>
           <p class="mt-1.5 text-gray-500 dark:text-gray-400 text-sm">{{ t('col.manageSubtitle') }}</p>
         </div>
-        <button @click="showAddCollectionModal = true" class="btn btn-primary">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-          {{ t('col.createCollection') }}
-        </button>
+        <div class="flex items-center gap-2">
+          <input type="file" ref="importFileInput" accept=".json" class="hidden" @change="handleImportFile" />
+          <button @click="$refs.importFileInput.click()" class="btn btn-outline" :disabled="importing">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+            {{ importing ? t('col.importing') : t('col.importCollection') }}
+          </button>
+          <button @click="showAddCollectionModal = true" class="btn btn-primary">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            {{ t('col.createCollection') }}
+          </button>
+        </div>
       </div>
 
       <!-- Collections grid -->
@@ -31,6 +38,14 @@
           </router-link>
           <!-- Actions -->
           <div class="px-5 pb-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button @click="shareCollection(collection)" class="text-xs text-gray-400 hover:text-primary transition-colors">
+              <svg class="w-4 h-4 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              {{ t('col.shareCollection') }}
+            </button>
+            <button @click="exportCollection(collection)" class="text-xs text-gray-400 hover:text-primary transition-colors">
+              <svg class="w-4 h-4 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              {{ t('col.exportCollection') }}
+            </button>
             <button @click="editCollection(collection)" class="text-xs text-gray-400 hover:text-primary transition-colors">
               <svg class="w-4 h-4 inline mr-0.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
               {{ t('col.editCollection') }}
@@ -67,10 +82,18 @@
               <p class="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{{ t('col.bookmarkCount', { n: processedBookmarks.length }) }}</p>
             </div>
           </div>
-          <button @click="showAddBookmarkModal = true" class="btn btn-primary">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-            {{ t('col.addBookmark') }}
-          </button>
+          <div class="flex items-center gap-2">
+            <button @click="shareCollection(currentCollection)" class="btn btn-outline px-2.5" :title="t('col.shareCollection')">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+            </button>
+            <button @click="exportCollection(currentCollection)" class="btn btn-outline px-2.5" :title="t('col.exportCollection')">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            </button>
+            <button @click="showAddBookmarkModal = true" class="btn btn-primary">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+              {{ t('col.addBookmark') }}
+            </button>
+          </div>
         </div>
 
         <!-- Toolbar -->
@@ -486,4 +509,87 @@ function onEscape(e) {
 }
 onMounted(() => document.addEventListener('keydown', onEscape))
 onUnmounted(() => { document.removeEventListener('keydown', onEscape); if (observer) observer.disconnect() })
+
+// === Export / Import / Share ===
+const importFileInput = ref(null)
+const importing = ref(false)
+
+function exportCollection(collection) {
+  const collectionBookmarks = bookmarks.value.filter(b => b.collection_id === collection.id)
+  const data = {
+    collection: { name: collection.name, icon: collection.icon, color: collection.color },
+    bookmarks: collectionBookmarks.map(b => ({
+      title: b.title, url: b.url, description: b.description || '',
+      favicon: b.favicon || '', tags: b.tags || [], is_pinned: b.is_pinned || false,
+    })),
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `koby-${collection.name}-${new Date().toISOString().split('T')[0]}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  toast.success(t('col.exportSuccess'))
+}
+
+async function handleImportFile(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  importing.value = true
+  try {
+    const text = await file.text()
+    const data = JSON.parse(text)
+    if (!data.collection || !Array.isArray(data.bookmarks)) {
+      toast.error(t('col.importInvalidFormat')); return
+    }
+    const newCol = await bookmarkStore.addCollection({
+      name: data.collection.name,
+      icon: data.collection.icon || '📁',
+      color: data.collection.color || '#3B82F6',
+    })
+    for (const b of data.bookmarks) {
+      await bookmarkStore.addBookmark({
+        title: b.title, url: b.url, description: b.description || '',
+        collection_id: newCol.id, favicon: b.favicon || null,
+        tags: b.tags || [], is_pinned: b.is_pinned || false,
+      })
+    }
+    toast.success(t('col.importSuccess'))
+  } catch {
+    toast.error(t('col.importFailed'))
+  } finally {
+    importing.value = false
+    if (importFileInput.value) importFileInput.value.value = ''
+  }
+}
+
+async function shareCollection(collection) {
+  const collectionBookmarks = bookmarks.value.filter(b => b.collection_id === collection.id)
+  const icon = collection.icon || '📁'
+  const lines = [`${icon} ${collection.name}`, '─'.repeat(20)]
+  collectionBookmarks.forEach(b => {
+    lines.push(b.title)
+    lines.push(`  ${b.url}`)
+    if (b.description) lines.push(`  ${b.description}`)
+    lines.push('')
+  })
+  lines.push(`${collectionBookmarks.length} bookmarks · Exported from Koby`)
+  const text = lines.join('\n')
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success(t('col.shareSuccess'))
+  } catch {
+    // Fallback for non-HTTPS environments
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+    toast.success(t('col.shareSuccess'))
+  }
+}
 </script>
