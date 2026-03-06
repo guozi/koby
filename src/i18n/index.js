@@ -70,6 +70,7 @@ const messages = {
     'bf.titlePlaceholder': '网站标题',
     'bf.descPlaceholder': '简短描述...',
     'bf.tagsPlaceholder': '工作, 学习, 设计...',
+    'bf.suggested': '建议',
     'bf.loadMore': '加载更多',
     'bf.fetching': '正在获取...',
 
@@ -257,6 +258,7 @@ const messages = {
     'bf.titlePlaceholder': 'Website title',
     'bf.descPlaceholder': 'Brief description...',
     'bf.tagsPlaceholder': 'work, study, design...',
+    'bf.suggested': 'Suggested',
     'bf.loadMore': 'Load more',
     'bf.fetching': 'Fetching...',
 

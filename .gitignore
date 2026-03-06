@@ -32,7 +32,6 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
-CC_FOR_CHENYUN.md
 
 # Testing
 /coverage
@@ -43,3 +42,6 @@ CC_FOR_CHENYUN.md
 .env.development.local
 .env.test.local
 .env.production.local
+
+CC_FOR_CHENYUN.md
+docs/growth-strategy.md

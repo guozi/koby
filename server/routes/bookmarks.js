@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { parseBookmarksHtml } = require('../utils/bookmarkParser');
 const { generateId } = require('../utils/id');
+const { autoTag } = require('../utils/autoTagger');
 
 function isSafeUrl(url) {
   try {
@@ -28,7 +29,8 @@ module.exports = (pool) => {
 
       const { getUrlMeta } = require('../utils/favicon');
       const meta = await getUrlMeta(url);
-      res.json(meta);
+      const suggestedTags = autoTag(url, meta.title, meta.description);
+      res.json({ ...meta, suggestedTags });
     } catch (error) {
       console.error('获取URL元数据失败:', error);
       res.status(500).json({ error: true, message: '获取URL元数据失败' });

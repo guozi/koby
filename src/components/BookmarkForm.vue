@@ -78,6 +78,14 @@
             </button>
           </span>
         </div>
+        <div v-if="unusedSuggestedTags.length > 0" class="flex flex-wrap items-center gap-1.5 mt-2">
+          <span class="text-xs text-gray-400">{{ t('bf.suggested') }}</span>
+          <button v-for="tag in unusedSuggestedTags" :key="tag" type="button" @click="addSuggestedTag(tag)"
+            class="inline-flex items-center gap-0.5 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 border border-dashed border-gray-300 dark:border-gray-600 transition-colors">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            {{ tag }}
+          </button>
+        </div>
       </div>
 
       <!-- Actions -->
@@ -117,11 +125,24 @@ onUnmounted(() => document.removeEventListener('keydown', onEscape))
 
 const formData = ref({ ...props.bookmark });
 const tagsInput = ref(props.bookmark.tags && Array.isArray(props.bookmark.tags) ? props.bookmark.tags.join(', ') : '');
+const suggestedTags = ref([]);
 
 const parsedTags = computed(() => {
   if (!tagsInput.value) return [];
   return tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
 });
+
+const unusedSuggestedTags = computed(() => {
+  const current = parsedTags.value.map(t => t.toLowerCase());
+  return suggestedTags.value.filter(t => !current.includes(t.toLowerCase()));
+});
+
+function addSuggestedTag(tag) {
+  const current = parsedTags.value;
+  if (!current.some(t => t.toLowerCase() === tag.toLowerCase())) {
+    tagsInput.value = [...current, tag].join(', ');
+  }
+}
 
 function removeTag(tagToRemove) {
   tagsInput.value = parsedTags.value.filter(tag => tag !== tagToRemove).join(', ');
@@ -160,6 +181,7 @@ async function fetchUrlMeta() {
       if (!formData.value.title && meta.title) formData.value.title = meta.title
       if (!formData.value.description && meta.description) formData.value.description = meta.description
       if (!formData.value.favicon && meta.favicon) formData.value.favicon = meta.favicon
+      if (meta.suggestedTags?.length) suggestedTags.value = meta.suggestedTags
     }
   } catch { /* ignore fetch errors */ }
   finally { fetchingMeta.value = false }
