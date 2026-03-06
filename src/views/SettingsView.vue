@@ -93,6 +93,37 @@
       <ImportExportPanel />
     </section>
 
+    <!-- Browser Extension -->
+    <section class="mb-6">
+      <h2 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{{ t('ext.title') }}</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-gray-600 dark:text-gray-300">{{ t('ext.subtitle') }}</p>
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <span v-for="(feature, i) in [t('ext.feature1'), t('ext.feature2'), t('ext.feature3'), t('ext.feature4')]" :key="i"
+                class="inline-flex items-center gap-1 text-2xs px-2 py-0.5 rounded-full bg-primary/5 dark:bg-primary/10 text-primary">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {{ feature }}
+              </span>
+            </div>
+            <div class="mt-4">
+              <a href="https://github.com/user/koby/releases" target="_blank" rel="noopener noreferrer"
+                class="btn btn-primary text-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                {{ t('ext.download') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Danger zone -->
     <section>
       <h2 class="text-xs font-semibold text-red-400 dark:text-red-500 uppercase tracking-wider mb-3">{{ t('settings.danger') }}</h2>

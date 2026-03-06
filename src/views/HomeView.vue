@@ -134,6 +134,79 @@
       <p class="mt-3 text-2xs text-gray-400 dark:text-gray-500">{{ t('home.noBookmarksHint') }}</p>
     </section>
 
+    <!-- Browser Extension Guide -->
+    <section v-if="!extensionDismissed" class="mt-10">
+      <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
+        <!-- Dismiss button -->
+        <button @click="dismissExtension"
+          class="absolute top-3 right-3 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 transition-colors z-10">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+
+        <div class="p-6 sm:p-8">
+          <!-- Header -->
+          <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('ext.title') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('ext.subtitle') }}</p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-6">
+            <!-- Steps -->
+            <div class="space-y-4">
+              <div v-for="(step, i) in [
+                { title: t('ext.step1Title'), desc: t('ext.step1Desc'), icon: '1' },
+                { title: t('ext.step2Title'), desc: t('ext.step2Desc'), icon: '2' },
+                { title: t('ext.step3Title'), desc: t('ext.step3Desc'), icon: '3' },
+              ]" :key="i" class="flex gap-3">
+                <div class="w-7 h-7 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  {{ step.icon }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ step.title }}</div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{{ step.desc }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Features -->
+            <div class="bg-white/60 dark:bg-gray-700/30 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50">
+              <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{{ t('ext.features') }}</div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div v-for="(feature, i) in [
+                  { text: t('ext.feature1'), icon: 'bookmark' },
+                  { text: t('ext.feature2'), icon: 'menu' },
+                  { text: t('ext.feature3'), icon: 'duplicate' },
+                  { text: t('ext.feature4'), icon: 'tag' },
+                ]" :key="i" class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-xs text-gray-700 dark:text-gray-300 leading-snug">{{ feature.text }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-3 mt-6">
+            <a href="https://github.com/user/koby/releases" target="_blank" rel="noopener noreferrer"
+              class="btn btn-primary text-sm">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              {{ t('ext.download') }}
+            </a>
+            <button @click="dismissExtension" class="btn btn-outline text-sm">{{ t('ext.dismiss') }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Add bookmark modal -->
     <div v-if="showAddBookmarkModal" class="modal-overlay">
       <BookmarkForm
@@ -217,6 +290,12 @@ const editingBookmark = ref(null)
 const showDeleteConfirmModal = ref(false)
 const bookmarkToDelete = ref(null)
 const submitting = ref(false)
+
+const extensionDismissed = ref(localStorage.getItem('ext-guide-dismissed') === '1')
+function dismissExtension() {
+  extensionDismissed.value = true
+  localStorage.setItem('ext-guide-dismissed', '1')
+}
 
 function getCollection(collection_id) {
   return collections.value.find(c => c.id === collection_id) || null

@@ -205,6 +205,23 @@ const messages = {
     'home.pinned': '置顶书签',
     'home.pinnedDesc': '快速访问您置顶的重要书签',
 
+    // Extension Guide
+    'ext.title': '浏览器扩展',
+    'ext.subtitle': '一键保存网页书签，无需离开当前页面',
+    'ext.step1Title': '下载扩展',
+    'ext.step1Desc': '从项目仓库下载浏览器扩展文件包',
+    'ext.step2Title': '安装扩展',
+    'ext.step2Desc': '打开 chrome://extensions，开启「开发者模式」，点击「加载已解压的扩展程序」选择解压后的文件夹',
+    'ext.step3Title': '登录使用',
+    'ext.step3Desc': '点击扩展图标，输入服务器地址和账号登录即可使用',
+    'ext.features': '支持功能',
+    'ext.feature1': '一键保存当前页面',
+    'ext.feature2': '右键菜单快速保存',
+    'ext.feature3': '自动检测重复书签',
+    'ext.feature4': 'AI 智能标签建议',
+    'ext.download': '下载扩展',
+    'ext.dismiss': '知道了',
+
     // Toolbox
     'toolbox.title': '工具箱',
     'toolbox.subtitle': '常用在线小工具，提升日常效率',
@@ -473,6 +490,23 @@ const messages = {
     'pinned': 'Pinned',
     'home.pinned': 'Pinned',
     'home.pinnedDesc': 'Quick access to your pinned bookmarks',
+
+    // Extension Guide
+    'ext.title': 'Browser Extension',
+    'ext.subtitle': 'Save bookmarks with one click, without leaving the page',
+    'ext.step1Title': 'Download',
+    'ext.step1Desc': 'Download the browser extension package from the project repository',
+    'ext.step2Title': 'Install',
+    'ext.step2Desc': 'Open chrome://extensions, enable "Developer mode", click "Load unpacked" and select the extracted folder',
+    'ext.step3Title': 'Sign In & Use',
+    'ext.step3Desc': 'Click the extension icon, enter your server URL and credentials to start saving',
+    'ext.features': 'Features',
+    'ext.feature1': 'One-click save current page',
+    'ext.feature2': 'Right-click context menu',
+    'ext.feature3': 'Duplicate bookmark detection',
+    'ext.feature4': 'AI-powered tag suggestions',
+    'ext.download': 'Download Extension',
+    'ext.dismiss': 'Got it',
 
     // Toolbox
     'toolbox.title': 'Toolbox',
