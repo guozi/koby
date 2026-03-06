@@ -12,7 +12,29 @@
             {{ avatarInitial }}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.name }}</div>
+            <div class="flex items-center gap-2" v-if="!editingName">
+              <div class="text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.name }}</div>
+              <button @click="startEditName" class="p-1 rounded-lg text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" :title="t('settings.editName')">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </button>
+            </div>
+            <div class="flex items-center gap-2" v-else>
+              <input
+                ref="nameInputRef"
+                v-model="editNameValue"
+                :placeholder="t('settings.namePlaceholder')"
+                class="text-base font-semibold bg-transparent border-b-2 border-primary outline-none text-gray-900 dark:text-white py-0.5 w-40"
+                maxlength="50"
+                @keyup.enter="confirmEditName"
+                @keyup.escape="cancelEditName"
+              />
+              <button @click="confirmEditName" :disabled="savingName" class="p-1 rounded-lg text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              </button>
+              <button @click="cancelEditName" :disabled="savingName" class="p-1 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
             <div class="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{{ authStore.user?.email }}</div>
           </div>
           <button @click="authStore.logout()" class="btn btn-outline text-sm flex-shrink-0">
@@ -175,10 +197,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useBookmarkStore } from '../stores/bookmarks'
 import { useI18n } from '../i18n'
+import { useToastStore } from '../stores/toast'
 import { authAPI } from '../services/api'
 import ImportExportPanel from '../components/ImportExportPanel.vue'
 
@@ -187,6 +210,7 @@ const t = (key, params) => _t.value(key, params)
 
 const authStore = useAuthStore()
 const bookmarkStore = useBookmarkStore()
+const toast = useToastStore()
 
 const isMac = computed(() => navigator.platform.toUpperCase().includes('MAC'))
 
@@ -202,6 +226,41 @@ const avatarColor = computed(() => {
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
   return avatarColors[Math.abs(hash) % avatarColors.length]
 })
+
+const editingName = ref(false)
+const editNameValue = ref('')
+const savingName = ref(false)
+const nameInputRef = ref(null)
+
+function startEditName() {
+  editNameValue.value = authStore.user?.name || ''
+  editingName.value = true
+  nextTick(() => nameInputRef.value?.focus())
+}
+
+function cancelEditName() {
+  editingName.value = false
+  editNameValue.value = ''
+}
+
+async function confirmEditName() {
+  const name = editNameValue.value.trim()
+  if (!name) return
+  if (name === authStore.user?.name) {
+    cancelEditName()
+    return
+  }
+  savingName.value = true
+  try {
+    await authStore.updateProfile(name)
+    editingName.value = false
+    toast.success(t('settings.nameUpdated'))
+  } catch {
+    toast.error(t('settings.nameUpdateFailed'))
+  } finally {
+    savingName.value = false
+  }
+}
 
 const showDeleteAccountModal = ref(false)
 const deletePassword = ref('')
@@ -237,7 +296,10 @@ async function confirmDeleteAccount() {
 }
 
 function onEscape(e) {
-  if (e.key === 'Escape' && showDeleteAccountModal.value) closeDeleteModal()
+  if (e.key === 'Escape') {
+    if (editingName.value) cancelEditName()
+    if (showDeleteAccountModal.value) closeDeleteModal()
+  }
 }
 onMounted(() => document.addEventListener('keydown', onEscape))
 onUnmounted(() => document.removeEventListener('keydown', onEscape))

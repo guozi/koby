@@ -153,6 +153,11 @@ const messages = {
     'settings.deleteAccountFailed': '删除失败',
     'settings.passwordRequired': '请输入密码',
     'settings.passwordWrong': '密码错误',
+    'settings.editName': '修改昵称',
+    'settings.namePlaceholder': '输入新昵称',
+    'settings.nameUpdated': '昵称已更新',
+    'settings.nameRequired': '昵称不能为空',
+    'settings.nameUpdateFailed': '修改昵称失败',
     'settings.version': '版本',
 
     // Import/Export
@@ -445,6 +450,11 @@ const messages = {
     'settings.deleteAccountFailed': 'Deletion failed',
     'settings.passwordRequired': 'Password is required',
     'settings.passwordWrong': 'Incorrect password',
+    'settings.editName': 'Edit name',
+    'settings.namePlaceholder': 'Enter new name',
+    'settings.nameUpdated': 'Name updated',
+    'settings.nameRequired': 'Name is required',
+    'settings.nameUpdateFailed': 'Failed to update name',
     'settings.version': 'Version',
 
     'ie.export': 'Export',

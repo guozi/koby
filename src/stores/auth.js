@@ -27,6 +27,12 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('koby_user')
       router.push('/login')
     },
+    async updateProfile(name) {
+      const user = await authAPI.updateProfile({ name })
+      this.user = user
+      localStorage.setItem('koby_user', JSON.stringify(user))
+      return user
+    },
     async checkAuth() {
       if (!this.token) return false
       try {

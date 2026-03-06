@@ -204,6 +204,26 @@ module.exports = (pool) => {
     }
   });
 
+  // 修改昵称
+  router.put('/me', authMiddleware, async (req, res) => {
+    try {
+      const { name } = req.body;
+      if (!name || typeof name !== 'string' || name.trim().length === 0) {
+        return res.status(400).json({ error: true, message: '昵称不能为空' });
+      }
+      const trimmedName = name.trim();
+      if (trimmedName.length > MAX_NAME_LEN) {
+        return res.status(400).json({ error: true, message: `昵称不能超过 ${MAX_NAME_LEN} 个字符` });
+      }
+      await pool.query('UPDATE users SET name = ? WHERE id = ?', [trimmedName, req.userId]);
+      const [users] = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = ?', [req.userId]);
+      res.json(users[0]);
+    } catch (error) {
+      console.error('修改昵称失败:', error);
+      res.status(500).json({ error: true, message: '修改昵称失败' });
+    }
+  });
+
   // 重新发送验证邮件
   router.post('/resend-verification', resendLimiter, async (req, res) => {
     try {
