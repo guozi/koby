@@ -66,8 +66,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
     async initialize() {
       try {
         this.loading = true;
-        await this.fetchCollections();
-        await this.fetchBookmarks();
+        await Promise.all([this.fetchCollections(), this.fetchBookmarks()]);
         this.error = null;
       } catch (error) {
         console.error('初始化数据失败:', error);

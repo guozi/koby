@@ -118,7 +118,7 @@ async function handleLogin() {
     const data = await authAPI.login(loginForm.value)
     authStore.setAuth(data.token, data.user)
     bookmarkStore.resetState()
-    await bookmarkStore.initialize()
+    bookmarkStore.initialize()
     router.push('/')
   } catch (err) {
     const resp = err.response?.data

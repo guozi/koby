@@ -10,6 +10,7 @@ const messages = {
     'nav.categories': '分类',
     'nav.logout': '退出登录',
     'nav.toolbox': '工具箱',
+    'nav.profile': '个人设置',
 
     // Home
     'home.title': '我的书签',
@@ -311,6 +312,7 @@ const messages = {
     'nav.categories': 'Categories',
     'nav.logout': 'Sign out',
     'nav.toolbox': 'Toolbox',
+    'nav.profile': 'Settings',
 
     'home.title': 'My Bookmarks',
     'home.subtitle': 'Explore your curated bookmarks. Organize, search, and manage all your bookmarks in one place.',
