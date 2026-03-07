@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { generateId } = require('../utils/id');
 
+const MAX_COLLECTIONS_PER_USER = 50;
+
 module.exports = (pool) => {
   // 获取所有收藏夹（当前用户）
   router.get('/', async (req, res) => {
@@ -44,6 +46,15 @@ module.exports = (pool) => {
 
       if (!name) {
         return res.status(400).json({ error: true, code: 'COLLECTION_NAME_REQUIRED', message: '收藏夹名称是必填项' });
+      }
+
+      // 数量限制检查
+      const [countResult] = await pool.query(
+        'SELECT COUNT(*) as total FROM collections WHERE user_id = ?',
+        [req.userId]
+      );
+      if (countResult[0].total >= MAX_COLLECTIONS_PER_USER) {
+        return res.status(403).json({ error: true, code: 'COLLECTION_LIMIT_REACHED', message: `收藏夹数量已达上限（${MAX_COLLECTIONS_PER_USER}）` });
       }
 
       // 验证父收藏夹归属

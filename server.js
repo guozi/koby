@@ -39,8 +39,8 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(bodyParser.json({ limit: '50mb'}));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 
 // 认证路由限流：每 IP 15 分钟最多 20 次
 const authLimiter = rateLimit({

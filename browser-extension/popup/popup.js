@@ -22,9 +22,13 @@ async function init() {
   showView('loading');
 
   // Load stored credentials
-  const stored = await chrome.storage.local.get(['apiBase', 'token', 'user']);
+  const stored = await chrome.storage.local.get(['apiBase', 'encryptedToken', 'user']);
   apiBase = stored.apiBase || '';
-  token = stored.token || '';
+
+  // Decrypt token
+  if (stored.encryptedToken) {
+    token = await decryptToken(stored.encryptedToken) || '';
+  }
 
   if (apiBase && token) {
     // Verify token is still valid
@@ -33,7 +37,7 @@ async function init() {
       await loadSaveView();
     } catch {
       // Token expired
-      await chrome.storage.local.remove(['token', 'user']);
+      await chrome.storage.local.remove(['encryptedToken', 'user']);
       token = '';
       showView('login');
       if (apiBase) $('#api-base').value = apiBase;
@@ -104,7 +108,8 @@ $('#login-form').addEventListener('submit', async (e) => {
     if (!data.token) throw new Error('Invalid response from server');
 
     token = data.token;
-    await chrome.storage.local.set({ apiBase, token, user: data.user });
+    const encryptedToken = await encryptToken(token);
+    await chrome.storage.local.set({ apiBase, encryptedToken, user: data.user });
     await loadSaveView();
   } catch (err) {
     errorEl.textContent = err.message;
@@ -118,7 +123,7 @@ $('#login-form').addEventListener('submit', async (e) => {
 // ─── Logout ───
 
 $('#logout-btn').addEventListener('click', async () => {
-  await chrome.storage.local.remove(['token', 'user']);
+  await chrome.storage.local.remove(['encryptedToken', 'user']);
   token = '';
   collections = [];
   showView('login');

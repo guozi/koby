@@ -28,8 +28,8 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

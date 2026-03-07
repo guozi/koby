@@ -5,6 +5,8 @@ const { generateId } = require('../utils/id');
 const { autoTag } = require('../utils/autoTagger');
 const { isSafeUrl, isSafeUrlProtocol } = require('../utils/urlSafety');
 
+const MAX_BOOKMARKS_PER_USER = 500;
+
 module.exports = (pool) => {
   async function ensureCollectionOwnedByUser(collectionId, userId) {
     const [rows] = await pool.query(
@@ -84,6 +86,15 @@ module.exports = (pool) => {
 
       if (!title || !url || !collection_id) {
         return res.status(400).json({ error: true, code: 'BOOKMARK_FIELDS_REQUIRED', message: '标题、URL和收藏夹ID是必填项' });
+      }
+
+      // 数量限制检查
+      const [countResult] = await pool.query(
+        'SELECT COUNT(*) as total FROM bookmarks WHERE user_id = ?',
+        [req.userId]
+      );
+      if (countResult[0].total >= MAX_BOOKMARKS_PER_USER) {
+        return res.status(403).json({ error: true, code: 'BOOKMARK_LIMIT_REACHED', message: `书签数量已达上限（${MAX_BOOKMARKS_PER_USER}）` });
       }
 
       if (!isSafeUrlProtocol(url)) {
