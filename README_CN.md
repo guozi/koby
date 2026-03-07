@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>简洁高效的书签管理工具</strong>
+  <strong>自托管书签管理器，内置开发者工具箱</strong>
 </p>
 
 <p align="center">
@@ -14,22 +14,53 @@
 
 ---
 
-Koby 是一个简洁高效的多用户书签管理工具，帮助您整理、分类和快速访问重要网页书签。支持用户注册登录、邮箱验证、收藏夹管理、标签系统、暗色主题等功能，数据存储在 Cloudflare D1 上，部署在 Vercel。
+Koby 是一个简洁高效的自托管书签管理器，适合个人和小团队使用。轻松整理、分类和快速访问您的网页书签。内置 21 个开发者常用小工具，全部在浏览器本地运行，数据不会离开您的设备。
 
 ## 功能特点
 
-- **用户认证** — 邮箱注册/登录，JWT 认证，邮箱验证，密码找回，多用户数据隔离
-- **收藏夹管理** — 树形嵌套收藏夹，自定义 emoji 图标和颜色，收藏夹颜色贯穿书签卡片
-- **书签管理** — 添加、编辑、删除、搜索、置顶，自动获取 Favicon 和元数据
-- **标签系统** — 为书签添加标签（`#tag` 样式），支持按标签筛选
-- **书签分享** — 一键复制书签标题和链接到剪贴板
+### 书签管理
+- **收藏夹** — 树形嵌套结构，自定义 emoji 图标和颜色
+- **标签系统** — `#tag` 风格标签，支持按标签筛选
+- **全局搜索** — `Ctrl+K` / `Cmd+K` 快捷键，客户端即时搜索 + 后端搜索
 - **URL 重复检测** — 新增书签时自动检测已存在的 URL
-- **视图切换** — 网格视图 / 列表视图，无限滚动懒加载
-- **全局搜索** — Ctrl+K / Cmd+K 快捷键，客户端即时搜索 + 后端搜索双模式
-- **中英文切换** — 完整的双语支持（简体中文 / English），一键切换
-- **暗色/亮色主题** — 支持自动跟随系统或手动切换
+- **置顶与分享** — 置顶重要书签，一键复制标题 + 链接
 - **数据导入导出** — 支持 JSON 和浏览器 HTML 书签格式
-- **响应式设计** — 桌面端侧边栏布局，移动端自动折叠为抽屉菜单
+- **视图切换** — 网格 / 列表视图，无限滚动懒加载
+
+### 开发者工具箱（21 个工具）
+
+所有工具完全在浏览器本地运行，无需发送任何服务器请求。
+
+| 工具 | 说明 |
+| ---- | ---- |
+| JSON 格式化 | 格式化、压缩和校验 JSON 数据 |
+| Base64 编解码 | Base64 编码与解码转换 |
+| URL 编解码 | URL 编码与解码转换 |
+| 时间戳转换 | Unix 时间戳与日期互转 |
+| UUID 生成器 | 批量生成随机 UUID |
+| 颜色转换 | HEX、RGB、HSL 颜色格式互转 |
+| 字数统计 | 统计字符数、单词数、行数 |
+| Hash 生成 | SHA-1/256/384/512 哈希计算 |
+| 正则测试 | 在线测试正则表达式匹配 |
+| 文本对比 | 逐行对比两段文本的差异 |
+| 日期计算器 | 计算日期差值，推算未来/过去日期 |
+| SQL 格式化 | SQL 语句美化与压缩 |
+| 代码美化 | 代码语法高亮着色，导出分享图片 |
+| Lorem Ipsum | 生成占位假文本段落 |
+| JWT 解码 | 解码 JWT Token，查看 Header/Payload，检查过期状态 |
+| Properties ↔ YAML | Properties 与 YAML 格式互转 |
+| Cron 表达式 | 解析 Cron 表达式，人类可读描述 + 接下来 5 次执行时间 |
+| HTTP 状态码 | 可搜索的 HTTP 状态码速查表 |
+| 进制转换 | BIN/OCT/DEC/HEX 实时互转 |
+| Markdown 预览 | 左右分栏实时 Markdown 编辑与预览 |
+| QR Code 生成 | 输入文本或链接生成二维码，下载 PNG |
+
+### 平台能力
+- **用户认证** — 邮箱注册/登录，JWT 认证，邮箱验证，密码找回
+- **中英文切换** — 完整双语支持，一键切换
+- **暗色/亮色主题** — 自动跟随系统或手动切换
+- **浏览器扩展** — 一键保存当前页面，AI 智能标签建议
+- **响应式设计** — 桌面端侧边栏，移动端抽屉菜单
 - **PWA 支持** — Service Worker 离线缓存，可安装为桌面应用
 - **安全防护** — 请求频率限制、输入校验、XSS 防护、邮箱标准化
 
@@ -106,6 +137,7 @@ koby/
 ├── api/index.js              # Vercel Serverless 入口
 ├── db/init-d1.sql            # D1 数据库 Schema
 ├── server.js                 # 本地开发服务器
+├── browser-extension/        # Chrome 浏览器扩展，一键保存书签
 ├── server/
 │   ├── db/database.js        # D1 数据库适配层
 │   ├── middleware/auth.js     # JWT 认证中间件
@@ -122,24 +154,18 @@ koby/
 │   ├── App.vue               # 根组件（侧边栏 + 顶栏 + 搜索）
 │   ├── router/index.js       # 前端路由 + Auth Guard
 │   ├── services/api.js       # API 服务层
-│   ├── i18n/index.js         # 国际化翻译（中/英）
-│   ├── utils/share.js        # 书签分享工具
-│   ├── stores/
-│   │   ├── auth.js           # 认证状态
-│   │   ├── bookmarks.js      # 书签/收藏夹状态（含树形 getter）
-│   │   ├── theme.js          # 主题状态
-│   │   ├── locale.js         # 语言切换状态
-│   │   └── toast.js          # 消息提示状态
+│   ├── i18n/                 # 国际化翻译（中/英）
+│   ├── composables/          # 共享组合式函数（useToolHelper 等）
+│   ├── stores/               # Pinia 状态管理（auth, bookmarks, theme, locale, toast）
 │   ├── views/
 │   │   ├── HomeView.vue      # 首页（置顶书签 + 最近书签）
 │   │   ├── CollectionsView.vue # 收藏夹管理 / 收藏夹书签详情
 │   │   ├── AllBookmarksView.vue # 全部书签浏览
-│   │   ├── LoginView.vue     # 登录/注册
-│   │   ├── VerifyEmailView.vue # 邮箱验证
-│   │   ├── ForgotPasswordView.vue # 忘记密码
-│   │   ├── ResetPasswordView.vue # 重置密码
-│   │   └── SettingsView.vue  # 设置（导入/导出）
-│   └── components/           # 通用组件
+│   │   ├── ToolboxView.vue   # 开发者工具箱（21 个工具）
+│   │   ├── SettingsView.vue  # 设置（导入/导出）
+│   │   └── ...               # 登录、验证、密码重置等页面
+│   └── components/
+│       └── tools/            # 21 个工具组件（ToolJson, ToolJwt 等）
 └── vercel.json               # Vercel 部署配置
 ```
 

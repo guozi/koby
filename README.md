@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>A Clean & Efficient Bookmark Manager</strong>
+  <strong>A self-hosted bookmark manager with a built-in developer toolbox</strong>
 </p>
 
 <p align="center">
@@ -14,21 +14,52 @@
 
 ---
 
-Koby is a clean and efficient multi-user bookmark manager that helps you organize, categorize, and quickly access your important web bookmarks. It supports user registration, email verification, collection management, tagging, dark mode, and more. Data is stored on Cloudflare D1 and deployed on Vercel.
+Koby is a clean and efficient self-hosted bookmark manager for individuals and small teams. Organize, categorize, and access your web bookmarks with ease. It comes with a built-in developer toolbox featuring 21 handy utilities — all running in the browser, no data leaves your machine.
 
 ## Features
 
-- **Authentication** — Email registration/login, JWT auth, email verification, password reset, multi-user data isolation
-- **Collections** — Nested tree structure, custom emoji icons and colors, collection colors applied across bookmark cards
-- **Bookmark Management** — Add, edit, delete, search, pin bookmarks with auto favicon & metadata fetching
-- **Tagging** — Add tags to bookmarks (`#tag` style), filter by tags
-- **Sharing** — One-click copy bookmark title and link to clipboard
-- **Duplicate Detection** — Automatically detect existing URLs when adding bookmarks
-- **View Modes** — Grid / List view with infinite scroll lazy loading
-- **Global Search** — Ctrl+K / Cmd+K shortcut, dual-mode instant client-side + backend search
+### Bookmark Management
+- **Collections** — Nested tree structure with custom emoji icons and colors
+- **Tagging** — Add `#tag` style tags to bookmarks, filter by tags
+- **Global Search** — `Ctrl+K` / `Cmd+K` shortcut, instant client-side + backend search
+- **Duplicate Detection** — Auto-detect existing URLs when adding bookmarks
+- **Pin & Share** — Pin important bookmarks, one-click copy title + link
+- **Import / Export** — JSON and browser HTML bookmark formats
+- **View Modes** — Grid / List view with infinite scroll
+
+### Developer Toolbox (21 tools)
+
+All tools run entirely in the browser with zero server requests.
+
+| Tool | Description |
+| ---- | ---- |
+| JSON Formatter | Format, minify, and validate JSON |
+| Base64 Codec | Encode / decode Base64 strings |
+| URL Codec | Encode / decode URL strings |
+| Timestamp | Convert between Unix timestamps and dates |
+| UUID Generator | Generate random UUIDs in bulk |
+| Color Converter | Convert between HEX, RGB, and HSL |
+| Word Counter | Count characters, words, and lines |
+| Hash Generator | Compute SHA-1/256/384/512 hashes |
+| Regex Tester | Test regular expressions online |
+| Text Diff | Compare two texts line by line |
+| Date Calculator | Calculate date differences and offsets |
+| SQL Formatter | Format and minify SQL statements |
+| Code Beautifier | Syntax highlight code and export as image |
+| Lorem Ipsum | Generate placeholder text |
+| JWT Decoder | Decode JWT tokens, inspect header/payload, check expiry |
+| Properties ↔ YAML | Convert between Properties and YAML formats |
+| Cron Expression | Parse cron with human-readable descriptions + next 5 runs |
+| HTTP Status Codes | Searchable reference for all HTTP status codes |
+| Radix Converter | Real-time BIN/OCT/DEC/HEX conversion |
+| Markdown Preview | Live side-by-side Markdown editor and preview |
+| QR Code Generator | Generate QR codes from text or URLs, download as PNG |
+
+### Platform
+- **Authentication** — Email registration/login, JWT auth, email verification, password reset
 - **Bilingual** — Full Chinese / English support with one-click switching
 - **Dark / Light Theme** — System auto-detection or manual toggle
-- **Import / Export** — JSON and browser HTML bookmark formats
+- **Browser Extension** — One-click save from any page with AI tag suggestions
 - **Responsive** — Desktop sidebar layout, mobile drawer menu
 - **PWA** — Service Worker offline caching, installable as desktop app
 - **Security** — Rate limiting, input validation, XSS protection, email normalization
@@ -106,6 +137,7 @@ koby/
 ├── api/index.js              # Vercel Serverless entry
 ├── db/init-d1.sql            # D1 database schema
 ├── server.js                 # Local dev server
+├── browser-extension/        # Chrome extension for one-click saving
 ├── server/
 │   ├── db/database.js        # D1 database adapter
 │   ├── middleware/auth.js     # JWT auth middleware
@@ -122,24 +154,18 @@ koby/
 │   ├── App.vue               # Root component (sidebar + topbar + search)
 │   ├── router/index.js       # Frontend router + Auth Guard
 │   ├── services/api.js       # API service layer
-│   ├── i18n/index.js         # i18n translations (zh/en)
-│   ├── utils/share.js        # Bookmark sharing utility
-│   ├── stores/
-│   │   ├── auth.js           # Auth state
-│   │   ├── bookmarks.js      # Bookmarks/collections state (tree getter)
-│   │   ├── theme.js          # Theme state
-│   │   ├── locale.js         # Locale switching state
-│   │   └── toast.js          # Toast notification state
+│   ├── i18n/                 # i18n translations (zh/en)
+│   ├── composables/          # Shared composables (useToolHelper, etc.)
+│   ├── stores/               # Pinia stores (auth, bookmarks, theme, locale, toast)
 │   ├── views/
 │   │   ├── HomeView.vue      # Home (pinned + recent bookmarks)
 │   │   ├── CollectionsView.vue # Collection management / detail
 │   │   ├── AllBookmarksView.vue # All bookmarks browser
-│   │   ├── LoginView.vue     # Login / Register
-│   │   ├── VerifyEmailView.vue # Email verification
-│   │   ├── ForgotPasswordView.vue # Forgot password
-│   │   ├── ResetPasswordView.vue # Reset password
-│   │   └── SettingsView.vue  # Settings (import/export)
-│   └── components/           # Shared components
+│   │   ├── ToolboxView.vue   # Developer toolbox (21 tools)
+│   │   ├── SettingsView.vue  # Settings (import/export)
+│   │   └── ...               # Login, verify, password reset views
+│   └── components/
+│       └── tools/            # 21 tool components (ToolJson, ToolJwt, etc.)
 └── vercel.json               # Vercel deployment config
 ```
 
