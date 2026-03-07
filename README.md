@@ -220,17 +220,19 @@ koby/
   <img src="public/img/collection_1.png" alt="Collections" width="100%">
 </details>
 
+## Sponsor
+
+If you find Koby helpful, consider supporting the project:
+
+<p align="center">
+  <a href="https://ko-fi.com/X8X31VJQ3E">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" />
+  </a>
+</p>
+
 ## License
 
 [MIT](LICENSE)
-
-## Sponsor
-
-If you find Koby helpful, feel free to scan the QR code below to show your support:
-
-<p align="center">
-  <img src="public/img/sponsor-qrcode.png" alt="Sponsor QR Code" width="350" height="350">
-</p>
 
 ---
 
