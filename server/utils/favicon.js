@@ -6,6 +6,7 @@
 
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { isSafeUrl } = require('./urlSafety');
 
 /**
  * 从网站获取favicon URL
@@ -14,12 +15,14 @@ const cheerio = require('cheerio');
  */
 async function getFaviconUrl(url) {
   try {
-    // 确保URL格式正确
     if (!url.startsWith('http')) {
       url = 'https://' + url;
     }
-    
-    // 尝试获取网页内容
+
+    if (!(await isSafeUrl(url))) {
+      return null;
+    }
+
     const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -83,6 +86,10 @@ async function getFaviconUrl(url) {
 async function getUrlMeta(url) {
   try {
     if (!url.startsWith('http')) url = 'https://' + url;
+
+    if (!(await isSafeUrl(url))) {
+      throw new Error('URL targets a private/internal network');
+    }
 
     const response = await axios.get(url, {
       headers: {

@@ -3,13 +3,7 @@ const router = express.Router();
 const { parseBookmarksHtml } = require('../utils/bookmarkParser');
 const { generateId } = require('../utils/id');
 const { autoTag } = require('../utils/autoTagger');
-
-function isSafeUrl(url) {
-  try {
-    const parsed = new URL(url);
-    return ['http:', 'https:'].includes(parsed.protocol);
-  } catch { return false; }
-}
+const { isSafeUrl, isSafeUrlProtocol } = require('../utils/urlSafety');
 
 module.exports = (pool) => {
   async function ensureCollectionOwnedByUser(collectionId, userId) {
@@ -25,7 +19,7 @@ module.exports = (pool) => {
     try {
       const { url } = req.query;
       if (!url) return res.status(400).json({ error: true, code: 'BOOKMARK_URL_REQUIRED', message: 'URL is required' });
-      if (!isSafeUrl(url)) return res.status(400).json({ error: true, code: 'BOOKMARK_URL_INVALID', message: 'Invalid URL' });
+      if (!(await isSafeUrl(url))) return res.status(400).json({ error: true, code: 'BOOKMARK_URL_INVALID', message: 'Invalid URL' });
 
       const { getUrlMeta } = require('../utils/favicon');
       const meta = await getUrlMeta(url);
@@ -92,7 +86,7 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, code: 'BOOKMARK_FIELDS_REQUIRED', message: '标题、URL和收藏夹ID是必填项' });
       }
 
-      if (!isSafeUrl(url)) {
+      if (!isSafeUrlProtocol(url)) {
         return res.status(400).json({ error: true, code: 'BOOKMARK_URL_PROTOCOL_INVALID', message: 'URL 必须以 http:// 或 https:// 开头' });
       }
 
@@ -136,7 +130,7 @@ module.exports = (pool) => {
         return res.status(400).json({ error: true, code: 'BOOKMARK_FIELDS_REQUIRED', message: '标题、URL和收藏夹ID是必填项' });
       }
 
-      if (!isSafeUrl(url)) {
+      if (!isSafeUrlProtocol(url)) {
         return res.status(400).json({ error: true, code: 'BOOKMARK_URL_PROTOCOL_INVALID', message: 'URL 必须以 http:// 或 https:// 开头' });
       }
 
@@ -204,7 +198,7 @@ module.exports = (pool) => {
       res.json(parsedData);
     } catch (error) {
       console.error('解析HTML书签失败:', error);
-      res.status(500).json({ error: true, code: 'BOOKMARK_PARSE_FAILED', message: '解析HTML书签失败: ' + error.message });
+      res.status(500).json({ error: true, code: 'BOOKMARK_PARSE_FAILED', message: '解析HTML书签失败' });
     }
   });
 

@@ -18,7 +18,16 @@ const collectionsRouter = require('../server/routes/collections')(pool);
 const app = express();
 app.set('trust proxy', 1);
 
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (origin.startsWith('chrome-extension://')) return callback(null, true);
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    if (origin === clientUrl) return callback(null, true);
+    callback(null, false);
+  },
+  credentials: true
+}));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 

@@ -38,11 +38,29 @@ const resendLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// 登录接口：每 IP 15 分钟最多 5 次
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: true, code: 'RATE_LIMIT_LOGIN', message: '登录请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // 忘记密码：每 IP 15 分钟最多 5 次
 const forgotPasswordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: { error: true, code: 'RATE_LIMIT_FORGOT_PASSWORD', message: '请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 验证/重置：每 IP 15 分钟最多 10 次
+const verifyResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: true, code: 'RATE_LIMIT_VERIFY', message: '请求过于频繁，请稍后再试' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -98,7 +116,7 @@ module.exports = (pool) => {
   });
 
   // 登录
-  router.post('/login', async (req, res) => {
+  router.post('/login', loginLimiter, async (req, res) => {
     try {
       const { password } = req.body;
       let { email } = req.body;
@@ -138,7 +156,7 @@ module.exports = (pool) => {
   });
 
   // 验证邮箱（原子操作防竞态）
-  router.post('/verify-email', async (req, res) => {
+  router.post('/verify-email', verifyResetLimiter, async (req, res) => {
     try {
       const { token } = req.body;
       if (!token) {
@@ -316,7 +334,7 @@ module.exports = (pool) => {
   });
 
   // 重置密码
-  router.post('/reset-password', async (req, res) => {
+  router.post('/reset-password', verifyResetLimiter, async (req, res) => {
     try {
       const { token, newPassword } = req.body;
       if (!token || !newPassword) {
