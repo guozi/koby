@@ -306,6 +306,63 @@ export const en = {
   'toolbox.preview': 'Preview',
   'toolbox.codeInputHint': 'Paste code...',
 
+  // Toolbox - JWT
+  'toolbox.jwt': 'JWT Decoder',
+  'toolbox.jwtDesc': 'Decode JWT tokens and inspect Header & Payload',
+  'toolbox.jwtInputHint': 'Paste JWT token...',
+  'toolbox.jwtSignature': 'Signature (display only)',
+  'toolbox.jwtExpired': 'Expired',
+  'toolbox.jwtValid': 'Valid',
+  'toolbox.jwtInvalid': 'Invalid JWT format, expected 3 dot-separated parts',
+
+  // Toolbox - Properties ↔ YAML
+  'toolbox.props': 'Properties ↔ YAML',
+  'toolbox.propsDesc': 'Convert between Properties and YAML formats',
+
+  // Toolbox - Cron
+  'toolbox.cron': 'Cron Expression',
+  'toolbox.cronDesc': 'Parse cron expressions with human-readable descriptions',
+  'toolbox.cronNext5': 'Next 5 executions',
+  'toolbox.cronInvalid': 'Invalid cron expression, expected 5 fields',
+  'toolbox.cronEveryMin': 'Every minute',
+  'toolbox.cronEveryHour': 'Every hour',
+  'toolbox.cronEveryDay': 'Every day',
+  'toolbox.cronEveryWeek': 'Every week',
+  'toolbox.cronEveryMonth': 'Every month',
+  'toolbox.cronMinute': 'Minute',
+  'toolbox.cronHour': 'Hour',
+  'toolbox.cronDay': 'Day',
+  'toolbox.cronMonth': 'Month',
+  'toolbox.cronWeekday': 'Weekday',
+  'toolbox.cronSun': 'Sun',
+  'toolbox.cronMon': 'Mon',
+  'toolbox.cronTue': 'Tue',
+  'toolbox.cronWed': 'Wed',
+  'toolbox.cronThu': 'Thu',
+  'toolbox.cronFri': 'Fri',
+  'toolbox.cronSat': 'Sat',
+
+  // Toolbox - HTTP Status Codes
+  'toolbox.httpcode': 'HTTP Status Codes',
+  'toolbox.httpcodeDesc': 'Look up HTTP status codes and their meanings',
+  'toolbox.httpSearch': 'Search status code or name...',
+
+  // Toolbox - Radix
+  'toolbox.radix': 'Radix Converter',
+  'toolbox.radixDesc': 'Convert between BIN/OCT/DEC/HEX in real time',
+
+  // Toolbox - Markdown
+  'toolbox.markdown': 'Markdown Preview',
+  'toolbox.markdownDesc': 'Live preview of Markdown rendering',
+  'toolbox.mdInputHint': 'Type Markdown text...',
+  'toolbox.mdPreviewHint': 'Preview will appear here...',
+
+  // Toolbox - QR Code
+  'toolbox.qrcode': 'QR Code Generator',
+  'toolbox.qrcodeDesc': 'Generate QR codes from text or URLs',
+  'toolbox.qrInputHint': 'Enter text or URL...',
+  'toolbox.qrDownload': 'Download PNG',
+
   // Error codes
   'error.RATE_LIMIT_REGISTER': 'Too many registration attempts, please try again later',
   'error.RATE_LIMIT_RESEND': 'Too many requests, please try again later',

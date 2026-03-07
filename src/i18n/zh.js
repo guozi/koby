@@ -306,6 +306,63 @@ export const zh = {
   'toolbox.preview': '预览',
   'toolbox.codeInputHint': '粘贴代码...',
 
+  // Toolbox - JWT
+  'toolbox.jwt': 'JWT 解码',
+  'toolbox.jwtDesc': '解码 JWT Token，查看 Header 和 Payload',
+  'toolbox.jwtInputHint': '粘贴 JWT Token...',
+  'toolbox.jwtSignature': '签名（仅展示）',
+  'toolbox.jwtExpired': '已过期',
+  'toolbox.jwtValid': '未过期',
+  'toolbox.jwtInvalid': '无效的 JWT 格式，需要 3 段以 . 分隔',
+
+  // Toolbox - Properties ↔ YAML
+  'toolbox.props': 'Properties ↔ YAML',
+  'toolbox.propsDesc': 'Properties 与 YAML 格式互转',
+
+  // Toolbox - Cron
+  'toolbox.cron': 'Cron 表达式',
+  'toolbox.cronDesc': '解析 Cron 表达式，显示可读描述和执行时间',
+  'toolbox.cronNext5': '接下来 5 次执行时间',
+  'toolbox.cronInvalid': '无效的 Cron 表达式，需要 5 个字段',
+  'toolbox.cronEveryMin': '每分钟',
+  'toolbox.cronEveryHour': '每小时',
+  'toolbox.cronEveryDay': '每天',
+  'toolbox.cronEveryWeek': '每周',
+  'toolbox.cronEveryMonth': '每月',
+  'toolbox.cronMinute': '分钟',
+  'toolbox.cronHour': '小时',
+  'toolbox.cronDay': '日',
+  'toolbox.cronMonth': '月',
+  'toolbox.cronWeekday': '星期',
+  'toolbox.cronSun': '日',
+  'toolbox.cronMon': '一',
+  'toolbox.cronTue': '二',
+  'toolbox.cronWed': '三',
+  'toolbox.cronThu': '四',
+  'toolbox.cronFri': '五',
+  'toolbox.cronSat': '六',
+
+  // Toolbox - HTTP Status Codes
+  'toolbox.httpcode': 'HTTP 状态码',
+  'toolbox.httpcodeDesc': '查询 HTTP 状态码含义和分类',
+  'toolbox.httpSearch': '搜索状态码或名称...',
+
+  // Toolbox - Radix
+  'toolbox.radix': '进制转换',
+  'toolbox.radixDesc': 'BIN/OCT/DEC/HEX 进制实时互转',
+
+  // Toolbox - Markdown
+  'toolbox.markdown': 'Markdown 预览',
+  'toolbox.markdownDesc': '实时预览 Markdown 渲染效果',
+  'toolbox.mdInputHint': '输入 Markdown 文本...',
+  'toolbox.mdPreviewHint': '预览将显示在这里...',
+
+  // Toolbox - QR Code
+  'toolbox.qrcode': 'QR Code 生成',
+  'toolbox.qrcodeDesc': '输入文本或链接生成二维码',
+  'toolbox.qrInputHint': '输入文本或 URL...',
+  'toolbox.qrDownload': '下载 PNG',
+
   // Error codes
   'error.RATE_LIMIT_REGISTER': '注册请求过于频繁，请稍后再试',
   'error.RATE_LIMIT_RESEND': '请求过于频繁，请稍后再试',

@@ -66,6 +66,13 @@ import ToolDateCalc from '../components/tools/ToolDateCalc.vue'
 import ToolSql from '../components/tools/ToolSql.vue'
 import ToolCodeImage from '../components/tools/ToolCodeImage.vue'
 import ToolLorem from '../components/tools/ToolLorem.vue'
+import ToolJwt from '../components/tools/ToolJwt.vue'
+import ToolProps from '../components/tools/ToolProps.vue'
+import ToolCron from '../components/tools/ToolCron.vue'
+import ToolHttpCode from '../components/tools/ToolHttpCode.vue'
+import ToolRadix from '../components/tools/ToolRadix.vue'
+import ToolMarkdown from '../components/tools/ToolMarkdown.vue'
+import ToolQrcode from '../components/tools/ToolQrcode.vue'
 
 const { t: _t } = useI18n()
 const t = (key, params) => _t.value(key, params)
@@ -85,6 +92,13 @@ const toolComponents = {
   sql: ToolSql,
   codeimg: ToolCodeImage,
   lorem: ToolLorem,
+  jwt: ToolJwt,
+  props: ToolProps,
+  cron: ToolCron,
+  httpcode: ToolHttpCode,
+  radix: ToolRadix,
+  markdown: ToolMarkdown,
+  qrcode: ToolQrcode,
 }
 
 const tools = computed(() => [
@@ -102,6 +116,13 @@ const tools = computed(() => [
   { id: 'sql',       icon: 'SQL',  color: '#2563EB', name: t('toolbox.sql'),       desc: t('toolbox.sqlDesc') },
   { id: 'codeimg',   icon: '</>',  color: '#6D28D9', name: t('toolbox.codeimg'),   desc: t('toolbox.codeimgDesc') },
   { id: 'lorem',     icon: 'Lp',   color: '#7C3AED', name: t('toolbox.lorem'),     desc: t('toolbox.loremDesc') },
+  { id: 'jwt',       icon: 'JWT',  color: '#F97316', name: t('toolbox.jwt'),       desc: t('toolbox.jwtDesc') },
+  { id: 'props',     icon: 'P↔Y',  color: '#14B8A6', name: t('toolbox.props'),     desc: t('toolbox.propsDesc') },
+  { id: 'cron',      icon: 'Cron', color: '#A855F7', name: t('toolbox.cron'),      desc: t('toolbox.cronDesc') },
+  { id: 'httpcode',  icon: 'HTTP', color: '#EF4444', name: t('toolbox.httpcode'),  desc: t('toolbox.httpcodeDesc') },
+  { id: 'radix',     icon: '0x',   color: '#0891B2', name: t('toolbox.radix'),     desc: t('toolbox.radixDesc') },
+  { id: 'markdown',  icon: 'MD',   color: '#1D4ED8', name: t('toolbox.markdown'),  desc: t('toolbox.markdownDesc') },
+  { id: 'qrcode',    icon: 'QR',   color: '#7C3AED', name: t('toolbox.qrcode'),    desc: t('toolbox.qrcodeDesc') },
 ])
 
 const activeTool = ref(null)
