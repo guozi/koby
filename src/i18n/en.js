@@ -7,6 +7,8 @@ export const en = {
   'nav.logout': 'Sign out',
   'nav.toolbox': 'Toolbox',
   'nav.profile': 'Settings',
+  'nav.collapse': 'Collapse',
+  'nav.expand': 'Expand',
 
   // Home
   'home.title': 'My Bookmarks',

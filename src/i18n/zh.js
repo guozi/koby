@@ -7,6 +7,8 @@ export const zh = {
   'nav.logout': '退出登录',
   'nav.toolbox': '工具箱',
   'nav.profile': '个人设置',
+  'nav.collapse': '收起',
+  'nav.expand': '展开',
 
   // Home
   'home.title': '我的书签',
