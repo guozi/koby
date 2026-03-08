@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { generateId } = require('../utils/id');
 
-const MAX_COLLECTIONS_PER_USER = 50;
+const MAX_COLLECTIONS_PER_USER = 20;
 
 module.exports = (pool) => {
   // 获取所有收藏夹（当前用户）
