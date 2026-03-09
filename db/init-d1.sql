@@ -42,3 +42,20 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   created_at TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
 );
+
+-- 标签表
+CREATE TABLE IF NOT EXISTS tags (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  color TEXT DEFAULT '#6B7280',
+  user_id TEXT NOT NULL REFERENCES users(id),
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(name, user_id)
+);
+
+-- 书签-标签关联表
+CREATE TABLE IF NOT EXISTS bookmark_tags (
+  bookmark_id TEXT NOT NULL REFERENCES bookmarks(id) ON DELETE CASCADE,
+  tag_id TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (bookmark_id, tag_id)
+);

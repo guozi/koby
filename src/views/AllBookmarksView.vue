@@ -80,7 +80,7 @@
               {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
             </span>
             <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
-              <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+              <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tagKey(tag)" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tagName(tag) }}</span>
             </div>
           </div>
           <div class="flex items-center gap-0.5 flex-shrink-0">
@@ -122,7 +122,7 @@
               {{ getCollection(bookmark.collection_id)?.name || t('home.uncategorized') }}
             </span>
             <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex flex-wrap gap-1.5">
-              <span v-for="tag in bookmark.tags" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+              <span v-for="tag in bookmark.tags" :key="tagKey(tag)" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tagName(tag) }}</span>
             </div>
           </div>
         </div>
@@ -212,11 +212,16 @@ const displayCount = ref(24)
 const sentinelRef = ref(null)
 
 const availableTags = computed(() => {
-  const tagSet = new Set()
+  const tagMap = new Map()
   allBookmarks.value.forEach(b => {
-    if (b.tags && Array.isArray(b.tags)) b.tags.forEach(tag => tagSet.add(tag))
+    if (b.tags && Array.isArray(b.tags)) {
+      b.tags.forEach(tag => {
+        const name = typeof tag === 'object' ? tag.name : tag
+        if (name) tagMap.set(name, tag)
+      })
+    }
   })
-  return Array.from(tagSet)
+  return Array.from(tagMap.keys())
 })
 
 const processedBookmarks = computed(() => {
@@ -238,7 +243,8 @@ const processedBookmarks = computed(() => {
   if (selectedTags.value.length > 0) {
     result = result.filter(b => {
       if (!b.tags || !Array.isArray(b.tags)) return false
-      return selectedTags.value.every(tag => b.tags.includes(tag))
+      const names = b.tags.map(t => typeof t === 'object' ? t.name : t)
+      return selectedTags.value.every(tag => names.includes(tag))
     })
   }
 
@@ -280,6 +286,8 @@ function getCollection(collectionId) {
 
 function formatDate(dateString) { return new Date(dateString).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) }
 function safeUrl(url) { try { const p = new URL(url); return ['http:', 'https:'].includes(p.protocol) ? url : '#' } catch { return '#' } }
+function tagName(tag) { return typeof tag === 'object' ? tag.name : tag }
+function tagKey(tag) { return typeof tag === 'object' ? tag.id : tag }
 
 // Bookmark CRUD
 const showAddBookmarkModal = ref(false)

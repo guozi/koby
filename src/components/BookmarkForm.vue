@@ -63,14 +63,25 @@
       <!-- Tags -->
       <div>
         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-          {{ t('bf.tags') }} <span class="text-gray-400">({{ t('bf.tagsHint') }})</span>
+          {{ t('bf.tags') }}
         </label>
-        <div class="relative">
+        <div class="relative" ref="tagDropdownRef">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-          <input v-model="tagsInput" type="text" class="input pl-9" :placeholder="t('bf.tagsPlaceholder')" />
+          <input v-model="tagSearchInput" type="text" class="input pl-9" :placeholder="t('bf.tagsPlaceholder')"
+            @focus="showTagDropdown = true" @keydown.enter.prevent="handleTagEnter" />
+          <!-- Autocomplete dropdown -->
+          <div v-if="showTagDropdown && filteredStoreTags.length > 0" class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+            <button v-for="tag in filteredStoreTags" :key="tag.id" type="button"
+              @mousedown.prevent="selectStoreTag(tag)"
+              class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" :style="{ backgroundColor: tag.color }"></span>
+              <span>{{ tag.name }}</span>
+              <span class="text-2xs text-gray-400 ml-auto">{{ tag.bookmark_count }}</span>
+            </button>
+          </div>
         </div>
-        <div v-if="parsedTags.length > 0" class="flex flex-wrap gap-1.5 mt-2">
-          <span v-for="tag in parsedTags" :key="tag"
+        <div v-if="selectedTags.length > 0" class="flex flex-wrap gap-1.5 mt-2">
+          <span v-for="tag in selectedTags" :key="tag"
             class="group inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800">
             {{ tag }}
             <button type="button" @click="removeTag(tag)" class="text-primary-400 hover:text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -124,33 +135,74 @@ onMounted(() => document.addEventListener('keydown', onEscape))
 onUnmounted(() => document.removeEventListener('keydown', onEscape))
 
 const formData = ref({ ...props.bookmark });
-const tagsInput = ref(props.bookmark.tags && Array.isArray(props.bookmark.tags) ? props.bookmark.tags.join(', ') : '');
 const suggestedTags = ref([]);
 
-const parsedTags = computed(() => {
-  if (!tagsInput.value) return [];
-  return tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+// Tag autocomplete state
+const tagSearchInput = ref('');
+const showTagDropdown = ref(false);
+const tagDropdownRef = ref(null);
+
+// Extract tag names from bookmark.tags (which may be objects or strings)
+function extractTagNames(tags) {
+  if (!tags || !Array.isArray(tags)) return [];
+  return tags.map(t => typeof t === 'object' ? t.name : t).filter(Boolean);
+}
+
+const selectedTags = ref(extractTagNames(props.bookmark.tags));
+
+const filteredStoreTags = computed(() => {
+  const q = tagSearchInput.value.toLowerCase().trim();
+  const current = selectedTags.value.map(t => t.toLowerCase());
+  return bookmarkStore.getAllTags
+    .filter(t => !current.includes(t.name.toLowerCase()))
+    .filter(t => !q || t.name.toLowerCase().includes(q))
+    .slice(0, 10);
 });
 
+function selectStoreTag(tag) {
+  if (!selectedTags.value.some(t => t.toLowerCase() === tag.name.toLowerCase())) {
+    selectedTags.value.push(tag.name);
+  }
+  tagSearchInput.value = '';
+  showTagDropdown.value = false;
+}
+
+function handleTagEnter() {
+  const name = tagSearchInput.value.trim();
+  if (!name) return;
+  if (!selectedTags.value.some(t => t.toLowerCase() === name.toLowerCase())) {
+    selectedTags.value.push(name);
+  }
+  tagSearchInput.value = '';
+}
+
 const unusedSuggestedTags = computed(() => {
-  const current = parsedTags.value.map(t => t.toLowerCase());
+  const current = selectedTags.value.map(t => t.toLowerCase());
   return suggestedTags.value.filter(t => !current.includes(t.toLowerCase()));
 });
 
 function addSuggestedTag(tag) {
-  const current = parsedTags.value;
-  if (!current.some(t => t.toLowerCase() === tag.toLowerCase())) {
-    tagsInput.value = [...current, tag].join(', ');
+  if (!selectedTags.value.some(t => t.toLowerCase() === tag.toLowerCase())) {
+    selectedTags.value.push(tag);
   }
 }
 
 function removeTag(tagToRemove) {
-  tagsInput.value = parsedTags.value.filter(tag => tag !== tagToRemove).join(', ');
+  selectedTags.value = selectedTags.value.filter(tag => tag !== tagToRemove);
 }
+
+// Close dropdown on outside click
+function handleClickOutside(e) {
+  if (tagDropdownRef.value && !tagDropdownRef.value.contains(e.target)) {
+    showTagDropdown.value = false;
+  }
+}
+onMounted(() => document.addEventListener('mousedown', handleClickOutside));
+onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside));
 
 watch(() => props.bookmark, (newVal) => {
   formData.value = { ...newVal };
-  tagsInput.value = newVal.tags && Array.isArray(newVal.tags) ? newVal.tags.join(', ') : '';
+  selectedTags.value = extractTagNames(newVal.tags);
 }, { deep: true });
 
 const duplicateBookmark = computed(() => {
@@ -193,6 +245,6 @@ function isSafeUrl(url) {
 
 function submitForm() {
   if (!isSafeUrl(formData.value.url)) { alert('URL must start with http:// or https://'); return }
-  emit('submit', { ...formData.value, tags: parsedTags.value });
+  emit('submit', { ...formData.value, tags: selectedTags.value });
 }
 </script>

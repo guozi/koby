@@ -30,6 +30,26 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
 );
 
+-- 标签表
+CREATE TABLE IF NOT EXISTS tags (
+  id VARCHAR(21) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  color VARCHAR(20) DEFAULT '#6B7280',
+  user_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_tag_name_user (name, user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 书签-标签关联表
+CREATE TABLE IF NOT EXISTS bookmark_tags (
+  bookmark_id INT NOT NULL,
+  tag_id VARCHAR(21) NOT NULL,
+  PRIMARY KEY (bookmark_id, tag_id),
+  FOREIGN KEY (bookmark_id) REFERENCES bookmarks(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
+
 -- 插入默认收藏夹
 INSERT INTO collections (name, icon, color) VALUES
 ('默认收藏夹', '📁', '#3B82F6'),

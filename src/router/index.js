@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/tags',
+      name: 'tags',
+      component: () => import('../views/TagsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/toolbox',
       name: 'toolbox',
       component: () => import('../views/ToolboxView.vue'),

@@ -29,9 +29,9 @@ function postProcessRows(rows) {
     const out = { ...row };
     if ('is_pinned' in out) out.is_pinned = Boolean(out.is_pinned);
     if ('is_verified' in out) out.is_verified = Boolean(out.is_verified);
-    if ('tags' in out && typeof out.tags === 'string') {
-      try { out.tags = JSON.parse(out.tags); } catch { /* keep as string */ }
-    }
+    // Tags are now served from the tags/bookmark_tags tables via JOIN.
+    // Remove the legacy JSON tags field from SELECT results to avoid confusion.
+    if ('tags' in out) delete out.tags;
     return out;
   });
 }
@@ -91,4 +91,17 @@ async function testConnection() {
   }
 }
 
-module.exports = { pool, testConnection };
+// Raw query that bypasses postProcessRows — used by migration scripts
+// to read legacy fields (e.g. bookmarks.tags JSON) before they are removed.
+async function rawQuery(sql, params = []) {
+  await d1Fetch('PRAGMA foreign_keys = ON');
+  const result = await d1Fetch(sql, preProcessParams(params));
+  const verb = sql.trim().split(/\s/)[0].toUpperCase();
+  if (verb === 'SELECT' || verb === 'PRAGMA') {
+    return [result.results || [], []];
+  }
+  const meta = result.meta || {};
+  return [{ insertId: meta.last_row_id, affectedRows: meta.changes }, []];
+}
+
+module.exports = { pool, testConnection, rawQuery };

@@ -157,7 +157,7 @@
               <div class="flex items-center gap-2 min-w-0">
                 <span class="text-2xs text-gray-400 flex-shrink-0">{{ formatDate(bookmark.created_at) }}</span>
                 <div v-if="bookmark.tags && bookmark.tags.length > 0" class="flex gap-1.5 overflow-hidden">
-                  <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+                  <span v-for="tag in bookmark.tags.slice(0, 2)" :key="tagKey(tag)" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tagName(tag) }}</span>
                 </div>
               </div>
               <div class="flex items-center gap-0.5 flex-shrink-0">
@@ -194,7 +194,7 @@
               </div>
               <span class="text-xs text-gray-400 dark:text-gray-500 truncate block mt-1">{{ bookmark.url }}</span>
               <div v-if="bookmark.tags && bookmark.tags.length > 0" class="mt-2 flex flex-wrap gap-1.5">
-                <span v-for="tag in bookmark.tags" :key="tag" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tag }}</span>
+                <span v-for="tag in bookmark.tags" :key="tagKey(tag)" class="text-2xs text-primary-500 dark:text-primary-400">#{{ tagName(tag) }}</span>
               </div>
             </div>
             <span class="text-2xs text-gray-400 flex-shrink-0 hidden sm:block">{{ formatDate(bookmark.created_at) }}</span>
@@ -325,13 +325,16 @@ const selectedTags = ref([])
 const availableTags = computed(() => {
   if (!currentCollection.value) return []
   const collectionBookmarks = bookmarks.value.filter(b => b.collection_id === currentCollection.value.id)
-  const tagSet = new Set()
+  const tagMap = new Map()
   collectionBookmarks.forEach(bookmark => {
     if (bookmark.tags && Array.isArray(bookmark.tags)) {
-      bookmark.tags.forEach(tag => tagSet.add(tag))
+      bookmark.tags.forEach(tag => {
+        const name = typeof tag === 'object' ? tag.name : tag
+        if (name) tagMap.set(name, tag)
+      })
     }
   })
-  return Array.from(tagSet)
+  return Array.from(tagMap.keys())
 })
 
 const processedBookmarks = computed(() => {
@@ -350,7 +353,8 @@ const processedBookmarks = computed(() => {
   if (selectedTags.value.length > 0) {
     result = result.filter(b => {
       if (!b.tags || !Array.isArray(b.tags)) return false
-      return selectedTags.value.every(tag => b.tags.includes(tag))
+      const names = b.tags.map(t => typeof t === 'object' ? t.name : t)
+      return selectedTags.value.every(tag => names.includes(tag))
     })
   }
 
@@ -407,6 +411,8 @@ function clearFilters() { searchQuery.value = ''; selectedTags.value = []; curre
 
 function formatDate(dateString) { return new Date(dateString).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) }
 function safeUrl(url) { try { const p = new URL(url); return ['http:', 'https:'].includes(p.protocol) ? url : '#' } catch { return '#' } }
+function tagName(tag) { return typeof tag === 'object' ? tag.name : tag }
+function tagKey(tag) { return typeof tag === 'object' ? tag.id : tag }
 
 // Bookmark CRUD
 const showAddBookmarkModal = ref(false)
@@ -520,7 +526,7 @@ function exportCollection(collection) {
     collection: { name: collection.name, icon: collection.icon, color: collection.color },
     bookmarks: collectionBookmarks.map(b => ({
       title: b.title, url: b.url, description: b.description || '',
-      favicon: b.favicon || '', tags: b.tags || [], is_pinned: b.is_pinned || false,
+      favicon: b.favicon || '', tags: (b.tags || []).map(t => typeof t === 'object' ? t.name : t), is_pinned: b.is_pinned || false,
     })),
   }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

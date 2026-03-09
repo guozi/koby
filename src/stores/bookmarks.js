@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { bookmarksAPI, collectionsAPI } from '../services/api'
+import { bookmarksAPI, collectionsAPI, tagsAPI } from '../services/api'
 
 export const useBookmarkStore = defineStore('bookmarks', {
   state: () => ({
     bookmarks: [],
     collections: [],
+    tags: [],
     loading: false,
     error: null
   }),
@@ -13,6 +14,8 @@ export const useBookmarkStore = defineStore('bookmarks', {
       return (collection_id) => state.bookmarks.filter(bookmark => bookmark.collection_id === collection_id)
     },
     getAllCollections: (state) => state.collections,
+    getAllTags: (state) => state.tags,
+    sortedTags: (state) => [...state.tags].sort((a, b) => (b.bookmark_count || 0) - (a.bookmark_count || 0)),
 
     // 从平铺列表构建树
     collectionTree: (state) => {
@@ -58,6 +61,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
     resetState() {
       this.bookmarks = [];
       this.collections = [];
+      this.tags = [];
       this.loading = false;
       this.error = null;
     },
@@ -66,7 +70,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
     async initialize() {
       try {
         this.loading = true;
-        await Promise.all([this.fetchCollections(), this.fetchBookmarks()]);
+        await Promise.all([this.fetchCollections(), this.fetchBookmarks(), this.fetchTags()]);
         this.error = null;
       } catch (error) {
         console.error('初始化数据失败:', error);
@@ -119,6 +123,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
           is_pinned: bookmark.is_pinned || false
         });
         this.bookmarks.push(newBookmark);
+        this.fetchTags();
         return newBookmark;
       } catch (error) {
         console.error('添加书签失败:', error);
@@ -129,7 +134,7 @@ export const useBookmarkStore = defineStore('bookmarks', {
     // 更新书签
     async updateBookmark(id, data) {
       try {
-        await bookmarksAPI.update(id, {
+        const updated = await bookmarksAPI.update(id, {
           title: data.title,
           url: data.url,
           description: data.description || '',
@@ -140,8 +145,9 @@ export const useBookmarkStore = defineStore('bookmarks', {
         });
         const index = this.bookmarks.findIndex(b => b.id === id);
         if (index !== -1) {
-          this.bookmarks[index] = { ...this.bookmarks[index], ...data };
+          this.bookmarks[index] = updated;
         }
+        this.fetchTags();
       } catch (error) {
         console.error('更新书签失败:', error);
         throw error;
@@ -176,6 +182,74 @@ export const useBookmarkStore = defineStore('bookmarks', {
       }
     },
     
+    // 获取所有标签
+    async fetchTags() {
+      try {
+        this.tags = await tagsAPI.getAll();
+      } catch (error) {
+        console.error('获取标签失败:', error);
+        throw error;
+      }
+    },
+
+    // 添加标签
+    async addTag(tag) {
+      try {
+        const newTag = await tagsAPI.add(tag);
+        this.tags.push(newTag);
+        return newTag;
+      } catch (error) {
+        console.error('添加标签失败:', error);
+        throw error;
+      }
+    },
+
+    // 更新标签
+    async updateTag(id, data) {
+      try {
+        const updated = await tagsAPI.update(id, data);
+        const index = this.tags.findIndex(t => t.id === id);
+        if (index !== -1) this.tags[index] = updated;
+        return updated;
+      } catch (error) {
+        console.error('更新标签失败:', error);
+        throw error;
+      }
+    },
+
+    // 删除标签
+    async removeTag(id) {
+      try {
+        await tagsAPI.delete(id);
+        this.tags = this.tags.filter(t => t.id !== id);
+        // Remove this tag from bookmarks in local state
+        this.bookmarks.forEach(b => {
+          if (Array.isArray(b.tags)) {
+            b.tags = b.tags.filter(t => t.id !== id);
+          }
+        });
+      } catch (error) {
+        console.error('删除标签失败:', error);
+        throw error;
+      }
+    },
+
+    // 合并标签
+    async mergeTags(sourceId, targetId) {
+      try {
+        const updated = await tagsAPI.merge(sourceId, targetId);
+        this.tags = this.tags.filter(t => t.id !== sourceId);
+        const index = this.tags.findIndex(t => t.id === targetId);
+        if (index !== -1) this.tags[index] = updated;
+        // Refresh bookmarks to get updated tag associations
+        await this.fetchBookmarks();
+        return updated;
+      } catch (error) {
+        console.error('合并标签失败:', error);
+        throw error;
+      }
+    },
+
     // 添加收藏夹
     async addCollection(collection) {
       try {
@@ -310,8 +384,12 @@ export const useBookmarkStore = defineStore('bookmarks', {
     
     // 导出书签和收藏夹
     exportBookmarks() {
+      const bookmarks = this.bookmarks.map(b => ({
+        ...b,
+        tags: (b.tags || []).map(t => typeof t === 'object' ? t.name : t)
+      }));
       return JSON.stringify({
-        bookmarks: this.bookmarks,
+        bookmarks,
         collections: this.collections
       });
     }

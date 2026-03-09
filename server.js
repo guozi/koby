@@ -19,6 +19,7 @@ const { authMiddleware } = require('./server/middleware/auth');
 const authRouter = require('./server/routes/auth')(pool);
 const bookmarksRouter = require('./server/routes/bookmarks')(pool);
 const collectionsRouter = require('./server/routes/collections')(pool);
+const tagsRouter = require('./server/routes/tags')(pool);
 
 // 创建Express应用
 const app = express();
@@ -56,6 +57,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/bookmarks', authMiddleware, bookmarksRouter);
 app.use('/api/collections', authMiddleware, collectionsRouter);
+app.use('/api/tags', authMiddleware, tagsRouter);
 
 // 根路由
 app.get('/', (req, res) => {

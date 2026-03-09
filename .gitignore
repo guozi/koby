@@ -44,4 +44,4 @@ pnpm-debug.log*
 .env.production.local
 
 CC_FOR_CHENYUN.md
-docs/growth-strategy.md
+docs/

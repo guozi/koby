@@ -305,16 +305,11 @@ onMounted(() => document.addEventListener('keydown', onEscape))
 onUnmounted(() => document.removeEventListener('keydown', onEscape))
 
 const stats = computed(() => {
-  const bookmarks = bookmarkStore.bookmarks
-  const tagSet = new Set()
-  bookmarks.forEach(b => {
-    if (b.tags) b.tags.forEach(tag => tagSet.add(tag))
-  })
   return {
-    bookmarks: bookmarks.length,
+    bookmarks: bookmarkStore.bookmarks.length,
     collections: bookmarkStore.getAllCollections.length,
-    pinned: bookmarks.filter(b => b.is_pinned).length,
-    tags: tagSet.size
+    pinned: bookmarkStore.bookmarks.filter(b => b.is_pinned).length,
+    tags: bookmarkStore.tags.length
   }
 })
 </script>

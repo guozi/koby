@@ -6,6 +6,61 @@ const { autoTag } = require('../utils/autoTagger');
 const { isSafeUrl, isSafeUrlProtocol } = require('../utils/urlSafety');
 
 const MAX_BOOKMARKS_PER_USER = 500;
+const MAX_TAGS_PER_BOOKMARK = 10;
+
+async function attachTagsToBookmarks(pool, bookmarks) {
+  for (const bm of bookmarks) {
+    const [bmTags] = await pool.query(
+      `SELECT t.id, t.name, t.color FROM tags t
+       INNER JOIN bookmark_tags bt ON bt.tag_id = t.id
+       WHERE bt.bookmark_id = ?`,
+      [bm.id]
+    );
+    bm.tags = bmTags;
+  }
+  return bookmarks;
+}
+
+async function syncBookmarkTags(pool, bookmarkId, userId, tagNames) {
+  // Delete existing links
+  await pool.query('DELETE FROM bookmark_tags WHERE bookmark_id = ?', [bookmarkId]);
+
+  if (!tagNames || !Array.isArray(tagNames) || tagNames.length === 0) return;
+
+  const names = tagNames.slice(0, MAX_TAGS_PER_BOOKMARK).map(n => n.trim()).filter(Boolean);
+  for (const name of names) {
+    // Find or create the tag
+    let [existing] = await pool.query(
+      'SELECT id FROM tags WHERE name = ? AND user_id = ?',
+      [name, userId]
+    );
+    let tagId;
+    if (existing.length > 0) {
+      tagId = existing[0].id;
+    } else {
+      tagId = generateId();
+      try {
+        await pool.query(
+          'INSERT INTO tags (id, name, user_id) VALUES (?, ?, ?)',
+          [tagId, name, userId]
+        );
+      } catch {
+        const [retry] = await pool.query(
+          'SELECT id FROM tags WHERE name = ? AND user_id = ?',
+          [name, userId]
+        );
+        tagId = retry[0]?.id;
+        if (!tagId) continue;
+      }
+    }
+    try {
+      await pool.query(
+        'INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)',
+        [bookmarkId, tagId]
+      );
+    } catch { /* duplicate */ }
+  }
+}
 
 module.exports = (pool) => {
   async function ensureCollectionOwnedByUser(collectionId, userId) {
@@ -43,6 +98,7 @@ module.exports = (pool) => {
         'SELECT * FROM bookmarks WHERE user_id = ? AND (title LIKE ? OR url LIKE ? OR description LIKE ?) ORDER BY is_pinned DESC, created_at DESC LIMIT 20',
         [req.userId, keyword, keyword, keyword]
       );
+      await attachTagsToBookmarks(pool, rows);
       res.json(rows);
     } catch (error) {
       console.error('搜索书签失败:', error);
@@ -57,6 +113,7 @@ module.exports = (pool) => {
         'SELECT * FROM bookmarks WHERE user_id = ? ORDER BY is_pinned DESC, created_at DESC',
         [req.userId]
       );
+      await attachTagsToBookmarks(pool, rows);
       res.json(rows);
     } catch (error) {
       console.error('获取书签失败:', error);
@@ -72,6 +129,7 @@ module.exports = (pool) => {
         'SELECT * FROM bookmarks WHERE collection_id = ? AND user_id = ? ORDER BY is_pinned DESC, created_at DESC',
         [collection_id, req.userId]
       );
+      await attachTagsToBookmarks(pool, rows);
       res.json(rows);
     } catch (error) {
       console.error('获取收藏夹书签失败:', error);
@@ -118,12 +176,17 @@ module.exports = (pool) => {
       }
 
       const bookmarkId = generateId();
+      // Extract tag names before storing — tags field kept for backward compat
+      const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
       const [result] = await pool.query(
         'INSERT INTO bookmarks (id, title, url, description, collection_id, favicon, tags, is_pinned, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [bookmarkId, title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned || false, req.userId]
+        [bookmarkId, title, url, description, collection_id, faviconUrl, tagNames.length ? JSON.stringify(tagNames) : null, is_pinned || false, req.userId]
       );
 
+      await syncBookmarkTags(pool, bookmarkId, req.userId, tagNames);
+
       const [newBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ?', [bookmarkId]);
+      await attachTagsToBookmarks(pool, newBookmark);
       res.status(201).json(newBookmark[0]);
     } catch (error) {
       console.error('添加书签失败:', error);
@@ -161,9 +224,10 @@ module.exports = (pool) => {
         }
       }
 
+      const tagNames = Array.isArray(tags) ? tags.map(t => typeof t === 'object' ? t.name : t) : [];
       await pool.query(
         'UPDATE bookmarks SET title = ?, url = ?, description = ?, collection_id = ?, favicon = ?, tags = ?, is_pinned = ? WHERE id = ? AND user_id = ?',
-        [title, url, description, collection_id, faviconUrl, tags ? JSON.stringify(tags) : null, is_pinned, bookmarkId, req.userId]
+        [title, url, description, collection_id, faviconUrl, tagNames.length ? JSON.stringify(tagNames) : null, is_pinned, bookmarkId, req.userId]
       );
 
       const [updatedBookmark] = await pool.query('SELECT * FROM bookmarks WHERE id = ? AND user_id = ?', [bookmarkId, req.userId]);
@@ -172,6 +236,8 @@ module.exports = (pool) => {
         return res.status(404).json({ error: true, code: 'BOOKMARK_NOT_FOUND', message: '书签不存在' });
       }
 
+      await syncBookmarkTags(pool, bookmarkId, req.userId, tagNames);
+      await attachTagsToBookmarks(pool, updatedBookmark);
       res.json(updatedBookmark[0]);
     } catch (error) {
       console.error('更新书签失败:', error);

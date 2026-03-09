@@ -16,6 +16,10 @@
             <svg class="flex-shrink-0" style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             <span v-show="!sidebarCollapsed">{{ t('nav.collections') }}</span>
           </router-link>
+          <router-link to="/tags" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/tags' && !$route.query.id }]" :title="sidebarCollapsed ? t('nav.tags') : undefined">
+            <svg class="flex-shrink-0" style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+            <span v-show="!sidebarCollapsed">{{ t('nav.tags') }}</span>
+          </router-link>
           <router-link to="/toolbox" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/toolbox' }]" :title="sidebarCollapsed ? t('nav.toolbox') : undefined">
             <svg class="flex-shrink-0" style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>
             <span v-show="!sidebarCollapsed">{{ t('nav.toolbox') }}</span>
@@ -29,11 +33,27 @@
           <div v-if="sidebarCollapsed" class="pt-3 pb-1 flex justify-center">
             <div class="w-6 border-t border-gray-200 dark:border-gray-700"></div>
           </div>
-          <router-link v-for="collection in sidebarCollections" :key="collection.id" :to="`/collections?id=${collection.id}`" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.query.id === collection.id }]" :title="sidebarCollapsed ? collection.name : undefined">
+          <router-link v-for="collection in sidebarCollections" :key="collection.id" :to="`/collections?id=${collection.id}`" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/collections' && $route.query.id === collection.id }]" :title="sidebarCollapsed ? collection.name : undefined">
             <span class="text-base flex-shrink-0">{{ collection.icon }}</span>
             <span v-show="!sidebarCollapsed" class="truncate">{{ collection.name }}</span>
             <span v-show="!sidebarCollapsed" class="ml-auto text-2xs text-gray-400 dark:text-gray-500 tabular-nums">{{ getBookmarkCount(collection.id) }}</span>
           </router-link>
+          <template v-if="topTags.length > 0">
+            <div v-show="!sidebarCollapsed" class="pt-4 pb-2">
+              <div class="flex items-center justify-between px-1">
+                <span class="text-2xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{{ t('nav.tags') }}</span>
+                <span class="text-2xs text-gray-400 dark:text-gray-500">{{ bookmarkStore.tags.length }}</span>
+              </div>
+            </div>
+            <div v-if="sidebarCollapsed" class="pt-3 pb-1 flex justify-center">
+              <div class="w-6 border-t border-gray-200 dark:border-gray-700"></div>
+            </div>
+            <router-link v-for="tag in topTags" :key="tag.id" :to="`/tags?id=${tag.id}`" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/tags' && $route.query.id === tag.id }]" :title="sidebarCollapsed ? tag.name : undefined">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" :style="{ backgroundColor: tag.color }"></span>
+              <span v-show="!sidebarCollapsed" class="truncate">{{ tag.name }}</span>
+              <span v-show="!sidebarCollapsed" class="ml-auto text-2xs text-gray-400 dark:text-gray-500 tabular-nums">{{ tag.bookmark_count }}</span>
+            </router-link>
+          </template>
         </nav>
         <div class="px-3 py-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <router-link to="/settings" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/settings' }]" :title="sidebarCollapsed ? t('nav.settings') : undefined">
@@ -112,6 +132,7 @@
               <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
                 <router-link @click="mobileMenuOpen = false" to="/" class="sidebar-item"><span>{{ t('nav.home') }}</span></router-link>
                 <router-link @click="mobileMenuOpen = false" to="/collections" class="sidebar-item"><span>{{ t('nav.collections') }}</span></router-link>
+                <router-link @click="mobileMenuOpen = false" to="/tags" class="sidebar-item"><span>{{ t('nav.tags') }}</span></router-link>
                 <router-link @click="mobileMenuOpen = false" to="/toolbox" class="sidebar-item"><span>{{ t('nav.toolbox') }}</span></router-link>
                 <div class="pt-4 pb-2"><span class="text-2xs font-semibold text-gray-400 uppercase tracking-wider px-1">{{ t('nav.categories') }}</span></div>
                 <router-link v-for="collection in sidebarCollections" :key="collection.id" @click="mobileMenuOpen = false" :to="`/collections?id=${collection.id}`" class="sidebar-item">
@@ -187,9 +208,10 @@ function closeUserMenu(e) {
 watch(() => route.path, () => { userMenuOpen.value = false; });
 
 const sidebarCollections = computed(() => bookmarkStore.getAllCollections);
+const topTags = computed(() => bookmarkStore.sortedTags.slice(0, 10));
 
 const currentPageTitle = computed(() => {
-  const titles = { '/': t('nav.home'), '/collections': t('nav.collections'), '/bookmarks': t('all.title'), '/toolbox': t('nav.toolbox'), '/settings': t('nav.settings') };
+  const titles = { '/': t('nav.home'), '/collections': t('nav.collections'), '/bookmarks': t('all.title'), '/tags': t('nav.tags'), '/toolbox': t('nav.toolbox'), '/settings': t('nav.settings') };
   return titles[route.path] || '';
 });
 

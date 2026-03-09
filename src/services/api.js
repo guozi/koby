@@ -62,6 +62,16 @@ export const bookmarksAPI = {
   search: (q) => apiClient.get('/api/bookmarks/search', { params: { q } })
 };
 
+// 标签相关API
+export const tagsAPI = {
+  getAll: () => apiClient.get('/api/tags'),
+  add: (tag) => apiClient.post('/api/tags', tag),
+  update: (id, tag) => apiClient.put(`/api/tags/${id}`, tag),
+  delete: (id) => apiClient.delete(`/api/tags/${id}`),
+  merge: (sourceId, targetId) => apiClient.post('/api/tags/merge', { sourceId, targetId }),
+  getBookmarks: (id) => apiClient.get(`/api/tags/${id}/bookmarks`),
+};
+
 // 收藏夹相关API
 export const collectionsAPI = {
   getAll: () => apiClient.get('/api/collections'),
