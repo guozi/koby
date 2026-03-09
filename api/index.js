@@ -14,6 +14,7 @@ const { authMiddleware } = require('../server/middleware/auth');
 const authRouter = require('../server/routes/auth')(pool);
 const bookmarksRouter = require('../server/routes/bookmarks')(pool);
 const collectionsRouter = require('../server/routes/collections')(pool);
+const tagsRouter = require('../server/routes/tags')(pool);
 
 const app = express();
 app.set('trust proxy', 1);
@@ -42,6 +43,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/bookmarks', authMiddleware, bookmarksRouter);
 app.use('/api/collections', authMiddleware, collectionsRouter);
+app.use('/api/tags', authMiddleware, tagsRouter);
 
 app.get('/api', (req, res) => {
   res.json({ message: 'Koby API 服务器运行中' });
