@@ -9,14 +9,25 @@ const MAX_BOOKMARKS_PER_USER = 500;
 const MAX_TAGS_PER_BOOKMARK = 10;
 
 async function attachTagsToBookmarks(pool, bookmarks) {
+  if (bookmarks.length === 0) return bookmarks;
+
+  const ids = bookmarks.map(bm => bm.id);
+  const placeholders = ids.map(() => '?').join(',');
+  const [allTags] = await pool.query(
+    `SELECT bt.bookmark_id, t.id, t.name, t.color FROM tags t
+     INNER JOIN bookmark_tags bt ON bt.tag_id = t.id
+     WHERE bt.bookmark_id IN (${placeholders})`,
+    ids
+  );
+
+  const tagMap = new Map();
+  for (const row of allTags) {
+    if (!tagMap.has(row.bookmark_id)) tagMap.set(row.bookmark_id, []);
+    tagMap.get(row.bookmark_id).push({ id: row.id, name: row.name, color: row.color });
+  }
+
   for (const bm of bookmarks) {
-    const [bmTags] = await pool.query(
-      `SELECT t.id, t.name, t.color FROM tags t
-       INNER JOIN bookmark_tags bt ON bt.tag_id = t.id
-       WHERE bt.bookmark_id = ?`,
-      [bm.id]
-    );
-    bm.tags = bmTags;
+    bm.tags = tagMap.get(bm.id) || [];
   }
   return bookmarks;
 }

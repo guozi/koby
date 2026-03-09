@@ -203,15 +203,26 @@ module.exports = (pool) => {
         [tagId, req.userId]
       );
 
-      // Attach tags array to each bookmark
-      for (const bm of rows) {
-        const [bmTags] = await pool.query(
-          `SELECT t.id, t.name, t.color FROM tags t
+      // Batch-fetch tags for all bookmarks in one query
+      if (rows.length > 0) {
+        const ids = rows.map(bm => bm.id);
+        const placeholders = ids.map(() => '?').join(',');
+        const [allTags] = await pool.query(
+          `SELECT bt.bookmark_id, t.id, t.name, t.color FROM tags t
            INNER JOIN bookmark_tags bt ON bt.tag_id = t.id
-           WHERE bt.bookmark_id = ?`,
-          [bm.id]
+           WHERE bt.bookmark_id IN (${placeholders})`,
+          ids
         );
-        bm.tags = bmTags;
+        const tagMap = new Map();
+        for (const row of allTags) {
+          if (!tagMap.has(row.bookmark_id)) tagMap.set(row.bookmark_id, []);
+          tagMap.get(row.bookmark_id).push({ id: row.id, name: row.name, color: row.color });
+        }
+        for (const bm of rows) {
+          bm.tags = tagMap.get(bm.id) || [];
+        }
+      } else {
+        rows.forEach(bm => bm.tags = []);
       }
 
       res.json(rows);

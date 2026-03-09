@@ -46,10 +46,14 @@ function preProcessParams(params) {
 }
 
 // 模拟 mysql2/promise 的 pool.query(sql, params) → [rows, fields]
+let pragmaInitialized = false;
 const pool = {
   async query(sql, params = []) {
-    // 启用外键约束
-    await d1Fetch('PRAGMA foreign_keys = ON');
+    // 只在首次查询时启用外键约束，后续请求跳过
+    if (!pragmaInitialized) {
+      await d1Fetch('PRAGMA foreign_keys = ON');
+      pragmaInitialized = true;
+    }
 
     const result = await d1Fetch(sql, preProcessParams(params));
     const verb = sql.trim().split(/\s/)[0].toUpperCase();
