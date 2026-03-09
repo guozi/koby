@@ -33,11 +33,20 @@
           <div v-if="sidebarCollapsed" class="pt-3 pb-1 flex justify-center">
             <div class="w-6 border-t border-gray-200 dark:border-gray-700"></div>
           </div>
-          <router-link v-for="collection in sidebarCollections" :key="collection.id" :to="`/collections?id=${collection.id}`" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/collections' && $route.query.id === collection.id }]" :title="sidebarCollapsed ? collection.name : undefined">
-            <span class="text-base flex-shrink-0">{{ collection.icon }}</span>
-            <span v-show="!sidebarCollapsed" class="truncate">{{ collection.name }}</span>
-            <span v-show="!sidebarCollapsed" class="ml-auto text-2xs text-gray-400 dark:text-gray-500 tabular-nums">{{ getBookmarkCount(collection.id) }}</span>
-          </router-link>
+          <template v-if="!sidebarCollapsed">
+            <SidebarCollections
+              :collections="sidebarCollections"
+              :collapsed="false"
+              :bookmarks="bookmarkStore.bookmarks"
+              :expanded-ids="expandedIds"
+              @toggle="handleToggleExpand"
+            />
+          </template>
+          <template v-else>
+            <router-link v-for="collection in sidebarCollections" :key="collection.id" :to="`/collections?id=${collection.id}`" class="sidebar-item-collapsed" :class="{ 'sidebar-item-active': $route.path === '/collections' && $route.query.id === collection.id }" :title="collection.name">
+              <span class="text-base flex-shrink-0">{{ collection.icon }}</span>
+            </router-link>
+          </template>
         </nav>
         <div class="px-3 py-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <router-link to="/settings" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/settings' }]" :title="sidebarCollapsed ? t('nav.settings') : undefined">
@@ -119,10 +128,14 @@
                 <router-link @click="mobileMenuOpen = false" to="/tags" class="sidebar-item"><span>{{ t('nav.tags') }}</span></router-link>
                 <router-link @click="mobileMenuOpen = false" to="/toolbox" class="sidebar-item"><span>{{ t('nav.toolbox') }}</span></router-link>
                 <div class="pt-4 pb-2"><span class="text-2xs font-semibold text-gray-400 uppercase tracking-wider px-1">{{ t('nav.categories') }}</span></div>
-                <router-link v-for="collection in sidebarCollections" :key="collection.id" @click="mobileMenuOpen = false" :to="`/collections?id=${collection.id}`" class="sidebar-item">
-                  <span class="text-base flex-shrink-0">{{ collection.icon }}</span>
-                  <span class="truncate">{{ collection.name }}</span>
-                </router-link>
+                <SidebarCollections
+                  :collections="sidebarCollections"
+                  :collapsed="false"
+                  :bookmarks="bookmarkStore.bookmarks"
+                  :expanded-ids="expandedIds"
+                  @navigate="mobileMenuOpen = false"
+                  @toggle="handleToggleExpand"
+                />
               </nav>
               <div class="px-3 py-3 border-t border-gray-200 dark:border-gray-700">
                 <router-link @click="mobileMenuOpen = false" to="/settings" class="sidebar-item"><span>{{ t('nav.settings') }}</span></router-link>
@@ -157,6 +170,7 @@ import ThemeToggle from './components/ThemeToggle.vue';
 import LangToggle from './components/LangToggle.vue';
 import Toast from './components/Toast.vue';
 import SearchModal from './components/SearchModal.vue';
+import SidebarCollections from './components/SidebarCollections.vue';
 
 const { t: _t } = useI18n();
 const t = (key, params) => _t.value(key, params);
@@ -191,7 +205,42 @@ function closeUserMenu(e) {
 
 watch(() => route.path, () => { userMenuOpen.value = false; });
 
-const sidebarCollections = computed(() => bookmarkStore.getAllCollections);
+const sidebarCollections = computed(() => bookmarkStore.collectionTree);
+
+const EXPANDED_STORAGE_KEY = 'koby_sidebar_expanded';
+const expandedIds = ref(loadExpandedIds());
+
+function loadExpandedIds() {
+  try {
+    const stored = localStorage.getItem(EXPANDED_STORAGE_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveExpandedIds() {
+  localStorage.setItem(EXPANDED_STORAGE_KEY, JSON.stringify([...expandedIds.value]));
+}
+
+function handleToggleExpand(id) {
+  if (expandedIds.value.has(id)) {
+    expandedIds.value.delete(id);
+  } else {
+    expandedIds.value.add(id);
+  }
+  expandedIds.value = new Set(expandedIds.value);
+  saveExpandedIds();
+}
+
+// Auto-expand root-level collections that have children on first visit
+watch(() => sidebarCollections.value, (tree) => {
+  if (!localStorage.getItem(EXPANDED_STORAGE_KEY) && tree.length) {
+    tree.forEach(node => {
+      if (node.children?.length) expandedIds.value.add(node.id);
+    });
+    expandedIds.value = new Set(expandedIds.value);
+    saveExpandedIds();
+  }
+}, { immediate: true });
 
 const currentPageTitle = computed(() => {
   const titles = { '/': t('nav.home'), '/collections': t('nav.collections'), '/bookmarks': t('all.title'), '/tags': t('nav.tags'), '/toolbox': t('nav.toolbox'), '/settings': t('nav.settings') };
