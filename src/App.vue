@@ -38,22 +38,6 @@
             <span v-show="!sidebarCollapsed" class="truncate">{{ collection.name }}</span>
             <span v-show="!sidebarCollapsed" class="ml-auto text-2xs text-gray-400 dark:text-gray-500 tabular-nums">{{ getBookmarkCount(collection.id) }}</span>
           </router-link>
-          <template v-if="topTags.length > 0">
-            <div v-show="!sidebarCollapsed" class="pt-4 pb-2">
-              <div class="flex items-center justify-between px-1">
-                <span class="text-2xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{{ t('nav.tags') }}</span>
-                <span class="text-2xs text-gray-400 dark:text-gray-500">{{ bookmarkStore.tags.length }}</span>
-              </div>
-            </div>
-            <div v-if="sidebarCollapsed" class="pt-3 pb-1 flex justify-center">
-              <div class="w-6 border-t border-gray-200 dark:border-gray-700"></div>
-            </div>
-            <router-link v-for="tag in topTags" :key="tag.id" :to="`/tags?id=${tag.id}`" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/tags' && $route.query.id === tag.id }]" :title="sidebarCollapsed ? tag.name : undefined">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" :style="{ backgroundColor: tag.color }"></span>
-              <span v-show="!sidebarCollapsed" class="truncate">{{ tag.name }}</span>
-              <span v-show="!sidebarCollapsed" class="ml-auto text-2xs text-gray-400 dark:text-gray-500 tabular-nums">{{ tag.bookmark_count }}</span>
-            </router-link>
-          </template>
         </nav>
         <div class="px-3 py-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <router-link to="/settings" :class="[sidebarCollapsed ? 'sidebar-item-collapsed' : 'sidebar-item', { 'sidebar-item-active': $route.path === '/settings' }]" :title="sidebarCollapsed ? t('nav.settings') : undefined">
@@ -208,7 +192,6 @@ function closeUserMenu(e) {
 watch(() => route.path, () => { userMenuOpen.value = false; });
 
 const sidebarCollections = computed(() => bookmarkStore.getAllCollections);
-const topTags = computed(() => bookmarkStore.sortedTags.slice(0, 10));
 
 const currentPageTitle = computed(() => {
   const titles = { '/': t('nav.home'), '/collections': t('nav.collections'), '/bookmarks': t('all.title'), '/tags': t('nav.tags'), '/toolbox': t('nav.toolbox'), '/settings': t('nav.settings') };
