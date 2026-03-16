@@ -481,6 +481,7 @@ export const en = {
   'toolbox.unitVolume': 'Volume',
   'toolbox.unitSpeed': 'Speed',
   'toolbox.unitData': 'Data',
+  'toolbox.unitTime': 'Time',
 
   // Toolbox - Barcode
   'toolbox.barcode': 'Barcode Generator',

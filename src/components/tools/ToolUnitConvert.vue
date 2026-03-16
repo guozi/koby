@@ -103,6 +103,18 @@ const unitData = {
       { key: 'tb', label: 'TB', factor: 1099511627776 },
     ]
   },
+  time: {
+    units: [
+      { key: 'ms', label: 'ms', factor: 0.001 },
+      { key: 's', label: 's', factor: 1 },
+      { key: 'min', label: 'min', factor: 60 },
+      { key: 'h', label: 'h', factor: 3600 },
+      { key: 'd', label: 'day', factor: 86400 },
+      { key: 'wk', label: 'week', factor: 604800 },
+      { key: 'mo', label: 'month (30d)', factor: 2592000 },
+      { key: 'yr', label: 'year (365d)', factor: 31536000 },
+    ]
+  },
 }
 
 const categories = computed(() => [
@@ -113,6 +125,7 @@ const categories = computed(() => [
   { key: 'volume', name: t('toolbox.unitVolume') },
   { key: 'speed', name: t('toolbox.unitSpeed') },
   { key: 'data', name: t('toolbox.unitData') },
+  { key: 'time', name: t('toolbox.unitTime') },
 ])
 
 const activeCat = ref('length')

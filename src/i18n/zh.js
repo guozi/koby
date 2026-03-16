@@ -481,6 +481,7 @@ export const zh = {
   'toolbox.unitVolume': '体积',
   'toolbox.unitSpeed': '速度',
   'toolbox.unitData': '数据存储',
+  'toolbox.unitTime': '时间',
 
   // Toolbox - Barcode
   'toolbox.barcode': '条形码生成',
