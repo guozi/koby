@@ -105,7 +105,7 @@
     <!-- List view -->
     <div v-if="processedBookmarks.length > 0 && viewMode === 'list'" class="space-y-3 mb-6">
       <div v-for="bookmark in visibleBookmarks" :key="bookmark.id"
-        class="bookmark-card group relative flex items-center gap-4 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm hover:bg-gray-50/50 dark:hover:bg-gray-800/80 transition-all duration-300 ease-out">
+        class="bookmark-card group relative flex items-center gap-4 px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:-translate-y-0.5 hover:bg-gray-50/30 dark:hover:bg-gray-750 transition-all duration-300 ease-out">
         <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-l-xl scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center"></div>
         <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           :style="{ backgroundColor: (getCollection(bookmark.collection_id)?.color || '#6B7280') + '15' }">
