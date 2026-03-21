@@ -45,7 +45,7 @@
   .card {
     @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
            shadow-card transition-all duration-300 ease-out
-           hover:shadow-card-hover hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-gray-600;
+           hover:shadow-card-hover hover:-translate-y-1 hover:border-primary-300/60 dark:hover:border-primary-500/40;
   }
 
   /* Sidebar nav item */

@@ -27,7 +27,7 @@
         <a v-for="bookmark in pinnedBookmarks" :key="bookmark.id"
           :href="safeUrl(bookmark.url)" target="_blank" rel="noopener noreferrer"
           class="group flex items-center gap-3 px-3.5 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md transition-all duration-200 relative">
+                 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out relative">
           <!-- Left amber accent -->
           <div class="absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-amber-400 dark:bg-amber-500"></div>
           <!-- Favicon -->
@@ -69,8 +69,9 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         <div v-for="bookmark in recentBookmarks" :key="bookmark.id"
-          class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
-                 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+          class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700
+                 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 ease-out overflow-hidden">
+          <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-l-xl scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center"></div>
           <!-- Card body -->
           <div class="p-3.5">
             <div class="flex items-start gap-3">

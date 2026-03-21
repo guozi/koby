@@ -34,9 +34,9 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <button v-for="tool in cat.tools" :key="tool.id" @click="activeTool = tool.id"
               class="group text-left p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                     hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
+                     hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg transition-all duration-300 ease-out hover:scale-[1.02]">
               <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-bold"
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300"
                   :style="{ backgroundColor: tool.color + '15', color: tool.color }">
                   {{ tool.icon }}
                 </div>

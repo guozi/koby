@@ -16,10 +16,10 @@
       <!-- Tags grid -->
       <div v-if="tags.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div v-for="tag in tags" :key="tag.id"
-          class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+          class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 ease-out overflow-hidden">
           <router-link :to="`/tags?id=${tag.id}`" class="block p-5">
             <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
                 :style="{ backgroundColor: tag.color + '15' }">
                 <svg class="w-5 h-5" :style="{ color: tag.color }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
               </div>
@@ -80,7 +80,7 @@
         <!-- Bookmark list -->
         <div v-if="tagBookmarks.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
           <div v-for="bookmark in tagBookmarks" :key="bookmark.id"
-            class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all duration-200 overflow-hidden">
+            class="bookmark-card group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 ease-out overflow-hidden">
             <div class="p-4">
               <div class="flex items-start gap-3">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
