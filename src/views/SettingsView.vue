@@ -45,6 +45,23 @@
       </div>
     </section>
 
+    <!-- Security -->
+    <section class="mb-6">
+      <h2 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{{ t('settings.security') }}</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between p-5">
+          <div>
+            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ t('settings.changePassword') }}</div>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ t('settings.changePasswordDesc') }}</p>
+          </div>
+          <button @click="showChangePasswordModal = true" class="btn btn-outline text-sm flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+            {{ t('settings.changePassword') }}
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Stats -->
     <section class="mb-6">
       <h2 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{{ t('settings.overview') }}</h2>
@@ -193,6 +210,56 @@
         </div>
       </div>
     </div>
+
+    <!-- Change password modal -->
+    <div v-if="showChangePasswordModal" class="modal-overlay">
+      <div class="modal-content max-w-md p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('settings.changePassword') }}</h3>
+        </div>
+        <div class="space-y-3 mb-5">
+          <div>
+            <input
+              v-model="currentPassword"
+              type="password"
+              :placeholder="t('settings.currentPassword')"
+              class="input"
+              :class="{ 'border-red-300 dark:border-red-700 focus:ring-red-500/20 focus:border-red-500': changePasswordError }"
+              @input="changePasswordError = ''"
+            />
+          </div>
+          <div>
+            <input
+              v-model="newPassword"
+              type="password"
+              :placeholder="t('settings.newPassword')"
+              class="input"
+              @input="changePasswordError = ''"
+            />
+          </div>
+          <div>
+            <input
+              v-model="confirmPassword"
+              type="password"
+              :placeholder="t('settings.confirmNewPassword')"
+              class="input"
+              @keyup.enter="confirmChangePassword"
+              @input="changePasswordError = ''"
+            />
+          </div>
+          <p v-if="changePasswordError" class="text-xs text-red-500 mt-1.5">{{ changePasswordError }}</p>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button @click="closeChangePasswordModal" :disabled="changingPassword" class="btn btn-outline">{{ t('modal.cancel') }}</button>
+          <button @click="confirmChangePassword" :disabled="changingPassword || !currentPassword || !newPassword || !confirmPassword" class="btn btn-primary disabled:opacity-50">
+            {{ changingPassword ? t('settings.changingPassword') : t('settings.changePasswordBtn') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -267,6 +334,13 @@ const deletePassword = ref('')
 const deleteError = ref('')
 const deletingAccount = ref(false)
 
+const showChangePasswordModal = ref(false)
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const changePasswordError = ref('')
+const changingPassword = ref(false)
+
 function closeDeleteModal() {
   showDeleteAccountModal.value = false
   deletePassword.value = ''
@@ -295,10 +369,51 @@ async function confirmDeleteAccount() {
   }
 }
 
+function closeChangePasswordModal() {
+  showChangePasswordModal.value = false
+  currentPassword.value = ''
+  newPassword.value = ''
+  confirmPassword.value = ''
+  changePasswordError.value = ''
+}
+
+async function confirmChangePassword() {
+  if (!currentPassword.value || !newPassword.value || !confirmPassword.value) return
+
+  if (newPassword.value.length < 6) {
+    changePasswordError.value = t('settings.passwordTooShort')
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    changePasswordError.value = t('settings.passwordMismatch')
+    return
+  }
+
+  changingPassword.value = true
+  changePasswordError.value = ''
+  try {
+    await authAPI.changePassword(currentPassword.value, newPassword.value)
+    closeChangePasswordModal()
+    toast.success(t('settings.passwordChanged'))
+  } catch (err) {
+    const code = err.response?.data?.code
+    if (code === 'AUTH_PASSWORD_WRONG') {
+      changePasswordError.value = t('error.AUTH_PASSWORD_WRONG')
+    } else if (code === 'AUTH_PASSWORD_SAME') {
+      changePasswordError.value = t('error.AUTH_PASSWORD_SAME')
+    } else {
+      changePasswordError.value = resolveErrorMessage(err, t) || t('settings.changePasswordFailed')
+    }
+  } finally {
+    changingPassword.value = false
+  }
+}
+
 function onEscape(e) {
   if (e.key === 'Escape') {
     if (editingName.value) cancelEditName()
     if (showDeleteAccountModal.value) closeDeleteModal()
+    if (showChangePasswordModal.value) closeChangePasswordModal()
   }
 }
 onMounted(() => document.addEventListener('keydown', onEscape))

@@ -242,6 +242,43 @@ module.exports = (pool) => {
     }
   });
 
+  // 修改密码
+  router.put('/password', authMiddleware, verifyResetLimiter, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: true, code: 'AUTH_FIELDS_REQUIRED', message: '当前密码和新密码为必填项' });
+      }
+
+      if (newPassword.length < 6 || newPassword.length > MAX_PASSWORD_LEN) {
+        return res.status(400).json({ error: true, code: 'AUTH_PASSWORD_INVALID', message: '密码长度 6-128 位' });
+      }
+
+      const [users] = await pool.query('SELECT id, password_hash FROM users WHERE id = ?', [req.userId]);
+      if (users.length === 0) {
+        return res.status(404).json({ error: true, code: 'AUTH_USER_NOT_FOUND', message: '用户不存在' });
+      }
+
+      const valid = await bcrypt.compare(currentPassword, users[0].password_hash);
+      if (!valid) {
+        return res.status(403).json({ error: true, code: 'AUTH_PASSWORD_WRONG', message: '当前密码错误' });
+      }
+
+      const isSame = await bcrypt.compare(newPassword, users[0].password_hash);
+      if (isSame) {
+        return res.status(400).json({ error: true, code: 'AUTH_PASSWORD_SAME', message: '新密码不能与当前密码相同' });
+      }
+
+      const password_hash = await bcrypt.hash(newPassword, 10);
+      await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash, req.userId]);
+
+      res.json({ message: '密码修改成功' });
+    } catch (error) {
+      console.error('修改密码失败:', error);
+      res.status(500).json({ error: true, code: 'AUTH_CHANGE_PASSWORD_FAILED', message: '修改密码失败' });
+    }
+  });
+
   // 重新发送验证邮件
   router.post('/resend-verification', resendLimiter, async (req, res) => {
     try {
@@ -386,7 +423,7 @@ module.exports = (pool) => {
 
       const valid = await bcrypt.compare(password, users[0].password_hash);
       if (!valid) {
-        return res.status(401).json({ error: true, code: 'AUTH_PASSWORD_WRONG', message: '密码错误' });
+        return res.status(403).json({ error: true, code: 'AUTH_PASSWORD_WRONG', message: '密码错误' });
       }
 
       // 按依赖顺序删除：书签 → 收藏夹 → 用户
